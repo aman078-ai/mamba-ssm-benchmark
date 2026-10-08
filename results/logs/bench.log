@@ -1,0 +1,118 @@
+[device] NVIDIA GeForce RTX 3050 Laptop GPU: 4.00 GiB total, PyTorch capped at 2.97 GiB
+reference      L=   256  fwd    145.14 ms      9.2 MB   fwd+bwd    730.91 ms     49.9 MB
+reference      L=  1024  fwd    382.80 ms      4.1 MB   fwd+bwd   2515.76 ms    167.9 MB
+reference      L=  4096  fwd   1659.19 ms     16.1 MB   fwd+bwd  10232.15 ms    672.3 MB
+sequential     L=   256  fwd     28.13 ms     40.5 MB   fwd+bwd     93.45 ms     89.2 MB
+sequential     L=  1024  fwd    115.66 ms    162.0 MB   fwd+bwd    365.23 ms    356.3 MB
+sequential     L=  4096  fwd   1010.63 ms    328.0 MB   fwd+bwd   3248.45 ms    728.9 MB
+hillis_steele  L=   256  fwd      4.37 ms     48.5 MB   fwd+bwd     14.76 ms     97.1 MB
+hillis_steele  L=  1024  fwd     20.20 ms    194.0 MB   fwd+bwd     68.39 ms    388.2 MB
+hillis_steele  L=  4096  fwd     94.02 ms    392.0 MB   fwd+bwd    315.86 ms    792.8 MB
+hillis_steele  L= 16384  fwd    429.62 ms    416.0 MB   fwd+bwd   1428.65 ms    843.1 MB
+hillis_steele  L= 65536  fwd   1937.68 ms    512.0 MB   fwd+bwd   6384.97 ms   1044.1 MB
+blelloch       L=   256  fwd      4.15 ms     48.5 MB   fwd+bwd     14.10 ms    113.1 MB
+blelloch       L=  1024  fwd      9.76 ms    194.0 MB   fwd+bwd     37.33 ms    452.2 MB
+blelloch       L=  4096  fwd     36.82 ms    392.0 MB   fwd+bwd    144.67 ms    920.8 MB
+blelloch       L= 16384  fwd    148.29 ms    416.0 MB   fwd+bwd    582.53 ms    971.1 MB
+blelloch       L= 65536  fwd    597.15 ms    512.0 MB   fwd+bwd   2360.87 ms   1172.1 MB
+chunked        L=   256  fwd      4.05 ms     40.5 MB   fwd+bwd     12.88 ms     99.0 MB
+chunked        L=  1024  fwd      6.36 ms    162.0 MB   fwd+bwd     24.16 ms    392.1 MB
+chunked        L=  4096  fwd     19.66 ms    328.0 MB   fwd+bwd     92.98 ms    796.8 MB
+chunked        L= 16384  fwd    119.70 ms    352.0 MB   fwd+bwd    444.20 ms    845.1 MB
+chunked        L= 65536  fwd    912.22 ms    448.0 MB   fwd+bwd   2908.20 ms   1045.1 MB
+triton         L=   256  fwd      0.27 ms      0.5 MB   fwd+bwd      1.31 ms      9.6 MB
+triton         L=  1024  fwd      0.69 ms      2.0 MB   fwd+bwd      3.32 ms     38.2 MB
+triton         L=  4096  fwd      2.52 ms      8.0 MB   fwd+bwd     11.02 ms    152.6 MB
+triton         L= 16384  fwd      8.43 ms     32.0 MB   fwd+bwd     42.01 ms    610.1 MB
+triton         L= 65536  fwd     32.19 ms    128.0 MB   fwd+bwd    526.53 ms    904.1 MB
+saved results/bench/scan.json
+[device] NVIDIA GeForce RTX 3050 Laptop GPU: 4.00 GiB total, PyTorch capped at 2.97 GiB
+transformer       train step B=16 L=512: 126.1 ms = 64.9k tokens/s, 1245 MB
+transformer       L=   256  fwd     17.52 ms     11.6 MB   train     45.30 ms     38.9 MB
+transformer       L=   512  fwd     17.80 ms     20.5 MB   train     49.86 ms     91.1 MB
+transformer       L=  1024  fwd     17.01 ms     53.6 MB   train     46.12 ms    267.8 MB
+transformer       L=  2048  fwd     31.58 ms    181.4 MB   train     82.78 ms    906.3 MB
+transformer       L=  4096  fwd    104.29 ms    682.9 MB   train OOM
+transformer       L=  8192  fwd OOM   train OOM
+transformer_sdpa  train step B=16 L=512: 77.4 ms = 105.8k tokens/s, 591 MB
+transformer_sdpa  L=   256  fwd     14.95 ms     10.4 MB   train     40.77 ms     27.7 MB
+transformer_sdpa  L=   512  fwd     14.83 ms     12.0 MB   train     44.73 ms     46.1 MB
+transformer_sdpa  L=  1024  fwd     14.82 ms     15.5 MB   train     40.73 ms     83.9 MB
+transformer_sdpa  L=  2048  fwd     15.28 ms     22.5 MB   train     43.94 ms    158.5 MB
+transformer_sdpa  L=  4096  fwd     18.98 ms     36.9 MB   train     64.43 ms    307.8 MB
+transformer_sdpa  L=  8192  fwd     44.33 ms     65.9 MB   train    172.55 ms    602.4 MB
+transformer_sdpa  L= 16384  fwd    126.14 ms    123.9 MB   train    545.19 ms   1187.5 MB
+transformer_sdpa  L= 32768  fwd    417.31 ms    239.9 MB   train   1909.46 ms   2365.8 MB
+transformer_sdpa  L= 65536  fwd   1519.11 ms    471.9 MB   train OOM
+transformer_sdpa  L=131072  fwd   5763.12 ms    935.9 MB   train OOM
+mamba             train step B=16 L=512: 191.6 ms = 42.8k tokens/s, 1852 MB
+mamba             L=   256  fwd     23.16 ms     12.4 MB   train     65.87 ms     65.3 MB
+mamba             L=   512  fwd     23.34 ms     15.9 MB   train     65.93 ms    120.3 MB
+mamba             L=  1024  fwd     24.15 ms     23.9 MB   train     63.77 ms    233.1 MB
+mamba             L=  2048  fwd     25.77 ms     37.3 MB   train     91.71 ms    450.4 MB
+mamba             L=  4096  fwd     44.54 ms     65.7 MB   train    170.09 ms    890.6 MB
+mamba             L=  8192  fwd     85.77 ms    122.6 MB   train    334.00 ms   1770.9 MB
+mamba             L= 16384  fwd    187.41 ms    236.8 MB   train OOM
+mamba             L= 32768  fwd    409.12 ms    463.8 MB   train OOM
+mamba             L= 65536  fwd    848.93 ms    918.8 MB   train OOM
+mamba             L=131072  fwd   1800.33 ms   1828.8 MB   train OOM
+mamba_torchscan   train step B=16 L=512: 2164.8 ms = 3.8k tokens/s, 2380 MB
+mamba_torchscan   L=   256  fwd     57.70 ms     51.9 MB   train    183.36 ms    155.2 MB
+mamba_torchscan   L=   512  fwd     78.31 ms     94.9 MB   train    233.16 ms    298.3 MB
+mamba_torchscan   L=  1024  fwd     73.42 ms    181.0 MB   train    301.91 ms    589.1 MB
+mamba_torchscan   L=  2048  fwd    118.31 ms    353.3 MB   train    556.08 ms   1158.4 MB
+mamba_torchscan   L=  4096  fwd    235.14 ms    377.7 MB   train   1104.28 ms   1542.8 MB
+mamba_torchscan   L=  8192  fwd    644.24 ms    426.6 MB   train   2517.49 ms   2293.4 MB
+mamba_torchscan   L= 16384  fwd   1373.00 ms    524.8 MB   train OOM
+retnet            train step B=16 L=512: 115.0 ms = 71.2k tokens/s, 928 MB
+retnet            L=   256  fwd     30.95 ms     11.1 MB   train     78.90 ms     38.6 MB
+retnet            L=   512  fwd     36.44 ms     14.0 MB   train     75.05 ms     67.5 MB
+retnet            L=  1024  fwd     30.86 ms     19.7 MB   train     72.11 ms    126.3 MB
+retnet            L=  2048  fwd     30.52 ms     33.1 MB   train     76.46 ms    246.9 MB
+retnet            L=  4096  fwd     31.25 ms     54.3 MB   train     72.27 ms    486.4 MB
+retnet            L=  8192  fwd     40.33 ms    100.5 MB   train    114.68 ms    939.5 MB
+retnet            L= 16384  fwd     76.61 ms    193.5 MB   train    220.94 ms   1862.9 MB
+retnet            L= 32768  fwd    149.47 ms    381.2 MB   train OOM
+retnet            L= 65536  fwd    305.73 ms    764.2 MB   train OOM
+retnet            L=131072  fwd    648.07 ms   1560.2 MB   train OOM
+hybrid            train step B=16 L=512: 178.0 ms = 46.0k tokens/s, 1753 MB
+hybrid            L=   256  fwd     21.50 ms     12.2 MB   train     60.49 ms     61.3 MB
+hybrid            L=   512  fwd     21.54 ms     17.1 MB   train     61.46 ms    115.7 MB
+hybrid            L=  1024  fwd     22.92 ms     50.2 MB   train     59.96 ms    237.1 MB
+hybrid            L=  2048  fwd     25.65 ms    178.0 MB   train     88.19 ms    508.8 MB
+hybrid            L=  4096  fwd     54.17 ms    679.5 MB   train    185.47 ms   1409.4 MB
+hybrid            L=  8192  fwd OOM   train OOM
+saved results/bench/models.json
+[device] NVIDIA GeForce RTX 3050 Laptop GPU: 4.00 GiB total, PyTorch capped at 2.97 GiB
+transformer  P=    128   16.272 ms/token (graph   0.879)   state      0.750 MB
+transformer  P=    512   16.226 ms/token (graph   0.927)   state      3.000 MB
+transformer  P=   2048   17.014 ms/token (graph   1.008)   state     12.000 MB
+transformer  P=   8192   25.994 ms/token (graph   1.264)   state     48.000 MB
+transformer  P=  32768   16.685 ms/token (graph   2.259)   state    192.000 MB
+transformer  P= 131072   16.813 ms/token (graph   6.217)   state    768.000 MB
+transformer  P= 262144   18.052 ms/token (graph  11.668)   state   1536.000 MB
+mamba        P=    128   22.997 ms/token (graph   0.981)   state      0.376 MB
+mamba        P=    512   26.591 ms/token (graph   0.981)   state      0.376 MB
+mamba        P=   2048   22.920 ms/token (graph   1.474)   state      0.376 MB
+mamba        P=   8192   22.796 ms/token (graph   1.736)   state      0.376 MB
+mamba        P=  32768   23.670 ms/token (graph   3.538)   state      0.376 MB
+mamba        P= 131072   23.428 ms/token (graph   1.072)   state      0.376 MB
+mamba        P= 262144   24.029 ms/token (graph   1.092)   state      0.376 MB
+retnet       P=    128   21.788 ms/token (graph   1.542)   state      0.375 MB
+retnet       P=    512   24.359 ms/token (graph   1.371)   state      0.375 MB
+retnet       P=   2048   20.209 ms/token (graph   1.400)   state      0.375 MB
+retnet       P=   8192   25.258 ms/token (graph   1.648)   state      0.375 MB
+retnet       P=  32768   18.650 ms/token (graph   1.521)   state      0.375 MB
+retnet       P= 131072   20.280 ms/token (graph   1.465)   state      0.375 MB
+retnet       P= 262144   20.631 ms/token (graph   1.458)   state      0.375 MB
+hybrid       P=    128   22.281 ms/token (graph   1.461)   state      0.433 MB
+hybrid       P=    512   22.462 ms/token (graph   3.378)   state      0.808 MB
+hybrid       P=   2048   22.383 ms/token (graph   1.021)   state      2.308 MB
+hybrid       P=   8192   24.685 ms/token (graph   1.049)   state      8.308 MB
+hybrid       P=  32768   33.968 ms/token (graph   1.688)   state     32.308 MB
+hybrid       P= 131072   24.979 ms/token (graph   3.147)   state    128.308 MB
+hybrid       P= 262144   22.844 ms/token (graph   2.714)   state    256.308 MB
+saved results/bench/decode.json
+
+# Note: the generation (decode) benchmark above was re-run with more CUDA-graph repeats
+# (warmup 20, 100-400 repeats) to remove timing outliers; results/bench/decode.json holds the re-run.

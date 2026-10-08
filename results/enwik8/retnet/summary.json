@@ -1,0 +1,14 @@
+{
+  "run": "retnet",
+  "model": "retnet",
+  "layers": "RRRRRR",
+  "non_embedding_params": 4723456,
+  "steps": 4000,
+  "tokens": 32768000,
+  "seq_len": 512,
+  "final_val_bpc": 1.8222287813270621,
+  "best_val_bpc": 1.8222287813270621,
+  "train_time_min": 33.16442301666793,
+  "tokens_per_sec": 16467.445643750685,
+  "peak_train_mem_mb": 1004.89990234375
+}

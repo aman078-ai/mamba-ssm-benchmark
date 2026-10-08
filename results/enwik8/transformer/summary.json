@@ -1,0 +1,14 @@
+{
+  "run": "transformer",
+  "model": "transformer",
+  "layers": "AAAAAA",
+  "non_embedding_params": 4721920,
+  "steps": 4000,
+  "tokens": 32768000,
+  "seq_len": 512,
+  "final_val_bpc": 1.6961241949334611,
+  "best_val_bpc": 1.6961241949334611,
+  "train_time_min": 16.24567666999804,
+  "tokens_per_sec": 33617.14900690555,
+  "peak_train_mem_mb": 1304.091796875
+}

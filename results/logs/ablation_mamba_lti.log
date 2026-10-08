@@ -1,0 +1,31 @@
+[device] NVIDIA GeForce RTX 3050 Laptop GPU: 4.00 GiB total, PyTorch capped at 2.97 GiB
+[mamba_lti] layers=MMMMMMMMMMM non-embedding params=4,458,336 device=cuda
+[mamba_lti] step     0  val_bpc 8.1424  (0.0 min)
+[mamba_lti] step     0  train_bpc 8.110  14.8k tok/s
+[mamba_lti] step   100  train_bpc 3.095  29.3k tok/s
+[mamba_lti] step   200  train_bpc 2.573  35.8k tok/s
+[mamba_lti] step   250  val_bpc 2.4447  (0.9 min)
+[mamba_lti] step   300  train_bpc 2.183  38.7k tok/s
+[mamba_lti] step   400  train_bpc 2.323  40.3k tok/s
+[mamba_lti] step   500  val_bpc 2.2256  (1.7 min)
+[mamba_lti] step   500  train_bpc 2.182  41.3k tok/s
+[mamba_lti] step   600  train_bpc 2.126  42.0k tok/s
+[mamba_lti] step   700  train_bpc 2.141  42.5k tok/s
+[mamba_lti] step   750  val_bpc 2.1133  (2.4 min)
+[mamba_lti] step   800  train_bpc 2.296  42.9k tok/s
+[mamba_lti] step   900  train_bpc 2.215  43.2k tok/s
+[mamba_lti] step  1000  val_bpc 2.0446  (3.1 min)
+{
+  "run": "mamba_lti",
+  "model": "mamba",
+  "layers": "MMMMMMMMMMM",
+  "non_embedding_params": 4458336,
+  "steps": 1000,
+  "tokens": 8192000,
+  "seq_len": 512,
+  "final_val_bpc": 2.0446457631081487,
+  "best_val_bpc": 2.0446457631081487,
+  "train_time_min": 3.141786616666771,
+  "tokens_per_sec": 43457.226728588656,
+  "peak_train_mem_mb": 1651.521484375
+}

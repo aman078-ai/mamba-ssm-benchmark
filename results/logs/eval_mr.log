@@ -1,0 +1,14 @@
+[device] NVIDIA GeForce RTX 3050 Laptop GPU: 4.00 GiB total, PyTorch capped at 1.27 GiB
+[mamba] test bpc @512 = 1.6727
+[mamba]   bpc @512 = 1.6567675216252278
+[mamba]   bpc @1024 = 1.641397400371717
+[mamba]   bpc @2048 = 1.6343362567645117
+[mamba]   bpc @4096 = 1.6309357939413975
+[mamba]   bpc @8192 = 1.6294760094299554
+[retnet] test bpc @512 = 1.8022
+[retnet]   bpc @512 = 1.7893241983171253
+[retnet]   bpc @1024 = 1.7750853436726584
+[retnet]   bpc @2048 = 1.7685158381462627
+[retnet]   bpc @4096 = 1.7649494818449118
+[retnet]   bpc @8192 = 1.7631367304316041
+saved results/enwik8\eval.json

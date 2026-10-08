@@ -1,0 +1,14 @@
+{
+  "run": "mamba_euler",
+  "model": "mamba",
+  "layers": "MMMMMMMMMMM",
+  "non_embedding_params": 4818432,
+  "steps": 1000,
+  "tokens": 8192000,
+  "seq_len": 512,
+  "final_val_bpc": 1.997603885788239,
+  "best_val_bpc": 1.997603885788239,
+  "train_time_min": 2.891088084998046,
+  "tokens_per_sec": 47225.58750174698,
+  "peak_train_mem_mb": 1928.5517578125
+}

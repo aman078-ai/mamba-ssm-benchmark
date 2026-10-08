@@ -1,129 +1,87 @@
-"""enwik8 byte-level language modeling dataset.
+"""enwik8 byte-level language modeling data.
+
+enwik8 is the first 10^8 bytes of an English Wikipedia XML dump (Hutter Prize).
+Standard split (Al-Rfou et al., 2018; Dai et al., 2019): first 90M bytes train,
+next 5M validation, last 5M test. Vocabulary = 256 byte values. Metric = bits
+per character (bpc) = mean cross-entropy in nats / ln(2).
 
 Usage:
     from data.enwik8 import Enwik8
-    data = Enwik8(root='data/enwik8', train=True, seqlen=256)
-    x, y = data.get()  # returns (batch, seq_len) tensors
+    ds = Enwik8()                                  # downloads + caches on first use
+    x, y = ds.random_batch('train', batch_size=8, seq_len=512, device='cuda')
+    for x, y in ds.eval_batches('test', batch_size=8, seq_len=512): ...
 """
 
 import os
 import urllib.request
-import gzip
+import zipfile
+
 import numpy as np
 import torch
-from torch.utils.data import Dataset
+
+URL = "http://mattmahoney.net/dc/enwik8.zip"
+N_TRAIN, N_VALID, N_TEST = 90_000_000, 5_000_000, 5_000_000
+DEFAULT_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "enwik8")
 
 
-URL = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/enwik8"
-FNAME = "enwik8.gz"
+def prepare(root: str = DEFAULT_ROOT) -> str:
+    """Download enwik8 (if needed) and write train/valid/test .bin files.
 
-
-def _download(root: str):
-    """Download enwik8 if not present. Falls back to synthetic data if URL fails."""
+    Raises on failure instead of silently substituting fake data.
+    """
     os.makedirs(root, exist_ok=True)
-    fpath = os.path.join(root, FNAME)
-    if os.path.exists(fpath):
-        return fpath
-    # Try downloading
-    try:
-        print(f"Downloading enwik8 from {URL}...")
-        urllib.request.urlretrieve(URL + "/" + FNAME, fpath)
-        print("Download complete.")
-        return fpath
-    except Exception:
-        print("Download failed. Generating synthetic byte data...")
-        # Generate 1MB of synthetic byte data for testing
-        synthetic = np.random.randint(0, 256, size=1_000_000, dtype=np.uint8)
-        np.savez_compressed(os.path.join(root, "synthetic.npz"), data=synthetic)
-        return fpath.replace(FNAME, "synthetic.npz")
-
-
-def _load(enwik8_path: str):
-    """Load enwik8, return train/valid/test as numpy arrays of uint8."""
-    if enwik8_path.endswith("synthetic.npz"):
-        # Synthetic fallback
-        arr = np.load(enwik8_path)
-        data = arr["data"]
-        # Split: 900k train, 50k valid, 50k test
-        n = len(data)
-        train_data = data[:900_000]
-        valid_data = data[900_000:950_000]
-        test_data = data[950_000:n]
-        return train_data, valid_data, test_data
-    with gzip.open(enwik8_path, "rb") as f:
-        data = np.frombuffer(f.read(), dtype=np.uint8)
-    n = len(data)
-    train_data = data[:90_000_000]
-    valid_data = data[90_000_000:95_000_000]
-    test_data = data[95_000_000:n]
-    return train_data, valid_data, test_data
+    if all(os.path.exists(os.path.join(root, f"{s}.bin")) for s in ("train", "valid", "test")):
+        return root
+    zpath = os.path.join(root, "enwik8.zip")
+    if not os.path.exists(zpath):
+        print(f"[enwik8] downloading {URL} ...")
+        urllib.request.urlretrieve(URL, zpath)
+    with zipfile.ZipFile(zpath) as z:
+        raw = np.frombuffer(z.read("enwik8"), dtype=np.uint8)
+    if raw.size != N_TRAIN + N_VALID + N_TEST:
+        raise RuntimeError(f"enwik8 has {raw.size} bytes, expected 100,000,000")
+    splits = {
+        "train": raw[:N_TRAIN],
+        "valid": raw[N_TRAIN:N_TRAIN + N_VALID],
+        "test": raw[N_TRAIN + N_VALID:],
+    }
+    for name, arr in splits.items():
+        arr.tofile(os.path.join(root, f"{name}.bin"))
+    print(f"[enwik8] wrote train/valid/test .bin to {root}")
+    return root
 
 
 class Enwik8:
-    """Byte-level LM dataset over enwik8.
+    vocab_size = 256
 
-    Returns minibatches of shape (batch_size, seqlen).
-    """
+    def __init__(self, root: str = DEFAULT_ROOT):
+        prepare(root)
+        self.splits = {
+            s: np.memmap(os.path.join(root, f"{s}.bin"), dtype=np.uint8, mode="r")
+            for s in ("train", "valid", "test")
+        }
 
-    def __init__(self, root: str = "data/enwik8", train: bool = True,
-                 seqlen: int = 256, batch_size: int = 1):
-        self.root = root
-        self.train = train
-        self.seqlen = seqlen
-        self.batch_size = batch_size
+    def random_batch(self, split, batch_size, seq_len, device="cpu", generator=None):
+        """Uniformly sampled contiguous windows. Returns x, y of shape (B, T)."""
+        data = self.splits[split]
+        hi = len(data) - seq_len - 1
+        starts = torch.randint(0, hi, (batch_size,), generator=generator).numpy()
+        buf = np.stack([data[s:s + seq_len + 1] for s in starts]).astype(np.int64)
+        buf = torch.from_numpy(buf)
+        if device != "cpu":
+            buf = buf.pin_memory().to(device, non_blocking=True)
+        return buf[:, :-1], buf[:, 1:]
 
-        enwik8_path = _download(root)
-        train_data, valid_data, test_data = _load(enwik8_path)
+    def eval_batches(self, split, batch_size, seq_len, device="cpu", max_bytes=None):
+        """Non-overlapping windows covering the split (or its first max_bytes)."""
+        data = self.splits[split]
+        n = len(data) if max_bytes is None else min(len(data), max_bytes + 1)
+        n_windows = (n - 1) // seq_len
+        for i in range(0, n_windows, batch_size):
+            idx = range(i, min(i + batch_size, n_windows))
+            buf = np.stack([data[j * seq_len: j * seq_len + seq_len + 1] for j in idx]).astype(np.int64)
+            buf = torch.from_numpy(buf).to(device)
+            yield buf[:, :-1], buf[:, 1:]
 
-        self.data = train_data if self.train else valid_data
-        print(f"[enwik8] {self.train=}, data shape: {self.data.shape}, "
-              f"seqlen={self.seqlen}, batch_size={self.batch_size}")
-
-        # Map bytes (0-255) to indices
-        self.vocab_size = 256
-
-    def get(self):
-        """Get next minibatch of shape (batch_size, seqlen+1).
-        Returns x, y where y is x shifted by 1 (next-token prediction).
-        After calling get() enough times, reset to iterate from start.
-        """
-        # We need seqlen+1 tokens: x -> y next-token
-        buf_len = self.seqlen + 1
-        total_tokens = len(self.data)
-
-        # If we've consumed all data, reset
-        if not hasattr(self, '_idx'):
-            self._idx = 0
-
-        # Check if we need to wrap around
-        remaining = total_tokens - self._idx
-        if remaining < buf_len:
-            # Wrap: take what's left, then from the beginning
-            # Reset for next call
-            self._idx = 0
-            remaining = total_tokens
-
-        # Grab a chunk a bit larger than needed to handle batching
-        chunk = self.data[self._idx:self._idx + buf_len * self.batch_size]
-        self._idx += buf_len * self.batch_size
-
-        # Reshape to (batch_size, seqlen+1)
-        # If chunk is smaller than needed (end of data), zero-pad
-        needed = self.batch_size * buf_len
-        if len(chunk) < needed:
-            # Pad with zeros
-            pad_len = needed - len(chunk)
-            chunk = np.pad(chunk, (0, pad_len), mode='constant')
-        else:
-            # Trim to exact needed size
-            chunk = chunk[:needed]
-
-        chunk = chunk.reshape(self.batch_size, buf_len).astype(np.int64)
-        x = torch.from_numpy(chunk[:, :self.seqlen])   # input
-        y = torch.from_numpy(chunk[:, 1:])              # target (shifted)
-        return x, y
-
-    def iter_batches(self):
-        """Infinite iterator over (x, y) pairs of shape (batch, seqlen)."""
-        while True:
-            yield self.get()
+    def text(self, split, start, length):
+        return bytes(self.splits[split][start:start + length]).decode("utf-8", errors="replace")

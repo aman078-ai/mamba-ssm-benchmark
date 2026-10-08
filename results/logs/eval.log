@@ -1,0 +1,14 @@
+[device] NVIDIA GeForce RTX 3050 Laptop GPU: 4.00 GiB total, PyTorch capped at 2.97 GiB
+[transformer] test bpc @512 = 1.6507
+[transformer]   bpc @512 = 1.6236978259800534
+[transformer]   bpc @1024 = 2.24787663616526
+[transformer]   bpc @2048 = 3.212733742412954
+[transformer]   bpc @4096 = 3.9052177613478194
+[transformer]   bpc @8192 = None
+[hybrid] test bpc @512 = 1.6079
+[hybrid]   bpc @512 = 1.5801377110526653
+[hybrid]   bpc @1024 = 1.5483531752274897
+[hybrid]   bpc @2048 = 1.5414981645571075
+[hybrid]   bpc @4096 = 1.5540119499877079
+[hybrid]   bpc @8192 = None
+saved results/enwik8\eval.json

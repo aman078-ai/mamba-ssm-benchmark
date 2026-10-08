@@ -1,0 +1,41 @@
+{
+  "args": {
+    "model": "mamba",
+    "run": "mamba_euler",
+    "steps": 4000,
+    "stop_step": 1000,
+    "seq_len": 512,
+    "batch_size": 16,
+    "lr": 0.0015,
+    "min_lr": 0.0001,
+    "warmup": 200,
+    "weight_decay": 0.1,
+    "grad_clip": 1.0,
+    "eval_every": 250,
+    "eval_bytes": 1000000,
+    "log_every": 25,
+    "seed": 0,
+    "no_amp": false,
+    "override": "{\"discretization\":\"euler\"}",
+    "out": "results/enwik8_ablation"
+  },
+  "model_cfg": {
+    "layers": "MMMMMMMMMMM",
+    "vocab_size": 256,
+    "d_model": 256,
+    "n_head": 4,
+    "mlp_ratio": 4.0,
+    "dropout": 0.0,
+    "attn_impl": "manual",
+    "d_state": 16,
+    "expand": 2,
+    "d_conv": 4,
+    "selective": true,
+    "discretization": "euler",
+    "scan": "auto",
+    "d_block": 0,
+    "chunk_size": 0,
+    "retention_chunk": 64
+  },
+  "non_embedding_params": 4818432
+}

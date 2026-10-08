@@ -1,0 +1,73 @@
+[device] NVIDIA GeForce RTX 3050 Laptop GPU: 4.00 GiB total, PyTorch capped at 2.97 GiB
+[hybrid] layers=MMMMMAMMMM non-embedding params=4,729,344 device=cuda
+[hybrid] step     0  val_bpc 7.9635  (0.0 min)
+[hybrid] step     0  train_bpc 7.946  10.9k tok/s
+[hybrid] step   100  train_bpc 2.986  14.7k tok/s
+[hybrid] step   200  train_bpc 2.508  14.8k tok/s
+[hybrid] step   250  val_bpc 2.4108  (2.3 min)
+[hybrid] step   300  train_bpc 2.157  15.4k tok/s
+[hybrid] step   400  train_bpc 2.270  15.8k tok/s
+[hybrid] step   500  val_bpc 2.2042  (4.3 min)
+[hybrid] step   500  train_bpc 2.163  16.0k tok/s
+[hybrid] step   600  train_bpc 2.134  15.8k tok/s
+[hybrid] step   700  train_bpc 2.119  15.7k tok/s
+[hybrid] step   750  val_bpc 2.1048  (6.3 min)
+[hybrid] step   800  train_bpc 2.304  16.8k tok/s
+[hybrid] step   900  train_bpc 2.208  18.0k tok/s
+[hybrid] step  1000  val_bpc 2.0353  (7.2 min)
+[hybrid] step  1000  train_bpc 1.967  19.0k tok/s
+[hybrid] step  1100  train_bpc 2.005  19.9k tok/s
+[hybrid] step  1200  train_bpc 2.096  20.8k tok/s
+[hybrid] step  1250  val_bpc 1.9764  (8.1 min)
+[hybrid] step  1300  train_bpc 1.875  21.6k tok/s
+[hybrid] step  1400  train_bpc 1.745  22.3k tok/s
+[hybrid] step  1500  val_bpc 1.9269  (8.9 min)
+[hybrid] step  1500  train_bpc 1.828  22.9k tok/s
+[hybrid] step  1600  train_bpc 1.935  23.1k tok/s
+[hybrid] step  1700  train_bpc 1.866  22.2k tok/s
+[hybrid] step  1750  val_bpc 1.8883  (10.9 min)
+[hybrid] step  1800  train_bpc 1.867  21.5k tok/s
+[hybrid] step  1900  train_bpc 1.883  20.9k tok/s
+[hybrid] step  2000  val_bpc 1.8452  (13.4 min)
+[hybrid] step  2000  train_bpc 1.809  20.3k tok/s
+[hybrid] step  2100  train_bpc 1.907  19.9k tok/s
+[hybrid] step  2200  train_bpc 1.543  19.6k tok/s
+[hybrid] step  2250  val_bpc 1.8042  (15.8 min)
+[hybrid] step  2300  train_bpc 1.808  19.2k tok/s
+[hybrid] step  2400  train_bpc 1.751  18.9k tok/s
+[hybrid] step  2500  val_bpc 1.7647  (18.3 min)
+[hybrid] step  2500  train_bpc 1.710  18.7k tok/s
+[hybrid] step  2600  train_bpc 1.745  19.0k tok/s
+[hybrid] step  2700  train_bpc 1.646  19.4k tok/s
+[hybrid] step  2750  val_bpc 1.7276  (19.2 min)
+[hybrid] step  2800  train_bpc 1.639  19.8k tok/s
+[hybrid] step  2900  train_bpc 1.672  20.1k tok/s
+[hybrid] step  3000  val_bpc 1.7019  (20.1 min)
+[hybrid] step  3000  train_bpc 1.762  20.4k tok/s
+[hybrid] step  3100  train_bpc 1.593  20.7k tok/s
+[hybrid] step  3200  train_bpc 1.460  21.0k tok/s
+[hybrid] step  3250  val_bpc 1.6786  (21.0 min)
+[hybrid] step  3300  train_bpc 1.545  21.3k tok/s
+[hybrid] step  3400  train_bpc 1.710  21.6k tok/s
+[hybrid] step  3500  val_bpc 1.6633  (21.9 min)
+[hybrid] step  3500  train_bpc 1.525  21.9k tok/s
+[hybrid] step  3600  train_bpc 1.647  22.1k tok/s
+[hybrid] step  3700  train_bpc 1.632  22.4k tok/s
+[hybrid] step  3750  val_bpc 1.6537  (22.8 min)
+[hybrid] step  3800  train_bpc 1.477  22.6k tok/s
+[hybrid] step  3900  train_bpc 1.656  22.8k tok/s
+[hybrid] step  4000  val_bpc 1.6458  (23.7 min)
+{
+  "run": "hybrid",
+  "model": "hybrid",
+  "layers": "MMMMMAMMMM",
+  "non_embedding_params": 4729344,
+  "steps": 4000,
+  "tokens": 32768000,
+  "seq_len": 512,
+  "final_val_bpc": 1.6458473659117707,
+  "best_val_bpc": 1.6458473659117707,
+  "train_time_min": 23.66825888166483,
+  "tokens_per_sec": 23074.50396177677,
+  "peak_train_mem_mb": 1828.046875
+}

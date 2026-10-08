@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Mamba vs Transformer, From Scratch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+<style>
+/* Layout: one reading column like a paper; each finding = caption + one interactive figure. */
+:root {
+  --bg: #f6f6f3; --surface: #ffffff; --fg: #17181b; --fg-2: #50535a; --fg-3: #85878d;
+  --rule: #e2e2dd; --grid: #ebebe7; --chip: #ecece8; --heat: 42, 120, 214;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300;
+  --display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121313; --surface: #1a1a19; --fg: #f2f2ef; --fg-2: #c3c2b7; --fg-3: #8e8d87;
+  --rule: #2d2d2a; --grid: #262624; --chip: #262624; --heat: 92, 156, 236;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #2f9a2f;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #121313; --surface: #1a1a19; --fg: #f2f2ef; --fg-2: #c3c2b7; --fg-3: #8e8d87;
+  --rule: #2d2d2a; --grid: #262624; --chip: #262624; --heat: 92, 156, 236;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #2f9a2f;
+  color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.6 var(--body); margin: 0; }
+.page { max-width: 1040px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 64px; }
+h1, h2 { font-family: var(--display); font-weight: 600; text-wrap: balance; letter-spacing: -0.01em; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.1; }
+h2 { font-size: 24px; line-height: 1.25; }
+p { margin: 0; max-width: 68ch; color: var(--fg-2); }
+a { color: inherit; text-underline-offset: 3px; }
+.eyebrow { font: 500 11.5px/1 var(--mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-3); }
+header { display: grid; gap: 14px; padding-bottom: 28px; border-bottom: 1px solid var(--rule); }
+.env { font: 12.5px/1.5 var(--mono); color: var(--fg-3); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 28px; }
+.tile { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 16px 18px; display: grid; gap: 6px; align-content: start; }
+.tile .v { font: 600 28px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.tile .k { font-size: 13px; color: var(--fg-2); line-height: 1.4; }
+section { display: grid; gap: 14px; padding-block: 40px 8px; }
+.fig { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 14px 8px; min-width: 0; }
+.fig-head { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between; padding: 2px 4px 8px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--fg); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.legend i { width: 18px; height: 0; border-top: 2px solid; display: inline-block; }
+.legend i.dash { border-top-style: dashed; }
+.seg { display: inline-flex; background: var(--chip); border-radius: 8px; padding: 3px; gap: 2px; }
+.seg button { font: 500 12.5px var(--body); color: var(--fg-2); background: transparent; border: 0; padding: 6px 11px; border-radius: 6px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.seg button:focus-visible, input:focus-visible { outline: 2px solid var(--s1); outline-offset: 2px; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { font: 11.5px var(--mono); fill: var(--fg-3); }
+.chart .lab { font: 12px var(--body); fill: var(--fg); }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; font: 12px/1.5 var(--mono); color: var(--fg); box-shadow: 0 4px 16px rgba(0,0,0,.12); white-space: nowrap; z-index: 2; }
+.tip b { font-weight: 500; }
+.tip .sw { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.note { font-size: 13px; color: var(--fg-3); padding: 4px 4px 6px; max-width: none; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { font: 500 11.5px var(--mono); text-transform: uppercase; letter-spacing: .05em; color: var(--fg-3); }
+td.best { font-weight: 600; }
+.swatch { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: 0; }
+.bars { display: grid; gap: 8px; padding: 6px 4px 10px; }
+.bar { display: grid; grid-template-columns: minmax(120px, 210px) 1fr 58px; gap: 12px; align-items: center; font-size: 13px; }
+.bar .track { background: var(--chip); border-radius: 4px; height: 14px; position: relative; overflow: hidden; }
+.bar .fill { position: absolute; inset: 0 auto 0 0; border-radius: 4px; }
+.bar .fill.hatch { background-image: repeating-linear-gradient(45deg, transparent 0 4px, rgba(255,255,255,.45) 4px 7px); }
+.bar .num { font: 12.5px var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+.delta-text { font: 15px/2.1 var(--mono); padding: 10px 6px; word-break: break-all; }
+.delta-text span { padding: 2px 0; border-radius: 2px; cursor: default; }
+.ctrl { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; font-size: 13px; color: var(--fg-2); }
+.ctrl input[type=range] { width: 180px; accent-color: var(--s2); }
+.scale { display: flex; align-items: center; gap: 8px; font: 11.5px var(--mono); color: var(--fg-3); }
+.scale i { width: 120px; height: 10px; border-radius: 3px; background: linear-gradient(90deg, rgba(var(--heat), .04), rgba(var(--heat), .85)); display: inline-block; }
+footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--rule); display: grid; gap: 10px; }
+code, pre { font-family: var(--mono); font-size: 13px; }
+pre { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 12px 14px; overflow-x: auto; margin: 0; color: var(--fg); }
+@media (prefers-reduced-motion: no-preference) { .tip { transition: opacity .1s; } }
+</style>
+
+<div class="page">
+<header>
+  <div class="eyebrow">Byte-level language modeling · RTX 3050 Laptop (4 GB)</div>
+  <h1>Mamba vs Transformer, from scratch</h1>
+  <p>A selective state-space model (Mamba/S6), a GPT-style Transformer, RetNet-style linear attention and a Mamba–attention
+  hybrid, all written in plain PyTorch with a hand-written Triton kernel for the selective scan. The four models are
+  parameter-matched at about 4.7M parameters and measured for speed, memory and quality as sequences get longer.
+  Every chart below is generated from the project's result files.</p>
+  <div class="env" id="env"></div>
+  <div class="tiles" id="tiles"></div>
+</header>
+
+<section id="speed">
+  <div class="eyebrow">Speed and memory</div>
+  <h2>Attention is quadratic in sequence length; the scan is linear</h2>
+  <p>One forward pass or training step at batch size 1, until the GPU runs out of memory (marked ×). Dashed lines are
+  reference implementations: PyTorch's fused attention kernel and Mamba with the pure-PyTorch scan instead of the Triton kernel.</p>
+  <div class="fig">
+    <div class="fig-head"><div class="legend" id="lg-speed"></div>
+      <div class="seg" id="seg-speed"><button data-k="fwd:ms">Forward time</button><button data-k="fwd:peak_mb">Forward memory</button><button data-k="train:ms">Training step</button></div></div>
+    <div class="chart" id="c-speed"></div>
+  </div>
+  <div class="tbl" id="t-tp"></div>
+</section>
+
+<section id="decode">
+  <div class="eyebrow">Generation</div>
+  <h2>A KV cache grows with the context; a recurrent state does not</h2>
+  <p>Cost of producing one token when the model already holds P tokens of context. Eager mode launches every kernel from
+  Python. CUDA-graph mode replays a captured step, which removes launch overhead and shows the actual GPU work.</p>
+  <div class="two">
+    <div class="fig"><div class="fig-head"><div class="legend" id="lg-dec"></div>
+      <div class="seg" id="seg-dec"><button data-k="ms_graph">CUDA graph</button><button data-k="ms">Eager</button></div></div>
+      <div class="chart" id="c-dec"></div></div>
+    <div class="fig"><div class="fig-head"><div class="legend"><span>Cache or state size, MB</span></div></div>
+      <div class="chart" id="c-state"></div></div>
+  </div>
+</section>
+
+<section id="quality">
+  <div class="eyebrow">Quality on enwik8</div>
+  <h2>Same parameters, same data: who compresses Wikipedia best?</h2>
+  <p>Bits per character on the held-out test split (lower is better), after 32.8M training bytes each. The right chart
+  evaluates the same models on contexts longer than the 512 bytes they were trained on.</p>
+  <div class="tbl" id="t-q"></div>
+  <div class="two">
+    <div class="fig"><div class="fig-head"><div class="legend" id="lg-curve"></div></div><div class="chart" id="c-curve"></div></div>
+    <div class="fig"><div class="fig-head"><div class="legend"><span>Test bpc vs evaluation context</span></div>
+      <div class="seg" id="seg-ext"><button data-k="len">By context length</button><button data-k="pos">By position</button></div></div>
+      <div class="chart" id="c-ext"></div></div>
+  </div>
+</section>
+
+<section id="ablation">
+  <div class="eyebrow">Ablations</div>
+  <h2>What happens without selection, and with other discretizations</h2>
+  <p>Mamba variants trained on the same data with the same learning-rate schedule, compared over their first 1,000 steps.</p>
+  <div class="fig"><div class="fig-head"><div class="legend" id="lg-abl"></div></div><div class="chart" id="c-abl"></div></div>
+</section>
+
+<section id="scan">
+  <div class="eyebrow">Systems</div>
+  <h2>Six ways to compute the same recurrence</h2>
+  <p>One Mamba layer's selective scan (1 sequence, 512 channels, 16 state dimensions). The PyTorch scans write every
+  intermediate state to GPU memory; the fused Triton kernel keeps the state in registers.</p>
+  <div class="fig"><div class="fig-head"><div class="legend" id="lg-scan"></div>
+    <div class="seg" id="seg-scan"><button data-k="fwd:ms">Forward</button><button data-k="fwd_bwd:ms">Forward + backward</button><button data-k="fwd_bwd:peak_mb">Memory</button></div></div>
+    <div class="chart" id="c-scan"></div></div>
+</section>
+
+<section id="recall">
+  <div class="eyebrow">Synthetic tasks</div>
+  <h2>Exact recall and selective copying</h2>
+  <p>Small two-layer-sized models, 3,000 training steps each. Associative recall asks the model to retrieve the values of
+  N stored keys. Selective copying asks it to reproduce 8 tokens scattered among noise.</p>
+  <div class="two">
+    <div class="fig"><div class="fig-head"><div class="legend" id="lg-mqar"></div></div><div class="chart" id="c-mqar"></div></div>
+    <div class="fig"><div class="fig-head"><div class="legend"><span>Selective copying accuracy</span></div></div><div class="bars" id="b-sel"></div></div>
+  </div>
+</section>
+
+<section id="delta">
+  <div class="eyebrow">Inside the model</div>
+  <h2>What the trained Mamba chooses to remember</h2>
+  <p>Mamba's step size Δ decides how much of each byte enters the state. Darker means a larger Δ: the state is
+  overwritten by this byte. Lighter means the byte is mostly skipped. Values are relative to the layer's mean.
+  Hover a character to read its value.</p>
+  <div class="fig">
+    <div class="fig-head"><div class="ctrl"><label for="layer">Layer <b id="layer-v">1</b></label><input id="layer" type="range" min="1" max="1" value="1"></div>
+      <div class="scale">skipped <i></i> overwrites</div></div>
+    <div class="delta-text" id="dtext"></div>
+  </div>
+  <div class="fig"><div class="fig-head"><div class="legend"><span>Mean relative Δ by character type, selected layer</span></div></div><div class="bars" id="b-class"></div></div>
+</section>
+
+<footer>
+  <div class="eyebrow">Reproduce</div>
+  <pre>pip install -r requirements.txt
+python reproduce.py        # tests, training, ablations, evaluation, benchmarks, synthetic tasks, figures</pre>
+  <p class="note">Source: <a href="https://github.com/aman078-ai/mamba-ssm-benchmark">github.com/aman078-ai/mamba-ssm-benchmark</a></p>
+</footer>
+</div>
+
+<script id="data" type="application/json">{"models":{"transformer":{"layers":"AAAAAA","params":4721920,"val_bpc":1.6961241949334611,"test_bpc":1.650697762875938,"bpc_by_length":[[512,1.6236978259800534],[1024,2.24787663616526],[2048,3.212733742412954],[4096,3.9052177613478194]],"position_loss":[[1.5,3.3180439472198486],[2.5,2.969237804412842],[3.5,2.6532063484191895],[4.5,2.256070375442505],[5.5,2.167832136154175],[6.5,1.9662426710128784],[7.5,2.3898041248321533],[8.5,1.920773983001709],[9.5,1.9187703132629395],[10.5,1.841748595237732],[12.0,1.9374594688415527],[14.0,1.924713134765625],[16.0,1.8579049110412598],[18.0,1.8184258937835693],[20.5,1.8106054067611694],[23.5,1.705567479133606],[27.0,1.7731618881225586],[31.0,1.8130203485488892],[35.5,1.7359422445297241],[40.5,1.8434998989105225],[46.0,1.7884050607681274],[52.5,1.7561696767807007],[60.0,1.6507959365844727],[68.0,1.7251026630401611],[77.0,1.730417013168335],[88.0,1.6646546125411987],[100.5,1.6430995464324951],[114.5,1.6668676137924194],[130.5,1.6149396896362305],[148.5,1.632957935333252],[169.5,1.6518670320510864],[193.5,1.625177264213562],[220.0,1.5277578830718994],[250.5,1.601494550704956],[285.5,1.6258622407913208],[325.0,1.5995973348617554],[370.0,1.626235008239746],[421.5,1.600680947303772],[480.5,1.590667724609375],[547.5,1.6952261924743652],[623.0,1.9594732522964478],[709.5,2.3576266765594482],[808.5,3.6212780475616455],[920.5,3.8185653686523438],[1048.0,4.017568111419678],[1193.5,4.107565402984619],[1359.5,4.194806098937988],[1548.5,4.294856071472168],[1763.5,4.331934452056885],[2008.0,4.390624046325684],[2286.5,4.514294147491455],[2604.0,4.612454414367676],[2965.5,4.553288459777832],[3377.0,4.772444248199463],[3846.0,4.715225696563721]],"curve":[[2.048,3.0171779309435705],[4.096,2.576801534017448],[6.144,2.3666451305155958],[8.192,2.2577204838536105],[10.24,2.176691389170122],[12.288,2.0827025984539302],[14.336,1.9922677033790026],[16.384,1.9196849152359667],[18.432,1.8712622735744808],[20.48,1.8269981715302501],[22.528,1.7893283818633545],[24.576,1.7604767068233798],[26.624,1.7361070857372611],[28.672,1.7162732766566888],[30.72,1.7039508325722235],[32.768,1.6961241949334611]]},"mamba":{"layers":"MMMMMMMMMMM","params":4818432,"val_bpc":1.6845814770822696,"test_bpc":1.6726501150910131,"bpc_by_length":[[512,1.6567675216252278],[1024,1.641397400371717],[2048,1.6343362567645117],[4096,1.6309357939413975],[8192,1.6294760094299554]],"position_loss":[[1.5,3.1633782386779785],[2.5,2.9255459308624268],[3.5,2.498833179473877],[4.5,2.1385788917541504],[5.5,1.9253675937652588],[6.5,1.856227993965149],[7.5,2.1851677894592285],[8.5,1.7317298650741577],[9.5,1.7200446128845215],[10.5,1.740141749382019],[12.0,1.8517504930496216],[14.0,1.820811152458191],[16.0,1.7449880838394165],[18.0,1.6958550214767456],[20.5,1.6956835985183716],[23.5,1.6192930936813354],[27.0,1.6678489446640015],[31.0,1.6854641437530518],[35.5,1.6564830541610718],[40.5,1.740848183631897],[46.0,1.706649899482727],[52.5,1.6986802816390991],[60.0,1.5860222578048706],[68.0,1.7139551639556885],[77.0,1.692183256149292],[88.0,1.6250983476638794],[100.5,1.6372315883636475],[114.5,1.652819275856018],[130.5,1.618687629699707],[148.5,1.6314916610717773],[169.5,1.6623945236206055],[193.5,1.6429438591003418],[220.0,1.5965574979782104],[250.5,1.6554172039031982],[285.5,1.6522458791732788],[325.0,1.6464829444885254],[370.0,1.6738322973251343],[421.5,1.6616408824920654],[480.5,1.6758471727371216],[547.5,1.68258798122406],[623.0,1.6403324604034424],[709.5,1.6022874116897583],[808.5,1.6362311840057373],[920.5,1.6530144214630127],[1048.0,1.6387497186660767],[1193.5,1.6151787042617798],[1359.5,1.6535589694976807],[1548.5,1.6724622249603271],[1763.5,1.6021924018859863],[2008.0,1.6227468252182007],[2286.5,1.6469495296478271],[2604.0,1.6602590084075928],[2965.5,1.6450350284576416],[3377.0,1.6183115243911743],[3846.0,1.6325547695159912]],"curve":[[2.048,2.3973692520927847],[4.096,2.17223844572361],[6.144,2.069088038454455],[8.192,1.9975953089350662],[10.24,1.9434080687720023],[12.288,1.895279800911056],[14.336,1.8663751671908781],[16.384,1.8297748236790838],[18.432,1.803017271743028],[20.48,1.7765739110635783],[22.528,1.7489534373656384],[24.576,1.7301266293713022],[26.624,1.712940278200434],[28.672,1.6993829845490231],[30.72,1.6909692478945406],[32.768,1.6845814770822696]]},"retnet":{"layers":"RRRRRR","params":4723456,"val_bpc":1.8222287813270621,"test_bpc":1.8021630146661118,"bpc_by_length":[[512,1.7893241983171253],[1024,1.7750853436726584],[2048,1.7685158381462627],[4096,1.7649494818449118],[8192,1.7631367304316041]],"position_loss":[[1.5,3.2278075218200684],[2.5,3.0296807289123535],[3.5,2.548058271408081],[4.5,2.264610528945923],[5.5,2.0831034183502197],[6.5,1.9876643419265747],[7.5,2.3444340229034424],[8.5,1.8752912282943726],[9.5,1.8359254598617554],[10.5,1.8621772527694702],[12.0,1.9249534606933594],[14.0,1.9823353290557861],[16.0,1.8485748767852783],[18.0,1.8212494850158691],[20.5,1.8374899625778198],[23.5,1.7371745109558105],[27.0,1.786912441253662],[31.0,1.808882713317871],[35.5,1.7603628635406494],[40.5,1.8667768239974976],[46.0,1.804442048072815],[52.5,1.799798846244812],[60.0,1.7240883111953735],[68.0,1.8163071870803833],[77.0,1.8139585256576538],[88.0,1.7548495531082153],[100.5,1.7395405769348145],[114.5,1.788894534111023],[130.5,1.708972692489624],[148.5,1.7538907527923584],[169.5,1.8000433444976807],[193.5,1.7708261013031006],[220.0,1.7120091915130615],[250.5,1.7699098587036133],[285.5,1.7854167222976685],[325.0,1.7593013048171997],[370.0,1.8189350366592407],[421.5,1.7955620288848877],[480.5,1.7916793823242188],[547.5,1.816861629486084],[623.0,1.7644895315170288],[709.5,1.7427626848220825],[808.5,1.7723138332366943],[920.5,1.7760194540023804],[1048.0,1.7801847457885742],[1193.5,1.7550840377807617],[1359.5,1.7855374813079834],[1548.5,1.8056411743164062],[1763.5,1.7380160093307495],[2008.0,1.758405327796936],[2286.5,1.78581964969635],[2604.0,1.7875754833221436],[2965.5,1.7788368463516235],[3377.0,1.7509636878967285],[3846.0,1.7633440494537354]],"curve":[[2.048,2.8483744255257957],[4.096,2.5058262330160903],[6.144,2.3475062744872632],[8.192,2.2396650254454973],[10.24,2.168404161826436],[12.288,2.093247491809817],[14.336,2.0522189931609707],[16.384,2.009459349642957],[18.432,1.969737456645592],[20.48,1.9433406646939162],[22.528,1.9084710377237861],[24.576,1.8806817328932162],[26.624,1.8577622661728643],[28.672,1.8412395406614617],[30.72,1.828985382099191],[32.768,1.8222287813270621]]},"hybrid":{"layers":"MMMMMAMMMM","params":4729344,"val_bpc":1.6458473659117707,"test_bpc":1.6078924093810028,"bpc_by_length":[[512,1.5801377110526653],[1024,1.5483531752274897],[2048,1.5414981645571075],[4096,1.5540119499877079]],"position_loss":[[1.5,3.1747419834136963],[2.5,3.0062742233276367],[3.5,2.570984363555908],[4.5,2.20013689994812],[5.5,2.0280251502990723],[6.5,1.876242756843567],[7.5,2.1775293350219727],[8.5,1.7697349786758423],[9.5,1.7546182870864868],[10.5,1.7881112098693848],[12.0,1.8703498840332031],[14.0,1.8633208274841309],[16.0,1.7797547578811646],[18.0,1.7520270347595215],[20.5,1.764777660369873],[23.5,1.6607345342636108],[27.0,1.7268182039260864],[31.0,1.7564208507537842],[35.5,1.677175521850586],[40.5,1.7844492197036743],[46.0,1.718588948249817],[52.5,1.710327386856079],[60.0,1.5960172414779663],[68.0,1.6972579956054688],[77.0,1.6807695627212524],[88.0,1.6050010919570923],[100.5,1.6073787212371826],[114.5,1.6208409070968628],[130.5,1.5798039436340332],[148.5,1.5713814496994019],[169.5,1.6173791885375977],[193.5,1.590062141418457],[220.0,1.5116301774978638],[250.5,1.5625659227371216],[285.5,1.5876543521881104],[325.0,1.5683459043502808],[370.0,1.5871275663375854],[421.5,1.583562970161438],[480.5,1.5750552415847778],[547.5,1.606257677078247],[623.0,1.565950632095337],[709.5,1.5393860340118408],[808.5,1.5741219520568848],[920.5,1.571089267730713],[1048.0,1.5695130825042725],[1193.5,1.5586678981781006],[1359.5,1.5862979888916016],[1548.5,1.6066182851791382],[1763.5,1.5431574583053589],[2008.0,1.5702786445617676],[2286.5,1.6059792041778564],[2604.0,1.6258833408355713],[2965.5,1.6095830202102661],[3377.0,1.5975005626678467],[3846.0,1.6159605979919434]],"curve":[[2.048,2.4108319056199563],[4.096,2.2042330013815072],[6.144,2.104769246534544],[8.192,2.0352597503201815],[10.24,1.9763843721138092],[12.288,1.926875182987025],[14.336,1.88825482988624],[16.384,1.8451897612954116],[18.432,1.8041924883731995],[20.48,1.7647254708464692],[22.528,1.727574589646622],[24.576,1.7019360266692567],[26.624,1.678561267318434],[28.672,1.6633416808589059],[30.72,1.6536505860387873],[32.768,1.6458473659117707]]}},"env":{"gpu":"NVIDIA GeForce RTX 3050 Laptop GPU","torch":"2.7.1+cu126","cuda":"12.6","vram_gib":3.99951171875},"bench_models":[{"variant":"transformer","L":256,"params":4721920,"fwd":{"ms":17.52420000048005,"q25":16.79870000043593,"q75":18.914199996288517,"peak_mb":11.625},"train":{"ms":45.29805000129272,"q25":43.55937499894935,"q75":50.148875001468696,"peak_mb":38.888671875}},{"variant":"transformer","L":512,"params":4721920,"fwd":{"ms":17.80049999433686,"q25":16.756899998654262,"q75":18.5757500003092,"peak_mb":20.5},"train":{"ms":49.86249999637948,"q25":44.91924999638286,"q75":54.558699996050564,"peak_mb":91.1494140625}},{"variant":"transformer","L":1024,"params":4721920,"fwd":{"ms":17.005000001518056,"q25":15.978850000465172,"q75":18.106650002664537,"peak_mb":53.625},"train":{"ms":46.120549995976035,"q25":44.08172499825014,"q75":48.747350003395695,"peak_mb":267.7958984375}},{"variant":"transformer","L":2048,"params":4721920,"fwd":{"ms":31.57814999940456,"q25":31.468400000449037,"q75":32.186450000153854,"peak_mb":181.375},"train":{"ms":82.7761999971699,"q25":82.64760000020033,"q75":83.31480000197189,"peak_mb":906.3388671875}},{"variant":"transformer","L":4096,"params":4721920,"fwd":{"ms":104.28899999533314,"q25":104.09464999975171,"q75":104.34315000020433,"peak_mb":682.875},"train":{"oom":true}},{"variant":"transformer","L":8192,"params":4721920,"fwd":{"oom":true},"train":{"oom":true,"skipped":true}},{"variant":"transformer_sdpa","L":256,"params":4721920,"fwd":{"ms":14.948500003811205,"q25":13.695674999326002,"q75":16.26392500111251,"peak_mb":10.375},"train":{"ms":40.76724999686121,"q25":38.364824999007396,"q75":41.70380000141449,"peak_mb":27.662109375}},{"variant":"transformer_sdpa","L":512,"params":4721920,"fwd":{"ms":14.827549999608891,"q25":14.429450000534416,"q75":15.709349996541278,"peak_mb":12.0},"train":{"ms":44.73024999970221,"q25":42.56277499735006,"q75":47.28317500121193,"peak_mb":46.072265625}},{"variant":"transformer_sdpa","L":1024,"params":4721920,"fwd":{"ms":14.821750002738554,"q25":14.441050003370037,"q75":15.515824999965844,"peak_mb":15.5},"train":{"ms":40.73419999986072,"q25":38.92044999884092,"q75":41.55602499668021,"peak_mb":83.89697265625}},{"variant":"transformer_sdpa","L":2048,"params":4721920,"fwd":{"ms":15.282000000297558,"q25":14.114800000243122,"q75":16.867325000930578,"peak_mb":22.5},"train":{"ms":43.942749998677755,"q25":39.81217500222556,"q75":46.40064999512106,"peak_mb":158.54150390625}},{"variant":"transformer_sdpa","L":4096,"params":4721920,"fwd":{"ms":18.983650003065122,"q25":18.665424999198876,"q75":19.501374999890686,"peak_mb":36.875},"train":{"ms":64.42840000090655,"q25":63.83112500043353,"q75":65.02974999966682,"peak_mb":307.83056640625}},{"variant":"transformer_sdpa","L":8192,"params":4721920,"fwd":{"ms":44.3304000000353,"q25":43.755425000199466,"q75":44.57537499729369,"peak_mb":65.875},"train":{"ms":172.5536999947508,"q25":172.11150000366615,"q75":172.95089999970514,"peak_mb":602.40869140625}},{"variant":"transformer_sdpa","L":16384,"params":4721920,"fwd":{"ms":126.13749999582069,"q25":125.90722499589901,"q75":126.40669999746024,"peak_mb":123.875},"train":{"ms":545.1911999989534,"q25":544.1495000050054,"q75":545.5326000010245,"peak_mb":1187.501953125}},{"variant":"transformer_sdpa","L":32768,"params":4721920,"fwd":{"ms":417.3123000000487,"q25":416.73879999871133,"q75":418.0670999994618,"peak_mb":239.875},"train":{"ms":1909.457100002328,"q25":1906.2709999998333,"q75":1910.68770000129,"peak_mb":2365.751953125}},{"variant":"transformer_sdpa","L":65536,"params":4721920,"fwd":{"ms":1519.109099994239,"q25":1518.876199996157,"q75":1519.313400000101,"peak_mb":471.875},"train":{"oom":true}},{"variant":"transformer_sdpa","L":131072,"params":4721920,"fwd":{"ms":5763.124100005371,"q25":5762.125299996114,"q75":5767.238899999938,"peak_mb":935.875},"train":{"oom":true,"skipped":true}},{"variant":"mamba","L":256,"params":4818432,"fwd":{"ms":23.1631499955256,"q25":22.440750000896514,"q75":24.474625000948436,"peak_mb":12.3720703125},"train":{"ms":65.86679999963962,"q25":63.64662499981932,"q75":67.83827500294137,"peak_mb":65.294921875}},{"variant":"mamba","L":512,"params":4818432,"fwd":{"ms":23.342200001934543,"q25":22.489074997793068,"q75":24.558075001550606,"peak_mb":15.9267578125},"train":{"ms":65.93195000095875,"q25":62.64802499936195,"q75":74.15804999618558,"peak_mb":120.3134765625}},{"variant":"mamba","L":1024,"params":4818432,"fwd":{"ms":24.151749999873573,"q25":22.224799997275113,"q75":25.635575000706012,"peak_mb":23.908203125},"train":{"ms":63.768800002435455,"q25":62.75844999981928,"q75":66.3079249970906,"peak_mb":233.068359375}},{"variant":"mamba","L":2048,"params":4818432,"fwd":{"ms":25.76770000086981,"q25":24.070000003121095,"q75":26.965450000716373,"peak_mb":37.2548828125},"train":{"ms":91.7099500002223,"q25":90.20862500256044,"q75":97.79277500092576,"peak_mb":450.4248046875}},{"variant":"mamba","L":4096,"params":4818432,"fwd":{"ms":44.54420000183745,"q25":44.057699997210875,"q75":44.88349999883212,"peak_mb":65.6923828125},"train":{"ms":170.09200000029523,"q25":170.0799999962328,"q75":170.2009000000544,"peak_mb":890.5732421875}},{"variant":"mamba","L":8192,"params":4818432,"fwd":{"ms":85.77169999989565,"q25":85.73565000006056,"q75":86.27830000114045,"peak_mb":122.5673828125},"train":{"ms":334.0024999997695,"q25":333.7887000016053,"q75":334.1565000009723,"peak_mb":1770.8701171875}},{"variant":"mamba","L":16384,"params":4818432,"fwd":{"ms":187.40959999558982,"q25":186.98389999917708,"q75":187.61950000043726,"peak_mb":236.8173828125},"train":{"oom":true}},{"variant":"mamba","L":32768,"params":4818432,"fwd":{"ms":409.1155000060098,"q25":409.0871999942465,"q75":409.19859999848995,"peak_mb":463.8173828125},"train":{"oom":true,"skipped":true}},{"variant":"mamba","L":65536,"params":4818432,"fwd":{"ms":848.9329000003636,"q25":848.7290999983088,"q75":849.0309000044363,"peak_mb":918.8173828125},"train":{"oom":true,"skipped":true}},{"variant":"mamba","L":131072,"params":4818432,"fwd":{"ms":1800.3250999972806,"q25":1800.1149999981862,"q75":1800.4951999973855,"peak_mb":1828.8173828125},"train":{"oom":true,"skipped":true}},{"variant":"mamba_torchscan","L":256,"params":4818432,"fwd":{"ms":57.696000003488734,"q25":55.12580000140588,"q75":59.47404999824357,"peak_mb":51.8720703125},"train":{"ms":183.36360000103014,"q25":166.88640000211308,"q75":199.60839999839664,"peak_mb":155.232421875}},{"variant":"mamba_torchscan","L":512,"params":4818432,"fwd":{"ms":78.30770000146003,"q25":75.53399999596877,"q75":79.53329999872949,"peak_mb":94.9267578125},"train":{"ms":233.15919999731705,"q25":230.1999000046635,"q75":270.2336000002106,"peak_mb":298.2509765625}},{"variant":"mamba_torchscan","L":1024,"params":4818432,"fwd":{"ms":73.41749999613967,"q25":70.39410000288626,"q75":75.89140000345651,"peak_mb":181.0361328125},"train":{"ms":301.9097999931546,"q25":298.0922000060673,"q75":321.19970000348985,"peak_mb":589.13671875}},{"variant":"mamba_torchscan","L":2048,"params":4818432,"fwd":{"ms":118.30819999886444,"q25":118.04625000149827,"q75":124.15790000159177,"peak_mb":353.2548828125},"train":{"ms":556.084899995767,"q25":555.086599997594,"q75":556.4535000012256,"peak_mb":1158.3623046875}},{"variant":"mamba_torchscan","L":4096,"params":4818432,"fwd":{"ms":235.14319999958389,"q25":233.54709999694023,"q75":235.41139999724692,"peak_mb":377.6923828125},"train":{"ms":1104.2836000051466,"q25":1102.1397000004072,"q75":1105.5162999982713,"peak_mb":1542.8076171875}},{"variant":"mamba_torchscan","L":8192,"params":4818432,"fwd":{"ms":644.2425000059302,"q25":643.2554999992135,"q75":654.3638000002829,"peak_mb":426.5673828125},"train":{"ms":2517.4909999986994,"q25":2503.2466999982717,"q75":2534.0910000013537,"peak_mb":2293.3623046875}},{"variant":"mamba_torchscan","L":16384,"params":4818432,"fwd":{"ms":1372.9995000030613,"q25":1318.0114999995567,"q75":1494.5427999991807,"peak_mb":524.8173828125},"train":{"oom":true}},{"variant":"retnet","L":256,"params":4723456,"fwd":{"ms":30.953699999372475,"q25":29.799799998727394,"q75":33.90805000344699,"peak_mb":11.080078125},"train":{"ms":78.90020000195364,"q25":70.8742000060738,"q75":85.23930000228574,"peak_mb":38.5517578125}},{"variant":"retnet","L":512,"params":4723456,"fwd":{"ms":36.43835000184481,"q25":30.306549997476395,"q75":52.82297500161803,"peak_mb":13.95556640625},"train":{"ms":75.04770000377903,"q25":71.20230000145966,"q75":83.1594999981462,"peak_mb":67.4619140625}},{"variant":"retnet","L":1024,"params":4723456,"fwd":{"ms":30.85750000172993,"q25":29.06665000045905,"q75":31.55927500301914,"peak_mb":19.708984375},"train":{"ms":72.11020000249846,"q25":68.95699999586213,"q75":78.71470000100089,"peak_mb":126.29541015625}},{"variant":"retnet","L":2048,"params":4723456,"fwd":{"ms":30.524450001394143,"q25":29.582124996522907,"q75":31.177800005025347,"peak_mb":33.0986328125},"train":{"ms":76.45570000022417,"q25":74.24950000131503,"q75":81.02800000051502,"peak_mb":246.85009765625}},{"variant":"retnet","L":4096,"params":4723456,"fwd":{"ms":31.246100003045285,"q25":28.06757500002277,"q75":34.02782500052126,"peak_mb":54.2822265625},"train":{"ms":72.2687000015867,"q25":71.16149999637855,"q75":76.90799999545561,"peak_mb":486.40478515625}},{"variant":"retnet","L":8192,"params":4723456,"fwd":{"ms":40.32729999744333,"q25":39.79067499676603,"q75":40.574299993750174,"peak_mb":100.5166015625},"train":{"ms":114.68459999741754,"q25":113.65389999991748,"q75":115.72569999771076,"peak_mb":939.54541015625}},{"variant":"retnet","L":16384,"params":4723456,"fwd":{"ms":76.60939999914262,"q25":76.4768999943044,"q75":76.72499999898719,"peak_mb":193.45458984375},"train":{"ms":220.9355000013602,"q25":220.72669999761274,"q75":221.10909999901196,"peak_mb":1862.888671875}},{"variant":"retnet","L":32768,"params":4723456,"fwd":{"ms":149.46654999585007,"q25":149.00639999541454,"q75":150.29404999950202,"peak_mb":381.20556640625},"train":{"oom":true}},{"variant":"retnet","L":65536,"params":4723456,"fwd":{"ms":305.7332000025781,"q25":305.2945000017644,"q75":306.2318000011146,"peak_mb":764.20751953125},"train":{"oom":true,"skipped":true}},{"variant":"retnet","L":131072,"params":4723456,"fwd":{"ms":648.0707000009716,"q25":647.9617999939364,"q75":648.3783000003314,"peak_mb":1560.21142578125},"train":{"oom":true,"skipped":true}},{"variant":"hybrid","L":256,"params":4729344,"fwd":{"ms":21.500249997188803,"q25":21.02240000203892,"q75":23.524375001215958,"peak_mb":12.2353515625},"train":{"ms":60.49269999493845,"q25":58.796400004212046,"q75":62.33489999794983,"peak_mb":61.294921875}},{"variant":"hybrid","L":512,"params":4729344,"fwd":{"ms":21.543150000070455,"q25":21.2532250006916,"q75":22.990475001279265,"peak_mb":17.091796875},"train":{"ms":61.46390000503743,"q25":59.01129999983823,"q75":64.84130000171717,"peak_mb":115.7041015625}},{"variant":"hybrid","L":1024,"params":4729344,"fwd":{"ms":22.91614999921876,"q25":21.37912499892991,"q75":23.964849997355486,"peak_mb":50.216796875},"train":{"ms":59.95999999868218,"q25":57.013149995327694,"q75":62.12270000105491,"peak_mb":237.12109375}},{"variant":"hybrid","L":2048,"params":4729344,"fwd":{"ms":25.652200001786696,"q25":25.107550001848722,"q75":28.220724996572244,"peak_mb":177.966796875},"train":{"ms":88.19469999798457,"q25":88.02444999855652,"q75":88.45367500180146,"peak_mb":508.7841796875}},{"variant":"hybrid","L":4096,"params":4729344,"fwd":{"ms":54.16624999998021,"q25":53.49227499573317,"q75":55.07272500108229,"peak_mb":679.4697265625},"train":{"ms":185.46600000263425,"q25":185.01259999902686,"q75":186.24489999638172,"peak_mb":1409.4443359375}},{"variant":"hybrid","L":8192,"params":4729344,"fwd":{"oom":true},"train":{"oom":true}}],"train_tp":{"transformer":{"ms":126.13385000440758,"q25":125.92530000074476,"q75":126.89374999717984,"peak_mb":1245.2216796875,"tokens_per_s":64946.879840056754},"transformer_sdpa":{"ms":77.40605000435608,"q25":76.7100249959185,"q75":78.14420000249811,"peak_mb":591.15869140625,"tokens_per_s":105831.52091521256},"mamba":{"ms":191.55845000204863,"q25":191.0984250025649,"q75":192.4882749990502,"peak_mb":1852.291015625,"tokens_per_s":42765.01506413521},"mamba_torchscan":{"ms":2164.782899999409,"q25":2164.6742000011727,"q75":2165.0148000044283,"peak_mb":2380.205078125,"tokens_per_s":3784.2131883073525},"retnet":{"ms":115.04779999813763,"q25":114.2006250029226,"q75":115.83560000144644,"peak_mb":927.54833984375,"tokens_per_s":71205.1860194859},"hybrid":{"ms":177.95624999780557,"q25":177.6454750015546,"q75":178.81752499670256,"peak_mb":1752.8125,"tokens_per_s":46033.786394695424}},"bench_decode":[{"model":"transformer","context":128,"ms":14.496799994958565,"q25":13.203200003772508,"q75":15.73179999832064,"state_mb":0.75,"tokens_per_s":68.98074060121971,"ms_graph":0.8043499983614311},{"model":"transformer","context":512,"ms":16.076499996415805,"q25":15.043825000248034,"q75":16.689975000190316,"state_mb":3.0,"tokens_per_s":62.2025938620313,"ms_graph":0.7103499992808793},{"model":"transformer","context":2048,"ms":15.429799997946247,"q25":14.331250000395812,"q75":16.26399999804562,"state_mb":12.0,"tokens_per_s":64.80965405469306,"ms_graph":0.7735000035609119},{"model":"transformer","context":8192,"ms":15.32269999734126,"q25":13.83144999635988,"q75":17.28900000307476,"state_mb":48.0,"tokens_per_s":65.26264954436988,"ms_graph":1.0162500002479646},{"model":"transformer","context":32768,"ms":15.172600004007109,"q25":14.025649998075096,"q75":16.416700003901497,"state_mb":192.0,"tokens_per_s":65.908282017314,"ms_graph":1.9465000004856847},{"model":"transformer","context":131072,"ms":14.14199999999255,"q25":11.872700000822078,"q75":15.785400006279815,"state_mb":768.0,"tokens_per_s":70.71135624385,"ms_graph":6.051599997590529},{"model":"transformer","context":262144,"ms":16.569600004004315,"q25":15.229900003760122,"q75":17.513000006147195,"state_mb":1536.0,"tokens_per_s":60.35148704605625,"ms_graph":11.455899999418762},{"model":"mamba","context":128,"ms":25.27264999662293,"q25":24.22827500049607,"q75":26.952449998134398,"state_mb":0.3759765625,"tokens_per_s":39.568466311749084,"ms_graph":0.9287499997299165},{"model":"mamba","context":512,"ms":21.658400000887923,"q25":17.720275000101537,"q75":24.071549996733665,"state_mb":0.3759765625,"tokens_per_s":46.17146234066244,"ms_graph":0.9318499978689943},{"model":"mamba","context":2048,"ms":21.41910000500502,"q25":20.521099999314174,"q75":22.627500002272427,"state_mb":0.3759765625,"tokens_per_s":46.68730244344203,"ms_graph":0.9330000029876828},{"model":"mamba","context":8192,"ms":22.100700000009965,"q25":20.04490000399528,"q75":23.184499994385988,"state_mb":0.3759765625,"tokens_per_s":45.24743560156688,"ms_graph":0.9326500003226101},{"model":"mamba","context":32768,"ms":20.500449998507975,"q25":16.75532500303234,"q75":24.200924999604467,"state_mb":0.3759765625,"tokens_per_s":48.77941704073716,"ms_graph":0.9301000027335249},{"model":"mamba","context":131072,"ms":17.381399993610103,"q25":16.62860000215005,"q75":21.13660000031814,"state_mb":0.3759765625,"tokens_per_s":57.53276493076671,"ms_graph":0.9315999996033497},{"model":"mamba","context":262144,"ms":21.69750000030035,"q25":18.892825000875746,"q75":24.098699999740347,"state_mb":0.3759765625,"tokens_per_s":46.08825901537769,"ms_graph":0.9366500016767532},{"model":"retnet","context":128,"ms":18.710899996221997,"q25":17.588700000487734,"q75":20.058699999935925,"state_mb":0.375,"tokens_per_s":53.444783532695624,"ms_graph":0.8551999999326654},{"model":"retnet","context":512,"ms":19.002950000867713,"q25":17.52440000018396,"q75":20.528524997644126,"state_mb":0.375,"tokens_per_s":52.62340846838717,"ms_graph":0.8532000028935727},{"model":"retnet","context":2048,"ms":19.11610000388464,"q25":17.812500003856258,"q75":21.089274996484164,"state_mb":0.375,"tokens_per_s":52.3119255390371,"ms_graph":0.8506499980285298},{"model":"retnet","context":8192,"ms":17.96199999807868,"q25":15.306499997677747,"q75":20.873599998594727,"state_mb":0.375,"tokens_per_s":55.67308763539504,"ms_graph":0.8541999995941296},{"model":"retnet","context":32768,"ms":18.215399999462534,"q25":15.906100001302548,"q75":20.55380000092555,"state_mb":0.375,"tokens_per_s":54.898602283205754,"ms_graph":0.8514500004821457},{"model":"retnet","context":131072,"ms":17.822700003307546,"q25":16.509149996636552,"q75":19.677424996189075,"state_mb":0.375,"tokens_per_s":56.10822152728933,"ms_graph":0.8643000001029577},{"model":"retnet","context":262144,"ms":18.74439999664901,"q25":16.064399998867884,"q75":20.530200003122445,"state_mb":0.375,"tokens_per_s":53.34926699060909,"ms_graph":0.8668000009492971},{"model":"hybrid","context":128,"ms":20.501899998635054,"q25":18.370799996773712,"q75":22.24240000214195,"state_mb":0.4326171875,"tokens_per_s":48.775967108735124,"ms_graph":0.8798000017122831},{"model":"hybrid","context":512,"ms":19.8826000050758,"q25":18.771099999867147,"q75":22.172249999130145,"state_mb":0.8076171875,"tokens_per_s":50.29523300497477,"ms_graph":0.8849499972711783},{"model":"hybrid","context":2048,"ms":20.673099999839906,"q25":18.94420000098762,"q75":21.032849999755854,"state_mb":2.3076171875,"tokens_per_s":48.37203902693568,"ms_graph":0.8931999982451089},{"model":"hybrid","context":8192,"ms":20.988499996747123,"q25":19.911400000637514,"q75":22.889099996973528,"state_mb":8.3076171875,"tokens_per_s":47.64513901207727,"ms_graph":0.937300002988195},{"model":"hybrid","context":32768,"ms":20.56299999821931,"q25":19.131899996864377,"q75":21.19200000015553,"state_mb":32.3076171875,"tokens_per_s":48.631036331595425,"ms_graph":1.0943999986920971},{"model":"hybrid","context":131072,"ms":20.56050000101095,"q25":18.92470000166213,"q75":21.497749999980442,"state_mb":128.3076171875,"tokens_per_s":48.636949488136494,"ms_graph":1.7577999969944358},{"model":"hybrid","context":262144,"ms":20.569100001011975,"q25":18.865174997699796,"q75":21.41437499994936,"state_mb":256.3076171875,"tokens_per_s":48.616614239359095,"ms_graph":2.6368500002718065}],"bench_scan":[{"scan":"reference","L":256,"fwd":{"ms":145.14055000108783,"q25":114.57392499869457,"q75":150.8239750019129,"peak_mb":9.21875},"fwd_bwd":{"ms":730.9066000016173,"q25":701.403199993365,"q75":771.0328000030131,"peak_mb":49.94091796875}},{"scan":"reference","L":1024,"fwd":{"ms":382.7974000014365,"q25":381.37540000025183,"q75":408.5944999969797,"peak_mb":4.09375},"fwd_bwd":{"ms":2515.7621999969706,"q25":2505.720699999074,"q75":2616.320499997528,"peak_mb":167.90966796875}},{"scan":"reference","L":4096,"fwd":{"ms":1659.191099999589,"q25":1628.2690000007278,"q75":1710.089300002437,"peak_mb":16.09375},"fwd_bwd":{"ms":10232.154600002104,"q25":10170.622500001627,"q75":10408.927899996343,"peak_mb":672.28466796875}},{"scan":"sequential","L":256,"fwd":{"ms":28.126700002758298,"q25":27.64885000215145,"q75":31.700749997980893,"peak_mb":40.53125},"fwd_bwd":{"ms":93.44825000152923,"q25":91.36252500320552,"q75":97.23425000447605,"peak_mb":89.1884765625}},{"scan":"sequential","L":1024,"fwd":{"ms":115.65839999821037,"q25":110.68299999897135,"q75":122.06769999829703,"peak_mb":162.03125},"fwd_bwd":{"ms":365.226599999005,"q25":349.1204000019934,"q75":381.76260000182083,"peak_mb":356.2822265625}},{"scan":"sequential","L":4096,"fwd":{"ms":1010.6273000055808,"q25":977.1772999956738,"q75":1014.0668000021833,"peak_mb":328.03125},"fwd_bwd":{"ms":3248.4544000035385,"q25":2962.1103999961633,"q75":3412.286100006895,"peak_mb":728.8759765625}},{"scan":"hillis_steele","L":256,"fwd":{"ms":4.367349996755365,"q25":4.311800001232768,"q75":4.408124999827123,"peak_mb":48.5},"fwd_bwd":{"ms":14.757600001757964,"q25":14.705025003422634,"q75":14.904825002304278,"peak_mb":97.0634765625}},{"scan":"hillis_steele","L":1024,"fwd":{"ms":20.19980000113719,"q25":20.120549997955095,"q75":20.31495000119321,"peak_mb":194.03125},"fwd_bwd":{"ms":68.39485000091372,"q25":68.37229999837291,"q75":68.54575000215846,"peak_mb":388.1884765625}},{"scan":"hillis_steele","L":4096,"fwd":{"ms":94.01960000468534,"q25":93.98554999825137,"q75":94.14314999958151,"peak_mb":392.03125},"fwd_bwd":{"ms":315.8575999987079,"q25":315.7896000047913,"q75":316.01840000075754,"peak_mb":792.8291015625}},{"scan":"hillis_steele","L":16384,"fwd":{"ms":429.6241000047303,"q25":429.604199998721,"q75":429.7558999969624,"peak_mb":416.03125},"fwd_bwd":{"ms":1428.6504999981844,"q25":1428.5499999969034,"q75":1428.8077999954112,"peak_mb":843.0673828125}},{"scan":"hillis_steele","L":65536,"fwd":{"ms":1937.6802999977372,"q25":1937.5170999992406,"q75":1937.842899998941,"peak_mb":512.03125},"fwd_bwd":{"ms":6384.967499994673,"q25":6384.566499997163,"q75":6385.359799998696,"peak_mb":1044.064453125}},{"scan":"blelloch","L":256,"fwd":{"ms":4.145250000874512,"q25":3.763950006032246,"q75":4.701749998275773,"peak_mb":48.53125},"fwd_bwd":{"ms":14.096999999310356,"q25":13.275224997414625,"q75":14.974899997469038,"peak_mb":113.0947265625}},{"scan":"blelloch","L":1024,"fwd":{"ms":9.763950001797639,"q25":9.666975003710832,"q75":9.88695000341977,"peak_mb":194.03125},"fwd_bwd":{"ms":37.32579999996233,"q25":37.08299999743758,"q75":37.39105000022391,"peak_mb":452.1884765625}},{"scan":"blelloch","L":4096,"fwd":{"ms":36.820049994275905,"q25":36.7221249944123,"q75":36.978499996621395,"peak_mb":392.03125},"fwd_bwd":{"ms":144.67229999718256,"q25":144.62420000199927,"q75":145.4410000005737,"peak_mb":920.8291015625}},{"scan":"blelloch","L":16384,"fwd":{"ms":148.2934500054398,"q25":147.43949999865436,"q75":148.54830000149377,"peak_mb":416.03125},"fwd_bwd":{"ms":582.5257999968017,"q25":581.5124000000651,"q75":582.9739999971935,"peak_mb":971.0673828125}},{"scan":"blelloch","L":65536,"fwd":{"ms":597.1506999994745,"q25":597.1389000042109,"q75":597.3859000005177,"peak_mb":512.03125},"fwd_bwd":{"ms":2360.8702999990783,"q25":2359.9508999977843,"q75":2363.5003000017605,"peak_mb":1172.064453125}},{"scan":"chunked","L":256,"fwd":{"ms":4.047399997944012,"q25":3.4991499996976927,"q75":4.442749997906503,"peak_mb":40.53125},"fwd_bwd":{"ms":12.882049999461742,"q25":12.201749997984734,"q75":13.680350000868202,"peak_mb":99.0322265625}},{"scan":"chunked","L":1024,"fwd":{"ms":6.359750001138309,"q25":5.879624999579391,"q75":6.792674999815063,"peak_mb":162.03125},"fwd_bwd":{"ms":24.1618500003824,"q25":23.920399999042274,"q75":25.35705000082089,"peak_mb":392.1259765625}},{"scan":"chunked","L":4096,"fwd":{"ms":19.661049998831004,"q25":19.546724999599974,"q75":19.792924998910166,"peak_mb":328.03125},"fwd_bwd":{"ms":92.98444999876665,"q25":92.87365000091086,"q75":93.41874999881838,"peak_mb":796.7978515625}},{"scan":"chunked","L":16384,"fwd":{"ms":119.69670000689803,"q25":117.17455000325572,"q75":129.7923999991326,"peak_mb":352.03125},"fwd_bwd":{"ms":444.19949999428354,"q25":440.3922999990755,"q75":450.67280000512255,"peak_mb":845.0595703125}},{"scan":"chunked","L":65536,"fwd":{"ms":912.2189000045182,"q25":873.2823000027565,"q75":947.4656999955187,"peak_mb":448.03125},"fwd_bwd":{"ms":2908.19680000277,"q25":2839.3596000023535,"q75":3122.065499999735,"peak_mb":1045.0625}},{"scan":"triton","L":256,"fwd":{"ms":0.2699999968172051,"q25":0.2582000051916111,"q75":0.2989249987876974,"peak_mb":0.53125},"fwd_bwd":{"ms":1.3139499969838653,"q25":1.1750000030588126,"q75":1.472049996664282,"peak_mb":9.5947265625}},{"scan":"triton","L":1024,"fwd":{"ms":0.6939000013517216,"q25":0.6671000028291019,"q75":0.72987500243471,"peak_mb":2.03125},"fwd_bwd":{"ms":3.3194499992532656,"q25":3.122625001196866,"q75":3.488324999125325,"peak_mb":38.1884765625}},{"scan":"triton","L":4096,"fwd":{"ms":2.5216499998350628,"q25":2.4511749998055166,"q75":2.6657500020519365,"peak_mb":8.03125},"fwd_bwd":{"ms":11.0233999985212,"q25":10.8812249982293,"q75":11.115950001112651,"peak_mb":152.5634765625}},{"scan":"triton","L":16384,"fwd":{"ms":8.431000002019573,"q25":8.40007499937201,"q75":8.591724999860162,"peak_mb":32.03125},"fwd_bwd":{"ms":42.01394999836339,"q25":41.96027500074706,"q75":42.05135000120208,"peak_mb":610.0634765625}},{"scan":"triton","L":65536,"fwd":{"ms":32.1850500004075,"q25":32.10129999933997,"q75":32.31115000016871,"peak_mb":128.03125},"fwd_bwd":{"ms":526.5308000016375,"q25":526.4260999974795,"q75":526.7928999965079,"peak_mb":904.0634765625}}],"ablation":[{"name":"mamba","desc":"selective \u0394,B,C \u00b7 exact ZOH (default)","curve":[[250,2.3973692520927847],[500,2.17223844572361],[750,2.069088038454455],[1000,1.9975953089350662]]},{"name":"mamba_lti","desc":"**no selection** (LTI: \u0394,B,C constant)","curve":[[250,2.444693487587652],[500,2.225646139165246],[750,2.1132978598504564],[1000,2.0446457631081487]]},{"name":"mamba_euler","desc":"Euler B\u0304 = \u0394B (Mamba's simplification)","curve":[[250,2.3989616800531306],[500,2.1710579553991156],[750,2.0685841463712134],[1000,1.997603885788239]]},{"name":"mamba_bilinear","desc":"bilinear / Tustin","curve":[[250,2.3974182581660837],[500,2.170197606420195],[750,2.068022553536212],[1000,1.9950156543268724]]}],"mqar":[{"task":"mqar","arch":"transformer","d_model":64,"seq_len":128,"n_kv":4,"steps":3000,"params":98624,"final_loss":1.114591360092163,"train_s":103.75678099999641,"acc":0.5283203125},{"task":"mqar","arch":"mamba","d_model":64,"seq_len":128,"n_kv":4,"steps":3000,"params":130880,"final_loss":3.4154739379882812,"train_s":192.158797899996,"acc":0.078125},{"task":"mqar","arch":"retnet","d_model":64,"seq_len":128,"n_kv":4,"steps":3000,"params":98752,"final_loss":2.7592709064483643,"train_s":136.94507000000158,"acc":0.279052734375},{"task":"mqar","arch":"hybrid","d_model":64,"seq_len":128,"n_kv":4,"steps":3000,"params":114752,"final_loss":0.025887854397296906,"train_s":143.8639708999981,"acc":0.989501953125},{"task":"mqar","arch":"transformer","d_model":64,"seq_len":128,"n_kv":8,"steps":3000,"params":98624,"final_loss":2.9569599628448486,"train_s":101.80766890000086,"acc":0.2152099609375,"acc_by_length":{"128":0.21533203125,"256":0.21484375,"512":0.177734375,"1024":0.09619140625,"2048":0.0546875,"4096":0.033203125}},{"task":"mqar","arch":"mamba","d_model":64,"seq_len":128,"n_kv":8,"steps":3000,"params":130880,"final_loss":4.159341812133789,"train_s":191.3404237000068,"acc":0.01416015625,"acc_by_length":{"128":0.0107421875,"256":0.0107421875,"512":0.01611328125,"1024":0.013671875,"2048":0.013671875,"4096":0.01171875}},{"task":"mqar","arch":"retnet","d_model":64,"seq_len":128,"n_kv":8,"steps":3000,"params":98752,"final_loss":3.4529149532318115,"train_s":128.69188369999756,"acc":0.1405029296875,"acc_by_length":{"128":0.13720703125,"256":0.01171875,"512":0.01513671875,"1024":0.01171875,"2048":0.017578125,"4096":0.009765625}},{"task":"mqar","arch":"hybrid","d_model":64,"seq_len":128,"n_kv":8,"steps":3000,"params":114752,"final_loss":2.930277109146118,"train_s":142.80099640000117,"acc":0.243408203125,"acc_by_length":{"128":0.2373046875,"256":0.10107421875,"512":0.03271484375,"1024":0.017578125,"2048":0.015625,"4096":0.01171875}},{"task":"mqar","arch":"transformer","d_model":64,"seq_len":128,"n_kv":16,"steps":3000,"params":98624,"final_loss":3.221761703491211,"train_s":99.7367860000013,"acc":0.11297607421875},{"task":"mqar","arch":"mamba","d_model":64,"seq_len":128,"n_kv":16,"steps":3000,"params":130880,"final_loss":4.1588921546936035,"train_s":191.2035612999971,"acc":0.01458740234375},{"task":"mqar","arch":"retnet","d_model":64,"seq_len":128,"n_kv":16,"steps":3000,"params":98752,"final_loss":4.083350658416748,"train_s":129.62457130000257,"acc":0.02435302734375},{"task":"mqar","arch":"hybrid","d_model":64,"seq_len":128,"n_kv":16,"steps":3000,"params":114752,"final_loss":3.213066577911377,"train_s":145.94211370000266,"acc":0.1756591796875},{"task":"mqar","arch":"transformer","d_model":64,"seq_len":128,"n_kv":32,"steps":3000,"params":98624,"final_loss":3.5420331954956055,"train_s":102.27025870000216,"acc":0.088348388671875},{"task":"mqar","arch":"mamba","d_model":64,"seq_len":128,"n_kv":32,"steps":3000,"params":130880,"final_loss":4.158946514129639,"train_s":195.88974690000032,"acc":0.015045166015625},{"task":"mqar","arch":"retnet","d_model":64,"seq_len":128,"n_kv":32,"steps":3000,"params":98752,"final_loss":4.125683307647705,"train_s":133.13086840000324,"acc":0.020263671875},{"task":"mqar","arch":"hybrid","d_model":64,"seq_len":128,"n_kv":32,"steps":3000,"params":114752,"final_loss":3.9216408729553223,"train_s":151.2796215999988,"acc":0.0660400390625}],"selective":[{"task":"selective_copying","arch":"mamba","d_model":64,"seq_len":128,"n_tokens":8,"steps":3000,"params":130880,"final_loss":2.3011744022369385,"train_s":215.7617179000008,"acc":0.1282958984375,"acc_by_length":{"128":0.13427734375,"256":0.08642578125,"512":0.06396484375,"1024":0.0693359375,"2048":0.06640625,"4096":0.0625}},{"task":"selective_copying","arch":"mamba_lti","d_model":64,"seq_len":128,"n_tokens":8,"steps":3000,"params":110528,"final_loss":2.435289144515991,"train_s":363.0108804000047,"acc":0.138916015625,"acc_by_length":{"128":0.13525390625,"256":0.10009765625,"512":0.06982421875,"1024":0.06396484375,"2048":0.06640625,"4096":0.068359375}},{"task":"selective_copying","arch":"transformer","d_model":64,"seq_len":128,"n_tokens":8,"steps":3000,"params":98624,"final_loss":0.5607693791389465,"train_s":277.78725129999657,"acc":0.7286376953125,"acc_by_length":{"128":0.7265625,"256":0.20703125,"512":0.1630859375,"1024":0.10302734375,"2048":0.09375,"4096":0.068359375}},{"task":"selective_copying","arch":"retnet","d_model":64,"seq_len":128,"n_tokens":8,"steps":3000,"params":98752,"final_loss":0.8347144722938538,"train_s":191.16218880000088,"acc":0.7169189453125,"acc_by_length":{"128":0.71728515625,"256":0.3212890625,"512":0.171875,"1024":0.12548828125,"2048":0.10546875,"4096":0.080078125}},{"task":"selective_copying","arch":"hybrid","d_model":64,"seq_len":128,"n_tokens":8,"steps":3000,"params":114752,"final_loss":8.226239879149944e-05,"train_s":155.9748236000014,"acc":0.9998779296875,"acc_by_length":{"128":1.0,"256":0.18408203125,"512":0.142578125,"1024":0.125,"2048":0.1171875,"4096":0.0703125}}],"delta":{"text":"State |\n  Motto           = State sovereignty, national union |\n  Capital         = [[Indianapolis, Indiana|Indianapolis]] |\n  LargestCity     = [[Ind","rel":[[1.181,1.163,0.931,0.682,0.718,0.728,0.958,1.254,1.421,1.442,1.419,1.049,0.861,0.715,0.652,0.692,1.008,1.212,1.533,1.533,1.533,1.533,1.533,1.533,1.533,1.533,1.527,1.345,1.468,1.157,0.931,0.682,0.718,0.728,0.957,0.965,0.832,0.748,0.758,0.718,0.71,0.712,0.719,0.723,0.74,0.793,0.935,1.196,1.017,0.821,0.795,0.641,0.72,0.754,0.737,0.73,0.81,0.818,0.854,0.669,0.776,0.768,0.951,1.37,1.421,1.442,1.332,1.172,0.929,0.905,0.63,0.788,0.717,0.692,0.847,1.302,1.533,1.533,1.533,1.533,1.533,1.533,1.527,1.345,1.423,1.193,1.2,0.817,0.938,0.755,0.702,0.722,0.768,0.727,0.836,0.676,0.741,0.602,0.865,0.856,1.187,0.95,1.1,0.755,0.702,0.722,0.768,0.727,1.08,0.887,1.043,0.755,0.702,0.722,0.768,0.727,0.836,0.676,0.741,0.602,0.878,0.789,0.883,1.167,1.386,1.421,1.442,1.475,1.088,0.88,0.678,0.695,0.725,0.856,0.654,0.789,0.69,0.779,0.748,1.039,1.263,1.533,1.533,1.527,1.345,1.423,1.193,1.2,0.817,0.938],[1.021,1.098,1.071,1.078,0.85,0.878,1.051,1.095,1.057,1.102,1.054,1.169,1.017,0.981,0.917,0.873,1.002,1.045,1.063,1.029,1.04,1.032,1.032,1.031,1.031,1.032,1.091,1.082,1.167,1.156,1.08,1.065,0.847,0.878,1.01,0.987,0.971,0.932,0.905,0.909,0.958,0.87,0.847,0.912,0.85,0.929,0.971,1.179,1.035,1.003,0.846,0.861,0.84,0.949,0.897,0.922,1.001,1.037,1.086,0.912,0.941,0.885,1.062,1.08,1.057,1.092,1.04,1.082,1.082,1.204,0.868,0.989,1.029,0.93,0.983,1.061,1.041,1.05,1.039,1.032,1.033,1.031,1.09,1.083,1.147,1.092,1.201,0.939,1.018,0.966,0.916,1.026,0.939,0.869,0.973,0.855,0.984,0.952,0.865,1.006,1.145,0.995,1.071,0.966,0.91,1.03,0.944,0.904,1.109,0.962,1.035,0.954,0.907,1.03,0.941,0.869,0.969,0.852,0.985,0.952,0.868,0.98,0.91,1.052,1.141,1.047,1.1,1.1,1.038,1.013,0.951,0.832,0.886,0.849,0.932,0.923,0.959,1.01,0.957,1.006,1.081,1.074,1.038,1.089,1.082,1.138,1.09,1.199,0.939,1.018],[1.337,1.024,0.888,0.817,0.807,0.848,1.106,1.17,1.53,1.023,1.341,1.12,0.915,0.825,0.798,0.825,0.942,1.004,1.022,1.062,1.106,1.099,1.093,1.099,1.103,1.104,1.3,1.303,1.78,1.02,0.907,0.824,0.808,0.853,1.216,0.986,0.876,0.833,0.799,0.796,0.809,0.818,0.822,0.808,0.797,0.817,0.888,1.339,0.967,0.832,0.811,0.817,0.857,0.819,0.802,0.818,1.27,0.869,0.937,0.909,0.845,0.849,1.035,1.194,1.498,1.018,1.424,1.017,0.953,0.856,0.864,0.828,0.805,0.806,1.05,0.991,1.017,1.072,1.102,1.093,1.089,1.091,1.29,1.298,1.546,1.114,1.92,1.058,0.964,0.904,0.833,0.817,0.79,0.832,0.826,0.87,0.822,0.815,0.808,0.862,1.64,0.927,0.933,0.884,0.825,0.816,0.791,0.828,1.262,1.03,0.987,0.883,0.822,0.814,0.791,0.832,0.824,0.867,0.821,0.814,0.821,0.849,0.91,1.135,1.195,1.494,1.027,1.369,1.062,0.911,0.854,0.803,0.805,0.806,0.812,0.91,0.879,0.825,0.85,1.013,1.064,1.0,1.069,1.28,1.29,1.525,1.11,1.935,1.06,0.966],[1.049,1.1,0.909,0.923,1.043,0.99,0.996,1.17,1.354,1.18,1.12,0.936,0.902,0.962,0.882,0.858,1.055,1.063,1.03,0.991,1.017,1.04,1.029,1.03,1.028,1.028,1.045,1.03,0.974,1.066,0.88,0.936,0.999,1.004,1.016,1.037,1.027,0.874,0.906,0.917,0.991,0.934,0.973,1.098,1.028,0.999,1.029,1.048,1.047,0.999,0.866,0.882,0.884,0.953,0.918,1.063,1.079,1.113,0.952,0.914,0.878,0.938,1.118,1.187,1.334,1.161,1.091,1.007,0.877,0.874,0.951,0.951,1.009,1.012,1.001,0.99,1.034,0.986,1.018,1.02,1.019,1.024,1.04,1.026,1.034,1.146,0.987,1.083,0.882,0.937,0.874,1.009,0.946,0.842,0.904,0.879,0.987,0.915,0.988,0.997,0.942,1.093,0.873,0.951,0.86,1.0,0.934,0.9,0.93,1.03,0.99,0.984,0.892,1.03,0.932,0.847,0.919,0.889,1.005,0.935,0.94,0.984,1.058,1.179,1.434,1.29,1.146,1.125,0.976,0.867,0.93,0.91,0.97,1.08,1.024,0.896,1.017,0.975,0.995,1.042,0.983,1.021,0.968,1.001,1.013,1.035,1.14,0.982,1.082,0.886],[1.114,1.061,0.978,0.919,0.948,0.916,1.053,1.045,1.029,1.048,0.999,1.088,1.039,0.936,0.914,0.954,1.14,1.136,1.083,1.015,1.008,1.026,1.022,1.022,1.023,1.022,1.08,1.031,1.035,1.175,1.001,0.928,0.936,0.915,1.121,1.077,1.118,0.941,0.989,0.945,0.93,0.943,0.967,0.932,0.968,0.971,1.023,1.119,1.154,0.961,0.931,0.971,0.967,0.922,0.962,0.952,1.089,0.953,1.007,0.96,0.968,0.955,1.142,1.037,0.993,1.046,1.042,1.112,0.988,0.917,0.964,0.911,0.972,0.931,1.175,1.045,1.057,1.017,1.012,1.017,1.019,1.02,1.073,1.031,0.992,1.089,1.005,1.051,1.003,0.93,0.956,0.937,0.926,0.935,0.92,0.96,0.925,0.939,0.975,1.003,0.984,1.024,0.996,0.92,0.955,0.944,0.929,0.949,1.027,1.014,1.01,0.934,0.952,0.949,0.923,0.931,0.922,0.966,0.932,0.939,0.95,0.993,0.988,1.205,1.094,1.02,1.047,0.977,1.008,0.979,0.974,0.921,0.908,0.933,0.997,0.974,0.948,0.894,0.995,1.147,1.093,1.034,1.016,1.049,1.022,0.995,1.083,1.001,1.051,1.001],[1.005,0.925,0.908,0.981,0.898,1.077,1.012,1.051,1.085,1.075,1.121,0.975,0.926,1.0,0.907,0.937,0.935,0.977,0.979,1.126,1.181,1.22,1.247,1.265,1.258,1.241,1.164,1.08,1.022,0.973,1.004,1.019,0.927,1.06,1.014,0.945,0.906,0.925,0.931,0.9,0.911,0.91,0.95,0.936,0.95,0.941,0.957,0.936,0.889,0.943,0.977,0.949,0.963,0.963,1.02,0.942,0.998,0.973,0.941,0.934,0.906,0.936,0.948,1.013,1.071,1.083,1.108,0.971,1.029,0.965,0.986,0.922,0.975,0.955,1.141,0.95,1.072,1.121,1.201,1.255,1.273,1.294,1.216,1.091,0.977,0.921,1.013,1.05,0.992,0.916,0.893,0.998,0.915,0.884,0.882,0.925,0.907,0.941,0.909,0.987,0.974,1.006,0.992,0.925,0.894,1.011,0.914,0.897,0.979,1.007,1.003,0.904,0.902,0.976,0.912,0.886,0.882,0.925,0.904,0.941,0.897,0.941,0.939,1.043,1.131,1.145,1.102,1.127,0.94,0.972,0.925,0.931,0.954,0.999,0.944,0.946,0.975,0.938,1.145,0.992,0.976,1.097,1.17,1.162,1.079,0.971,0.915,1.016,1.044,0.994],[0.674,0.801,0.737,0.716,0.646,0.672,0.705,1.239,1.753,3.373,3.396,0.864,0.777,0.809,0.686,0.655,0.752,0.85,0.728,0.689,0.756,0.756,0.731,0.688,0.65,0.65,0.749,1.523,1.316,1.291,0.672,0.7,0.704,0.677,0.688,0.728,0.68,0.662,0.703,0.855,0.87,0.836,0.776,0.78,0.827,1.004,0.699,0.804,0.96,0.615,0.616,0.691,0.653,0.758,0.93,1.029,0.79,0.705,0.678,0.681,0.753,0.676,0.72,1.48,1.616,3.848,3.939,0.933,0.718,0.62,0.684,0.731,0.671,0.683,0.639,0.699,0.669,0.664,0.723,0.764,0.721,0.67,0.751,1.57,1.623,2.289,1.046,0.896,0.809,0.757,0.927,0.838,0.854,0.864,0.802,0.766,0.868,0.897,0.813,0.677,0.813,0.892,0.705,0.873,1.129,0.897,0.808,0.698,0.977,0.75,0.759,0.928,1.169,0.955,0.923,0.905,0.86,0.809,0.902,0.97,0.823,0.81,1.208,0.807,2.02,2.532,5.015,3.994,1.033,0.727,0.71,0.625,0.661,0.812,0.711,0.647,0.669,0.783,0.801,0.699,0.766,0.652,0.632,0.777,1.495,1.621,2.354,1.083,0.928,0.81],[1.406,1.393,0.91,0.757,0.738,0.818,1.223,1.502,1.097,1.097,1.042,1.222,0.836,0.816,0.707,0.785,0.941,1.092,0.952,1.11,1.149,0.996,0.968,0.876,0.848,0.856,0.977,1.497,2.677,1.86,1.061,0.802,0.745,0.761,1.456,1.329,0.995,0.718,0.728,0.739,0.756,0.727,0.764,0.674,0.741,0.742,0.95,2.025,1.231,0.764,0.723,0.744,0.739,0.747,0.825,0.831,1.834,1.165,0.918,0.723,0.766,0.725,1.952,1.864,1.158,1.27,1.309,1.197,0.8,0.714,0.733,0.748,0.737,0.824,1.059,0.985,0.829,0.915,0.905,0.946,0.901,0.833,0.907,1.411,2.643,1.391,1.4,1.17,0.839,0.726,0.712,0.744,0.779,0.797,0.763,0.775,0.768,0.843,0.758,0.957,0.973,1.027,0.899,0.739,0.733,0.746,0.768,0.837,1.01,1.441,0.822,0.729,0.72,0.748,0.798,0.793,0.76,0.763,0.765,0.854,0.751,0.809,0.841,1.093,1.411,1.331,1.206,1.094,0.985,0.742,0.728,0.727,0.726,0.755,0.769,0.744,0.75,0.776,0.996,1.279,0.961,0.824,0.961,1.133,1.736,2.718,1.333,1.285,1.117,0.839],[1.054,1.089,0.951,0.881,0.888,0.988,0.992,1.149,0.94,0.991,1.271,1.188,0.914,0.896,0.927,1.082,1.041,1.062,1.046,0.929,0.923,0.907,0.898,0.893,0.877,0.87,0.901,1.028,1.32,1.485,1.116,0.906,0.887,0.962,0.975,1.104,0.933,0.856,0.953,0.903,0.912,0.969,0.946,0.952,1.036,1.011,0.994,1.314,1.316,0.973,0.985,0.917,0.909,1.002,0.896,1.105,0.901,0.877,0.935,0.943,0.849,0.92,0.945,0.975,0.997,1.091,1.308,1.294,0.955,0.885,1.025,1.04,0.914,1.003,0.984,1.057,0.969,0.914,0.888,0.903,0.891,0.88,0.898,1.012,1.111,1.128,1.276,1.05,1.08,0.997,0.868,0.943,0.887,0.889,0.852,0.927,0.949,0.901,1.005,1.174,1.294,1.169,1.095,0.972,0.864,0.947,0.898,0.904,1.036,1.134,1.036,0.933,0.841,0.941,0.897,0.893,0.855,0.944,0.944,0.897,1.109,0.977,1.116,0.984,1.064,1.028,1.076,1.232,1.159,0.877,1.008,0.889,0.875,0.865,1.058,0.975,0.947,0.886,0.982,1.123,1.16,1.012,0.912,0.945,1.073,1.096,1.162,1.267,1.062,1.083],[1.455,0.784,0.7,0.765,1.384,1.344,0.751,0.739,0.852,1.222,1.232,1.736,0.716,0.957,1.083,0.909,0.823,0.7,0.848,0.851,0.775,0.75,0.686,0.675,0.67,0.668,0.698,0.798,1.371,1.329,0.883,0.718,1.279,1.289,0.718,0.705,0.763,0.853,0.868,0.997,0.833,0.767,0.879,1.524,1.821,1.492,1.044,1.115,0.883,0.73,0.734,0.838,0.818,0.926,0.796,0.815,0.857,0.704,0.76,0.74,0.919,0.9,0.866,0.681,0.918,1.481,1.611,1.934,0.945,0.951,0.846,0.835,0.962,1.024,0.734,0.695,0.731,0.897,1.074,0.838,0.707,0.678,0.692,0.77,1.136,0.909,1.261,2.915,0.775,0.718,0.924,1.006,0.765,0.889,1.05,1.095,1.145,1.007,1.346,0.945,0.998,0.911,0.787,0.853,1.113,1.154,0.809,1.003,0.915,2.051,0.798,0.798,0.915,0.994,0.753,0.855,1.168,1.145,1.199,1.056,1.196,0.797,0.941,1.163,0.8,1.077,1.369,1.429,1.785,0.808,0.943,0.938,0.959,1.114,0.916,0.732,0.747,1.489,1.101,0.79,0.864,0.877,0.851,0.869,0.786,1.275,0.898,1.363,3.052,0.797],[0.938,0.699,0.721,0.78,0.664,0.742,0.802,0.919,0.726,0.872,0.995,0.738,0.768,0.765,0.931,0.836,0.801,0.825,0.949,1.183,1.129,1.18,1.169,1.182,1.164,1.14,1.356,2.824,2.232,0.732,0.795,1.03,0.757,0.808,0.91,0.697,0.74,0.689,0.757,0.724,0.76,0.771,0.641,0.776,0.774,0.682,0.918,0.955,0.743,0.738,0.72,0.671,0.631,0.702,0.719,0.718,1.062,0.674,0.794,0.8,0.716,0.718,0.754,1.214,0.971,0.976,0.954,0.684,0.945,0.867,1.073,0.737,0.947,0.725,0.736,0.929,0.952,0.894,1.026,1.044,0.97,1.003,1.214,2.733,1.955,3.177,0.893,0.798,0.968,0.894,0.76,0.72,0.807,1.205,0.882,1.334,1.027,1.027,0.687,0.918,1.438,1.272,1.478,1.116,0.856,0.721,0.778,0.799,0.891,0.841,0.922,1.215,0.734,0.682,0.701,0.863,0.742,1.07,1.048,0.824,0.767,0.667,2.415,0.996,0.987,0.907,0.897,1.015,0.684,0.749,0.651,0.67,0.831,0.73,0.823,1.466,1.571,1.052,0.904,0.717,0.776,1.225,1.269,1.539,2.981,2.22,3.069,0.906,0.822,0.951]],"classes":{"space":[1.0051171779632568,0.9677013158798218,0.9438738822937012,1.002565860748291,0.9910144805908203,1.0276947021484375,0.9701353907585144,1.075487732887268,1.036561369895935,0.9679967761039734,1.1654754877090454],"newline":[1.113542914390564,1.0762253999710083,1.1313328742980957,1.2274532318115234,1.023285150527954,1.0284702777862549,2.0494301319122314,2.0130603313446045,1.08008873462677,1.4076192378997803,2.598717451095581],"word start":[1.217813491821289,1.0854079723358154,1.306618094444275,1.0576460361480713,1.0709216594696045,1.0189704895019531,1.1556371450424194,1.7582951784133911,1.1188870668411255,1.0799424648284912,1.0330641269683838],"inside word":[0.9085538387298584,0.9717831611633301,0.9154230952262878,0.9590546488761902,0.977757453918457,0.9858856797218323,0.8468018770217896,0.7477120757102966,0.9515401124954224,0.9456890225410461,0.8412123322486877],"digit":[1.2974966764450073,1.1076663732528687,1.142852544784546,0.928579568862915,1.000935435295105,1.0052878856658936,0.8975057601928711,0.8882493376731873,1.0908522605895996,1.0398569107055664,0.9381471276283264],"punctuation":[1.0339245796203613,1.0132555961608887,1.0005285739898682,1.1144675016403198,1.018524408340454,1.0139904022216797,1.1120409965515137,0.9971531629562378,1.047194480895996,1.1846301555633545,1.1619441509246826],"markup":[1.1039769649505615,1.0339586734771729,1.0592094659805298,1.0819332599639893,1.0224796533584595,1.0061529874801636,1.5927600860595703,1.1244980096817017,0.9989233016967773,1.078734040260315,1.4294077157974243]},"selective":{"mamba":{"noise":0.06529822200536728,"data":0.1522051990032196,"marker":0.06559939682483673},"mamba_lti":{"noise":0.06683289259672165,"data":0.06683289259672165,"marker":0.06683289259672165}}}}</script>
+<script>
+(() => {
+const D = JSON.parse(document.getElementById("data").textContent);
+const NAMES = { transformer: "Transformer", mamba: "Mamba", retnet: "RetNet", hybrid: "Hybrid",
+  transformer_sdpa: "Transformer · fused attn.", mamba_torchscan: "Mamba · PyTorch scan", mamba_lti: "Mamba w/o selection" };
+const COLOR = { transformer: "--s1", mamba: "--s2", retnet: "--s3", hybrid: "--s4",
+  transformer_sdpa: "--s1", mamba_torchscan: "--s2", mamba_lti: "--s2" };
+const DASH = { transformer_sdpa: 1, mamba_torchscan: 1, mamba_lti: 1 };
+const SCAN = { reference: ["autograd loop", "--s5"], sequential: ["sequential", "--s6"], hillis_steele: ["Hillis–Steele", "--s3"],
+  blelloch: ["Blelloch", "--s4"], chunked: ["chunked", "--s1"], triton: ["Triton kernel", "--s2"] };
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const fmtLen = v => v >= 1024 ? (v / 1024 >= 1024 ? (v / 1048576) + "M" : (v / 1024) + "K") : String(v);
+const fmtNum = v => v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v >= 1 ? v.toFixed(2) : v.toPrecision(2);
+const pct = v => (v * 100).toFixed(1) + "%";
+const $ = id => document.getElementById(id);
+const NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+
+function legend(id, items) {
+  $(id).innerHTML = items.map(s => `<span><i class="${s.dash ? "dash" : ""}" style="border-color:var(${s.color})"></i>${s.label}</span>`).join("");
+}
+
+// ---------- generic line chart: log or linear axes, OOM markers, crosshair tooltip ----------
+function lineChart(host, o) {
+  const draw = () => {
+    host.innerHTML = "";
+    const W = Math.max(300, host.clientWidth), H = o.height || Math.round(Math.min(380, Math.max(240, W * 0.42)));
+    const m = { l: 58, r: o.labels === false ? 16 : 108, t: 12, b: 42 };
+    if (W < 520) m.r = 16;
+    const series = o.series.filter(s => s.points.length);
+    const xs = series.flatMap(s => s.points.map(p => p[0]).concat(s.oom ? [s.oom[0]] : []));
+    const ys = series.flatMap(s => s.points.map(p => p[1])).concat(o.yExtra || []);
+    if (!xs.length) { host.innerHTML = '<p class="note">No data yet.</p>'; return; }
+    const sx = scale(o.xlog, Math.min(...xs), Math.max(...xs), m.l, W - m.r, o.xlog ? 1.15 : 0.02);
+    const sy = scale(o.ylog, o.ymin ?? Math.min(...ys), o.ymax ?? Math.max(...ys), H - m.b, m.t, o.ylog ? 1.25 : 0.06);
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": o.aria || "" }, host);
+    // grid + ticks
+    for (const t of sy.ticks(o.yfmt)) {
+      el("line", { x1: m.l, x2: W - m.r, y1: sy(t.v), y2: sy(t.v), stroke: css("--grid") }, svg);
+      el("text", { x: m.l - 8, y: sy(t.v) + 4, "text-anchor": "end" }, svg).textContent = t.s;
+    }
+    for (const t of sx.ticks(o.xfmt)) {
+      el("line", { x1: sx(t.v), x2: sx(t.v), y1: m.t, y2: H - m.b, stroke: css("--grid") }, svg);
+      el("text", { x: sx(t.v), y: H - m.b + 17, "text-anchor": "middle" }, svg).textContent = t.s;
+    }
+    el("text", { x: (m.l + W - m.r) / 2, y: H - 6, "text-anchor": "middle" }, svg).textContent = o.xlabel;
+    const yl = el("text", { x: 12, y: (m.t + H - m.b) / 2, "text-anchor": "middle", transform: `rotate(-90 12 ${(m.t + H - m.b) / 2})` }, svg);
+    yl.textContent = o.ylabel;
+    for (const r of (o.refs || [])) {
+      const x = sx(r.x);
+      el("line", { x1: x, x2: x, y1: m.t, y2: H - m.b, stroke: css("--fg-3"), "stroke-dasharray": "3 4" }, svg);
+      el("text", { x: x + 5, y: m.t + 12 }, svg).textContent = r.label;
+    }
+    if (o.hline) {
+      const y = sy(o.hline.y);
+      el("line", { x1: m.l, x2: W - m.r, y1: y, y2: y, stroke: css("--fg-3"), "stroke-dasharray": "3 4" }, svg);
+      el("text", { x: m.l + 6, y: y - 6 }, svg).textContent = o.hline.label;
+    }
+    // series
+    const ends = [];
+    for (const s of series) {
+      const c = css(s.color);
+      const d = s.points.map((p, i) => (i ? "L" : "M") + sx(p[0]).toFixed(1) + "," + sy(p[1]).toFixed(1)).join("");
+      el("path", { d, fill: "none", stroke: c, "stroke-width": 2, "stroke-dasharray": s.dash ? "6 4" : "", "stroke-linejoin": "round" }, svg);
+      if (o.markers !== false) for (const p of s.points)
+        el("circle", { cx: sx(p[0]), cy: sy(p[1]), r: 3.6, fill: s.dash ? css("--surface") : c, stroke: s.dash ? c : css("--surface"), "stroke-width": s.dash ? 1.6 : 1.5 }, svg);
+      if (s.oom) {
+        const x = sx(s.oom[0]), y = sy(s.points[s.points.length - 1][1]);
+        el("path", { d: `M${x - 5},${y - 5}L${x + 5},${y + 5}M${x - 5},${y + 5}L${x + 5},${y - 5}`, stroke: c, "stroke-width": 2.4, fill: "none" }, svg);
+        if (o.labels === false || W < 520) el("text", { x: x + 8, y: y + 4 }, svg).textContent = "OOM";
+      }
+      const last = s.points[s.points.length - 1];
+      const xMax = Math.max(...xs);
+      if (last[0] === xMax || s.oom) ends.push({ y: sy(last[1]), x: sx(last[0]), label: s.label + (s.oom ? " · OOM" : ""), dash: s.dash });
+    }
+    if (m.r > 40 && o.labels !== false) {   // direct labels at line ends, nudged apart
+      ends.filter(e => !e.dash).sort((a, b) => a.y - b.y).reduce((prev, e) => { e.y = Math.max(e.y, prev + 14); return e.y; }, -1e9);
+      for (const e of ends.filter(e => !e.dash)) el("text", { x: W - m.r + 8, y: e.y + 4, class: "lab" }, svg).textContent = e.label;
+    }
+    // hover
+    const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; host.appendChild(tip);
+    const cross = el("line", { y1: m.t, y2: H - m.b, stroke: css("--fg-3"), "stroke-width": 1, visibility: "hidden" }, svg);
+    const xsU = [...new Set(series.flatMap(s => s.points.map(p => p[0])))].sort((a, b) => a - b);
+    const hit = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: "transparent" }, svg);
+    const move = ev => {
+      const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * W / r.width;
+      let best = xsU[0]; for (const x of xsU) if (Math.abs(sx(x) - px) < Math.abs(sx(best) - px)) best = x;
+      cross.setAttribute("x1", sx(best)); cross.setAttribute("x2", sx(best)); cross.setAttribute("visibility", "visible");
+      const rows = series.map(s => { const p = s.points.find(q => q[0] === best);
+        const oom = !p && s.oom && s.oom[0] <= best;
+        return p || oom ? `<div><span class="sw" style="background:${css(s.color)}"></span>${s.label}: <b>${p ? (o.vfmt || fmtNum)(p[1]) : "out of memory"}</b></div>` : ""; }).join("");
+      tip.innerHTML = `<div style="color:var(--fg-3)">${(o.tipx || (v => v))(best)}</div>` + rows; tip.hidden = false;
+      const left = sx(best) * r.width / W; const tw = tip.offsetWidth;
+      tip.style.left = (left + 14 + tw > r.width ? left - tw - 14 : left + 14) + "px"; tip.style.top = "8px";
+    };
+    hit.addEventListener("pointermove", move);
+    hit.addEventListener("pointerleave", () => { tip.hidden = true; cross.setAttribute("visibility", "hidden"); });
+  };
+  draw(); host._redraw = draw;
+}
+new ResizeObserver(es => es.forEach(e => e.target._redraw && e.target._redraw())).observe(document.body);
+window.addEventListener("resize", () => document.querySelectorAll(".chart").forEach(c => c._redraw && c._redraw()));
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => document.querySelectorAll(".chart").forEach(c => c._redraw && c._redraw()));
+new MutationObserver(() => document.querySelectorAll(".chart").forEach(c => c._redraw && c._redraw())).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+function scale(log, lo, hi, a, b, pad) {
+  if (log) { lo = lo / pad; hi = hi * pad; } else { const d = (hi - lo) || 1; lo -= d * pad; hi += d * pad; }
+  const f = log ? (v => a + (Math.log(v) - Math.log(lo)) / (Math.log(hi) - Math.log(lo)) * (b - a)) : (v => a + (v - lo) / (hi - lo) * (b - a));
+  f.ticks = fmt => {
+    const out = [];
+    if (log) {
+      const base = (hi / lo > 40 && fmt === "len") ? 4 : 10;
+      if (fmt === "len") { for (let v = 2 ** Math.ceil(Math.log2(lo)); v <= hi; v *= base === 4 ? 4 : 2) out.push({ v, s: fmtLen(v) }); }
+      else { for (let e = Math.floor(Math.log10(lo)); e <= Math.ceil(Math.log10(hi)); e++) for (const k of [1, 2, 5]) { const v = k * 10 ** e; if (v >= lo && v <= hi && (k === 1 || hi / lo < 300)) out.push({ v, s: fmtNum(v) }); } }
+    } else {
+      const step = nice((hi - lo) / 5); for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) out.push({ v, s: fmt === "pct" ? Math.round(v * 100) + "%" : +v.toFixed(3) + "" });
+    }
+    return out;
+  };
+  return f;
+}
+function nice(x) { const e = 10 ** Math.floor(Math.log10(x)); const f = x / e; return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * e; }
+
+function segmented(id, onPick) {
+  const btns = [...$(id).querySelectorAll("button")];
+  const pick = b => { btns.forEach(x => x.setAttribute("aria-pressed", x === b)); onPick(b.dataset.k); };
+  btns.forEach(b => b.addEventListener("click", () => pick(b))); pick(btns[0]);
+}
+
+// ---------- header ----------
+if (D.env) $("env").textContent = `${D.env.gpu} · ${D.env.vram_gib.toFixed(1)} GB · PyTorch ${D.env.torch} · CUDA ${D.env.cuda}`;
+const tiles = [];
+const ms = D.models;
+const tested = Object.entries(ms).filter(([, m]) => m.test_bpc);
+if (tested.length) { const [n, m] = tested.reduce((a, b) => a[1].test_bpc < b[1].test_bpc ? a : b);
+  tiles.push([m.test_bpc.toFixed(3) + " bpc", `best enwik8 test score (${NAMES[n]}); lower is better`]); }
+if (D.bench_models) {
+  const fit = v => Math.max(0, ...D.bench_models.filter(r => r.variant === v && !r.fwd.oom).map(r => r.L));
+  tiles.push([fmtLen(fit("mamba")) + " vs " + fmtLen(fit("transformer")), "longest sequence one forward pass fits in 4 GB: Mamba vs Transformer"]);
+}
+if (D.bench_decode) {
+  const big = Math.max(...D.bench_decode.map(r => r.context));
+  const g = n => D.bench_decode.find(r => r.model === n && r.context === big);
+  const t = g("transformer"), mb = g("mamba");
+  if (t && mb && !mb.oom) tiles.push([t.oom ? "OOM vs " + fmtNum(mb.state_mb) + " MB" : fmtNum(t.state_mb) + " vs " + fmtNum(mb.state_mb) + " MB", `cache vs state at ${fmtLen(big)} tokens of context (Transformer vs Mamba)`]);
+}
+if (D.bench_scan) {
+  const tri = D.bench_scan.filter(r => r.scan === "triton" && !r.fwd.oom);
+  const L = Math.max(...tri.map(r => r.L));
+  const b = tri.find(r => r.L === L);
+  const torch = D.bench_scan.filter(r => r.L === L && r.scan !== "triton" && !r.fwd.oom);
+  if (b && torch.length) { const best = torch.reduce((x, y) => x.fwd.ms < y.fwd.ms ? x : y);
+    tiles.push([(best.fwd.ms / b.fwd.ms).toFixed(1) + "× faster", `fused Triton scan vs the best PyTorch scan (${best.scan}), forward pass at ${fmtLen(L)} tokens`]); }
+}
+$("tiles").innerHTML = tiles.map(([v, k]) => `<div class="tile"><div class="v">${v}</div><div class="k">${k}</div></div>`).join("");
+
+// ---------- speed ----------
+if (D.bench_models) {
+  const variants = [...new Set(D.bench_models.map(r => r.variant))];
+  legend("lg-speed", variants.map(v => ({ label: NAMES[v], color: COLOR[v], dash: DASH[v] })));
+  segmented("seg-speed", k => {
+    const [metric, field] = k.split(":");
+    const series = variants.map(v => { const rr = D.bench_models.filter(r => r.variant === v);
+      const ok = rr.filter(r => !r[metric].oom); const bad = rr.find(r => r[metric].oom && !r[metric].skipped);
+      return { label: NAMES[v], color: COLOR[v], dash: DASH[v], points: ok.map(r => [r.L, r[metric][field]]), oom: bad ? [bad.L] : null }; });
+    lineChart($("c-speed"), { series, xlog: true, ylog: true, xfmt: "len", xlabel: "sequence length (bytes)", tipx: v => fmtLen(v) + " bytes",
+      ylabel: field === "ms" ? "milliseconds" : "MB", vfmt: field === "ms" ? (v => fmtNum(v) + " ms") : (v => fmtNum(v) + " MB"),
+      hline: field === "peak_mb" && D.env ? { y: D.env.vram_gib * 1024, label: "GPU memory" } : null,
+      yExtra: field === "peak_mb" && D.env ? [D.env.vram_gib * 1024] : [] });
+  });
+  const tp = D.train_tp || {};
+  const rows = Object.entries(tp).filter(([, r]) => r.tokens_per_s);
+  if (rows.length) $("t-tp").innerHTML = `<table><thead><tr><th>Training at batch 16 × 512</th><th>tokens / s</th><th>ms / step</th><th>peak memory</th></tr></thead><tbody>` +
+    rows.map(([v, r]) => `<tr><td><span class="swatch" style="background:var(${COLOR[v]})"></span>${NAMES[v]}</td><td>${(r.tokens_per_s / 1000).toFixed(1)}k</td><td>${r.ms.toFixed(0)}</td><td>${(r.peak_mb / 1024).toFixed(2)} GB</td></tr>`).join("") + `</tbody></table>`;
+}
+
+// ---------- decode ----------
+if (D.bench_decode) {
+  const models = ["transformer", "mamba", "retnet", "hybrid"].filter(n => D.bench_decode.some(r => r.model === n));
+  legend("lg-dec", models.map(n => ({ label: NAMES[n], color: COLOR[n] })));
+  const ser = f => models.map(n => { const rr = D.bench_decode.filter(r => r.model === n);
+    const ok = rr.filter(r => !r.oom && r[f] != null); const bad = rr.find(r => r.oom);
+    return { label: NAMES[n], color: COLOR[n], points: ok.map(r => [r.context, r[f]]), oom: bad ? [bad.context] : null }; });
+  segmented("seg-dec", f => lineChart($("c-dec"), { series: ser(f), xlog: true, ylog: true, xfmt: "len", xlabel: "tokens already in context",
+    ylabel: "ms per token", vfmt: v => v.toFixed(2) + " ms", tipx: v => fmtLen(v) + " tokens of context" }));
+  lineChart($("c-state"), { series: ser("state_mb"), xlog: true, ylog: true, xfmt: "len", xlabel: "tokens already in context",
+    ylabel: "MB", vfmt: v => fmtNum(v) + " MB", tipx: v => fmtLen(v) + " tokens of context" });
+}
+
+// ---------- quality ----------
+const qa = ["transformer", "mamba", "retnet", "hybrid"].filter(a => ms[a]);
+if (qa.length) {
+  const lens = [...new Set(qa.flatMap(a => ms[a].bpc_by_length.map(p => p[0])))].sort((a, b) => a - b).filter(L => L > 512);
+  const best = Math.min(...qa.map(a => ms[a].test_bpc || 99));
+  $("t-q").innerHTML = `<table><thead><tr><th>Model</th><th>Layers</th><th>Params</th><th>Val bpc</th><th>Test bpc</th>${lens.map(L => `<th>Test @ ${fmtLen(L)}</th>`).join("")}</tr></thead><tbody>` +
+    qa.map(a => { const m = ms[a]; const by = Object.fromEntries(m.bpc_by_length);
+      return `<tr><td><span class="swatch" style="background:var(${COLOR[a]})"></span>${NAMES[a]}</td><td><code>${m.layers}</code></td><td>${(m.params / 1e6).toFixed(2)}M</td><td>${m.val_bpc.toFixed(3)}</td>` +
+        `<td class="${m.test_bpc === best ? "best" : ""}">${m.test_bpc ? m.test_bpc.toFixed(3) : "pending"}</td>${lens.map(L => `<td>${by[L] != null ? by[L].toFixed(3) : "OOM"}</td>`).join("")}</tr>`; }).join("") + `</tbody></table>`;
+  legend("lg-curve", qa.map(a => ({ label: NAMES[a], color: COLOR[a] })));
+  lineChart($("c-curve"), { series: qa.map(a => ({ label: NAMES[a], color: COLOR[a], points: ms[a].curve })), markers: false,
+    xlabel: "training bytes (millions)", ylabel: "validation bpc", ymax: 3.0, vfmt: v => v.toFixed(3) + " bpc", tipx: v => v.toFixed(1) + "M bytes" });
+  segmented("seg-ext", k => {
+    if (k === "len") lineChart($("c-ext"), { series: qa.map(a => ({ label: NAMES[a], color: COLOR[a], points: ms[a].bpc_by_length })), xlog: true, xfmt: "len",
+      xlabel: "evaluation context (trained at 512)", ylabel: "test bpc", refs: [{ x: 512, label: "train length" }], vfmt: v => v.toFixed(3) + " bpc", tipx: v => fmtLen(v) + " context" });
+    else lineChart($("c-ext"), { series: qa.map(a => ({ label: NAMES[a], color: COLOR[a], points: ms[a].position_loss })), xlog: true, xfmt: "len", markers: false,
+      ymin: 1.0, ymax: 4.0, xlabel: "position inside a 4K context", ylabel: "bpc at this position", refs: [{ x: 512, label: "train length" }], vfmt: v => v.toFixed(2) + " bpc", tipx: v => "position ≈ " + Math.round(v) });
+  });
+}
+
+// ---------- ablation ----------
+const ab = (D.ablation || []).filter(a => a.curve.length);
+if (ab.length > 1) {
+  const spec = { mamba: ["selective, exact ZOH (default)", "--s2", 0], mamba_lti: ["no selection (LTI)", "--s2", 1], mamba_euler: ["selective, Euler", "--s1", 0], mamba_bilinear: ["selective, bilinear", "--s3", 0] };
+  legend("lg-abl", ab.map(a => ({ label: spec[a.name][0], color: spec[a.name][1], dash: spec[a.name][2] })));
+  lineChart($("c-abl"), { series: ab.map(a => ({ label: spec[a.name][0], color: spec[a.name][1], dash: spec[a.name][2], points: a.curve })),
+    xlabel: "training step (16 × 512 bytes each)", ylabel: "validation bpc", vfmt: v => v.toFixed(3) + " bpc", tipx: v => "step " + v, labels: false });
+} else $("ablation").hidden = true;
+
+// ---------- scans ----------
+if (D.bench_scan) {
+  const names = [...new Set(D.bench_scan.map(r => r.scan))];
+  legend("lg-scan", names.map(n => ({ label: SCAN[n][0], color: SCAN[n][1] })));
+  segmented("seg-scan", k => { const [metric, field] = k.split(":");
+    lineChart($("c-scan"), { series: names.map(n => ({ label: SCAN[n][0], color: SCAN[n][1],
+      points: D.bench_scan.filter(r => r.scan === n && !r[metric].oom).map(r => [r.L, r[metric][field]]) })),
+      xlog: true, ylog: true, xfmt: "len", xlabel: "sequence length", ylabel: field === "ms" ? "milliseconds" : "MB",
+      vfmt: field === "ms" ? (v => fmtNum(v) + " ms") : (v => fmtNum(v) + " MB"), tipx: v => fmtLen(v) + " tokens" }); });
+}
+
+// ---------- synthetic ----------
+if ((D.mqar || []).length) {
+  const archs = ["transformer", "mamba", "retnet", "hybrid"].filter(a => D.mqar.some(r => r.arch === a));
+  legend("lg-mqar", archs.map(a => ({ label: NAMES[a], color: COLOR[a] })));
+  lineChart($("c-mqar"), { series: archs.map(a => ({ label: NAMES[a], color: COLOR[a], points: D.mqar.filter(r => r.arch === a).map(r => [r.n_kv, r.acc]).sort((x, y) => x[0] - y[0]) })),
+    xlog: true, xfmt: "len", ymin: 0, ymax: 1, yfmt: "pct", xlabel: "key-value pairs to recall (sequence of 128)", ylabel: "accuracy", vfmt: pct, tipx: v => v + " pairs" });
+} else $("c-mqar").innerHTML = '<p class="note">Associative recall results pending.</p>';
+function bars(id, rows, max) {
+  $(id).innerHTML = rows.map(r => `<div class="bar"><span>${r.label}</span><span class="track"><span class="fill ${r.dash ? "hatch" : ""}" style="width:${Math.max(0, r.v / max * 100)}%;background-color:var(${r.color})"></span></span><span class="num">${r.text}</span></div>`).join("");
+}
+if ((D.selective || []).length) bars("b-sel", D.selective.map(r => ({ label: NAMES[r.arch], color: COLOR[r.arch], dash: DASH[r.arch], v: r.acc, text: pct(r.acc) })), 1);
+
+// ---------- delta ----------
+if (D.delta) {
+  const L = D.delta.rel.length, s = $("layer"); s.max = L;
+  const render = () => {
+    const li = +s.value - 1; $("layer-v").textContent = s.value;
+    const row = D.delta.rel[li];
+    $("dtext").innerHTML = [...D.delta.text].map((ch, i) => { const v = row[i] ?? 1;
+      const a = Math.min(0.9, Math.max(0.03, (Math.log2(v) + 1) / 3 * 0.9));
+      const c = ch === " " ? "␣" : ch === "\n" ? "↵" : ch.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+      return `<span title="Δ = ${v.toFixed(2)}× layer mean" style="background:rgba(var(--heat),${a.toFixed(3)})">${c}</span>`; }).join("");
+    const cls = Object.entries(D.delta.classes);
+    if (cls.length) bars("b-class", cls.map(([k, v]) => ({ label: k, color: "--s2", v: v[li], text: v[li].toFixed(2) + "×" })).sort((a, b) => b.v - a.v),
+      Math.max(...cls.map(([, v]) => v[li])) * 1.05);
+  };
+  s.addEventListener("input", render); render();
+} else $("delta").hidden = true;
+})();
+</script>
+
+</body>
+</html>

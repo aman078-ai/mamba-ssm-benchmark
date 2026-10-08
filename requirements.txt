@@ -1,0 +1,10 @@
+# PyTorch with CUDA (pick the index URL for your CUDA version, see https://pytorch.org):
+#   pip install torch==2.7.1 --index-url https://download.pytorch.org/whl/cu126
+torch>=2.4
+numpy
+matplotlib
+psutil
+pytest
+# Fused selective-scan kernels (optional; falls back to the PyTorch scan without it).
+# Linux: triton ships with the CUDA build of torch.  Windows: the community build below.
+triton-windows<3.4; sys_platform == "win32"

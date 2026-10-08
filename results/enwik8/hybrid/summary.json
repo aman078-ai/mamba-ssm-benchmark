@@ -1,0 +1,14 @@
+{
+  "run": "hybrid",
+  "model": "hybrid",
+  "layers": "MMMMMAMMMM",
+  "non_embedding_params": 4729344,
+  "steps": 4000,
+  "tokens": 32768000,
+  "seq_len": 512,
+  "final_val_bpc": 1.6458473659117707,
+  "best_val_bpc": 1.6458473659117707,
+  "train_time_min": 23.66825888166483,
+  "tokens_per_sec": 23074.50396177677,
+  "peak_train_mem_mb": 1828.046875
+}

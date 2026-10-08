@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# dataset (downloaded and split by data/enwik8.py)
+data/enwik8/*.zip
+data/enwik8/*.bin
+
+# model checkpoints (regenerate with `python reproduce.py --only train`)
+*.pt
+results/_quick/
