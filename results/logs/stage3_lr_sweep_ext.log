@@ -1,0 +1,13 @@
+[stage3_lr_sweep] 12 runs -> results/research/stage3_lr_sweep
+  [1/12] mamba_n16_lr0.001  (done, skipping)
+  [2/12] mamba_n16_lr0.002  (done, skipping)
+  [3/12] mamba_n16_lr0.004  (done, skipping)
+  [4/12] mamba_n16_lr0.008  (done, skipping)
+  [5/12] mamba_n16_lr0.016
+  [6/12] mamba_n16_lr0.032
+  [7/12] transformer_rope_lr0.001  (done, skipping)
+  [8/12] transformer_rope_lr0.002  (done, skipping)
+  [9/12] transformer_rope_lr0.004  (done, skipping)
+  [10/12] transformer_rope_lr0.008  (done, skipping)
+  [11/12] transformer_rope_lr0.016
+  [12/12] transformer_rope_lr0.032

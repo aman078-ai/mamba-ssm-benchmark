@@ -1,0 +1,12 @@
+{
+  "name": "stage3_seeds",
+  "description": "Seed variance at the learning rates chosen in stage3_lr_sweep (best validation bpc): Mamba 0.016, Transformer (RoPE) 0.008. Same budget as the sweep. Seed 0 is re-run, so comparing it with the sweep run also measures run-to-run nondeterminism of the kernels.",
+  "out": "results/research/stage3_seeds",
+  "common": {"steps": 1500, "seq_len": 512, "batch_size": 16, "warmup": 100, "min_lr": 0.0001,
+             "eval_every": 250, "eval_bytes": 1000000},
+  "variants": {
+    "mamba_n16": {"model": "mamba", "lr": 0.016, "override": {"d_model": 128, "layers": "MMMMMMMM", "d_state": 16}},
+    "transformer_rope": {"model": "transformer", "lr": 0.008, "override": {"d_model": 128, "layers": "AAAAA", "pos_encoding": "rope"}}
+  },
+  "grid": {"seed": [0, 1, 2]}
+}

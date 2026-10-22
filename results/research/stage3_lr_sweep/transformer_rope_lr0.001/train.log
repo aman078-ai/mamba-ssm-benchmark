@@ -1,0 +1,38 @@
+[device] NVIDIA GeForce RTX 3050 Laptop GPU: 4.00 GiB total, PyTorch capped at 2.97 GiB
+[transformer_rope_lr0.001] layers=AAAAA non-embedding params=984,448 device=cuda
+[transformer_rope_lr0.001] step     0  val_bpc 7.9416  (0.0 min)
+[transformer_rope_lr0.001] step     0  train_bpc 7.936  40.1k tok/s
+[transformer_rope_lr0.001] step   100  train_bpc 4.163  97.0k tok/s
+[transformer_rope_lr0.001] step   200  train_bpc 3.408  97.8k tok/s
+[transformer_rope_lr0.001] step   250  val_bpc 3.2523  (0.3 min)
+[transformer_rope_lr0.001] step   300  train_bpc 3.009  98.0k tok/s
+[transformer_rope_lr0.001] step   400  train_bpc 3.000  98.1k tok/s
+[transformer_rope_lr0.001] step   500  val_bpc 2.8457  (0.7 min)
+[transformer_rope_lr0.001] step   500  train_bpc 2.843  98.2k tok/s
+[transformer_rope_lr0.001] step   600  train_bpc 2.674  98.2k tok/s
+[transformer_rope_lr0.001] step   700  train_bpc 2.705  98.2k tok/s
+[transformer_rope_lr0.001] step   750  val_bpc 2.6185  (1.0 min)
+[transformer_rope_lr0.001] step   800  train_bpc 2.797  98.3k tok/s
+[transformer_rope_lr0.001] step   900  train_bpc 2.737  98.3k tok/s
+[transformer_rope_lr0.001] step  1000  val_bpc 2.4637  (1.4 min)
+[transformer_rope_lr0.001] step  1000  train_bpc 2.391  98.3k tok/s
+[transformer_rope_lr0.001] step  1100  train_bpc 2.479  98.3k tok/s
+[transformer_rope_lr0.001] step  1200  train_bpc 2.484  98.4k tok/s
+[transformer_rope_lr0.001] step  1250  val_bpc 2.3757  (1.7 min)
+[transformer_rope_lr0.001] step  1300  train_bpc 2.224  98.4k tok/s
+[transformer_rope_lr0.001] step  1400  train_bpc 2.139  98.4k tok/s
+[transformer_rope_lr0.001] step  1500  val_bpc 2.3255  (2.1 min)
+{
+  "run": "transformer_rope_lr0.001",
+  "model": "transformer",
+  "layers": "AAAAA",
+  "non_embedding_params": 984448,
+  "steps": 1500,
+  "tokens": 12288000,
+  "seq_len": 512,
+  "final_val_bpc": 2.3254990387072065,
+  "best_val_bpc": 2.3254990387072065,
+  "train_time_min": 2.081770886713639,
+  "tokens_per_sec": 98377.7808149219,
+  "peak_train_mem_mb": 872.09716796875
+}

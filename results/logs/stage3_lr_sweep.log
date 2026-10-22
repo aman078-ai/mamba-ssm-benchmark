@@ -1,0 +1,10 @@
+[stage3_lr_sweep] 8 runs -> results/research/stage3_lr_sweep
+  [1/8] mamba_n16_lr0.001
+  [2/8] mamba_n16_lr0.002
+  [3/8] mamba_n16_lr0.004
+  [4/8] mamba_n16_lr0.008
+  [5/8] transformer_rope_lr0.001
+  [6/8] transformer_rope_lr0.002
+  [7/8] transformer_rope_lr0.004
+  [8/8] transformer_rope_lr0.008
+SWEEP_DONE

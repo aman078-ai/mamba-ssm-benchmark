@@ -30,6 +30,7 @@ Status legend: **open**, **fixed (stage N)**, **mitigated** (documented, not rem
 | 18 | medium | repository | No LICENSE or CITATION file. | — | fixed (stage 1): MIT `LICENSE`, `CITATION.cff` |
 | 19 | medium | reporting | "bpc" undefined (it is bits per byte). | README | fixed (stage 0) |
 | 20 | low | repository | GitHub repository description still says "64–1024 tokens". | GitHub page | open (owner action) |
+| 21 | high | analysis error | Window-level bpc improving with window length was read as "Mamba keeps using more context". It partly reflects fewer cold-start bytes per window; per-position loss shows Mamba plateaus after ~1–2K and the hybrid degrades at 2–4K. Found in stage 3. | `results/enwik8/eval.json` position_loss | fixed (stage 3): README finding 2 corrected; the study reports per-position loss, not only window-level bpc |
 
 Re-verified as holding: the test suite design (NumPy brute force, finite-difference gradients, ZOH vs. RK4, cache and
 recurrent-state equivalence, causality); a 64K-token forward pass of the trained Mamba stays finite; parameter matching
@@ -57,6 +58,12 @@ predict where it fails?
 - **H2**: a longer training length delays that failure.
 - **H3** (DeciMamba): the receptive field implied by Δ, measured on held-out text, predicts the failure length.
 - Controls: Mamba without selection; Transformers with RoPE, NoPE and ALiBi at the same training lengths.
+- Measurement (from audit finding 21): window-level bpc mixes context use with the number of cold-start bytes per
+  window, and comparing positions inside one window mixes context use with how hard the text at each position is.
+  Each run is therefore scored on the **same bytes under two contexts**: the loss with the full context from the start
+  of a 16K window minus the loss with about one training length of context (sliding windows). Reported per band of
+  positions, fixed in advance: 1–2×, 2–4×, 4–8×, 8–16× (and 16–32×) the training length. Negative = extra context helps
+  (utilization); positive = it hurts (degradation or collapse).
 
 ## Stage checklist
 

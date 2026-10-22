@@ -37,6 +37,8 @@ class LMConfig:
     mlp_ratio: float = 4.0
     dropout: float = 0.0
     attn_impl: str = "manual"
+    pos_encoding: str = "rope"          # attention position encoding: rope | none | alibi
+    attn_query_chunk: int = 1024        # query block size for attn_impl="chunked"
     # Mamba
     d_state: int = 16
     expand: int = 2
@@ -59,7 +61,8 @@ class Block(nn.Module):
         self.kind = kind
         self.norm1 = RMSNorm(cfg.d_model)
         if kind == "A":
-            self.mixer = Attention(cfg.d_model, cfg.n_head, cfg.dropout, cfg.attn_impl)
+            self.mixer = Attention(cfg.d_model, cfg.n_head, cfg.dropout, cfg.attn_impl,
+                                   pos_encoding=cfg.pos_encoding, query_chunk=cfg.attn_query_chunk)
         elif kind == "M":
             self.mixer = Mamba(cfg.d_model, cfg.d_state, cfg.expand, cfg.d_conv,
                                selective=cfg.selective, discretization=cfg.discretization,

@@ -107,3 +107,35 @@ def test_can_overfit_a_batch(name):
         if step == 0:
             first = loss.item()
     assert first > 5.0 and loss.item() < 0.5, (first, loss.item())
+
+
+@pytest.mark.parametrize("pos", ["rope", "none", "alibi"])
+def test_position_encodings_causal_and_cache_consistent(pos):
+    """NoPE and ALiBi baselines: causal, and KV-cache decoding equals the full forward pass."""
+    m = small("AA", pos_encoding=pos)
+    x = torch.randint(0, 256, (2, 30))
+    x2 = x.clone()
+    x2[:, 20:] = torch.randint(0, 256, (2, 10))
+    with torch.no_grad():
+        full = m(x)
+        torch.testing.assert_close(m(x2)[:, :20], full[:, :20])
+        states = m.init_state(2, 30, x.device, torch.float64)
+        parts = [m(x[:, :13], states, 0), m(x[:, 13:21], states, 13)]
+        parts += [m(x[:, t:t + 1], states, t) for t in range(21, 30)]
+    torch.testing.assert_close(torch.cat(parts, 1), full)
+
+
+@pytest.mark.parametrize("pos", ["rope", "none", "alibi"])
+@pytest.mark.parametrize("impl", ["chunked", "sdpa"])
+def test_attention_implementations_agree(pos, impl):
+    x = torch.randint(0, 256, (2, 45))
+    ref = small("AA", pos_encoding=pos, attn_impl="manual")
+    other = small("AA", pos_encoding=pos, attn_impl=impl, attn_query_chunk=8)
+    with torch.no_grad():
+        torch.testing.assert_close(other(x), ref(x))
+
+
+def test_alibi_penalizes_distance():
+    from models.transformer import alibi_slopes
+    s = alibi_slopes(4)
+    assert torch.all(s > 0) and torch.all(s[1:] < s[:-1])

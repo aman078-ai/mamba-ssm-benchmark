@@ -66,11 +66,14 @@ PyTorch's `scaled_dot_product_attention`.
    lowest test bpc (1.608), the Transformer 1.651 and Mamba 1.673. With one seed and untuned learning rates, the
    0.022 bpc Transformer–Mamba gap is not evidence of either being better. *Status: preliminary; seed variance and
    per-architecture tuning are scheduled (docs/AUDIT.md, stages 3–5).*
-2. **Beyond the training length, the RoPE Transformer collapses and the recurrent models keep improving.** The
-   Transformer goes from 1.62 to 3.91 bpc at 4K. That is the known behavior of rotary embeddings used without any
-   length-extension method, and no NoPE, ALiBi or interpolation baseline was run. Mamba improves with more context
-   (1.657 → 1.629 at 8K, 16× its training length). Published work disagrees on when Mamba extrapolates (DeciMamba,
-   Stuffed Mamba, Mamba Modulation; §10); explaining this observation is the project's research question.
+2. **Beyond the training length, the RoPE Transformer collapses; the recurrent models stay stable but use little extra
+   context.** The Transformer goes from 1.62 to 3.91 bpc at 4K, the known behavior of rotary embeddings without any
+   length-extension method (no NoPE, ALiBi or interpolation baseline was run). Window-level bpc for Mamba falls with
+   longer windows (1.657 → 1.629 at 8K), but that mostly reflects fewer cold-start bytes per window: the loss at each
+   position inside a 4K window is 1.662 bpc at positions 256–512, 1.636 at 1–2K and 1.641 at 2–4K, so Mamba gains about
+   0.02 bpc from context beyond its training length and then plateaus. The hybrid degrades at 2–4K (1.574 → 1.611).
+   When and why Mamba stays stable is contested in the literature (DeciMamba, Stuffed Mamba, Mamba Modulation; §10)
+   and is the project's research question.
 3. **Efficiency depends as much on the kernel as on the architecture.** With a fused kernel on both sides, attention
    is faster up to roughly 32K tokens and trains 2.5× faster at 512 tokens; Mamba is 3.2× faster at 128K. Naive
    attention, which materializes the T×T score matrix, runs out of the 2.97 GiB at 8K tokens; fused attention reaches
@@ -323,7 +326,9 @@ count as several bytes). The test set is the full 5 MB held-out split; longer-co
 
 The right-hand panel above shows the mechanism behind finding 2. Within one 4K-byte window, the Transformer's loss
 jumps from ~1.6 to >4 bpc the moment positions pass 512, the largest offset RoPE saw in training. The recurrent models
-just keep using the extra context.
+stay roughly flat beyond 512: they do not break, but they also gain little from the extra context. Note that
+window-level bpc (the middle panel and the table) improves with window length partly because longer windows contain
+fewer cold-start bytes; the per-position curve is the measure of whether extra context is used.
 
 Samples from each model (temperature 0.8, top-k 40) are in [`results/samples.md`](results/samples.md). All four
 produce wiki-markup-shaped English at this scale.
