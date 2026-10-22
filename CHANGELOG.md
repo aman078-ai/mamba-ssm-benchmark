@@ -4,6 +4,17 @@ Each entry records what changed, which results it affects, and the numbers befor
 
 ## Unreleased
 
+### Stage 2: tests and tooling
+
+- Triton backward: under `torch.use_deterministic_algorithms(True)` dB/dC are reduced through per-tile partial buffers
+  instead of atomics. Before: run-to-run gradient differences up to 9.2e-5; after (deterministic mode): bitwise
+  identical (`results/audit/determinism.json`). Default mode is unchanged, so earlier results are unaffected.
+- New tests: deterministic mode, GPU training path vs. token-by-token decoding (fp32, 1e-4) for Mamba / hybrid /
+  RetNet stacks, 16K-token forward+backward finiteness, Triton vs. chunked scan at L = 8192, scans at L = 2048 with
+  extreme decays, experiment-runner expansion.
+- `bench_models` also measures `train_b16_l512_opt` (gradient clipping + AdamW step). Fused-attention Transformer:
+  76.3 ms without the optimizer step, 78.3 ms with it (smoke run).
+
 ### Stage 1: reproducibility infrastructure
 
 No model, kernel or training logic changed, so no result is affected.

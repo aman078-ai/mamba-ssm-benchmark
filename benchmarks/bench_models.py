@@ -51,12 +51,26 @@ def main(argv=None):
             loss.backward()
             model.zero_grad(set_to_none=True)
 
-        tb = measure(train_b16, budget_s=2.0, max_repeats=10)
-        if not tb.get("oom"):
-            tb["tokens_per_s"] = 16 * 512 / tb["ms"] * 1e3
-            print(f"{vname:17s} train step B=16 L=512: {tb['ms']:.1f} ms = {tb['tokens_per_s'] / 1e3:.1f}k tokens/s, "
-                  f"{tb['peak_mb']:.0f} MB", flush=True)
-        results.setdefault("train_b16_l512", {})[vname] = tb
+        opt = torch.optim.AdamW(model.parameters(), lr=1e-4, fused=True)
+
+        def train_b16_opt():                    # a full optimizer step, as in real training
+            with torch.autocast("cuda", dtype=torch.bfloat16):
+                loss = F.cross_entropy(model(xb).float().view(-1, 256), xb.view(-1))
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            opt.step()
+            opt.zero_grad(set_to_none=True)
+
+        # "train_b16_l512" (fwd + bwd only) is kept for comparison with earlier results;
+        # "train_b16_l512_opt" adds gradient clipping and the AdamW step.
+        for key, fn in (("train_b16_l512", train_b16), ("train_b16_l512_opt", train_b16_opt)):
+            tb = measure(fn, budget_s=2.0, max_repeats=10)
+            if not tb.get("oom"):
+                tb["tokens_per_s"] = 16 * 512 / tb["ms"] * 1e3
+                print(f"{vname:17s} {key}: {tb['ms']:.1f} ms = {tb['tokens_per_s'] / 1e3:.1f}k tokens/s, "
+                      f"{tb['peak_mb']:.0f} MB", flush=True)
+            results.setdefault(key, {})[vname] = tb
+        del opt
         del xb
         stop = {"fwd": False, "train": False}
         for L in lengths:

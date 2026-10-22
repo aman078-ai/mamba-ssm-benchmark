@@ -127,3 +127,16 @@ def test_discretizations_converge_to_zoh(method):
         ma, mb = discretize(delta, A, Bm, x, method)
         errs.append(((za - ma).abs().max() + (zb - mb).abs().max()).item())
     assert errs[0] > errs[1] > errs[2] and errs[2] < 1e-5
+
+
+@pytest.mark.parametrize("name", ["hillis_steele", "blelloch", "chunked"])
+def test_scans_long_sequence_extreme_decays(name):
+    """L = 2048 with decays spanning near-0 (state wiped) to near-1 (state kept for thousands of steps)."""
+    torch.manual_seed(1)
+    a = torch.rand(1, 2048, 2, 3, dtype=DT)
+    a[..., 0, :] = 1 - 1e-4 * torch.rand(1, 2048, 3, dtype=DT)      # very slow decay
+    a[..., 1, :] = 1e-6 * torch.rand(1, 2048, 3, dtype=DT)          # almost complete reset
+    b = torch.randn(1, 2048, 2, 3, dtype=DT)
+    out = SCANS[name](a, b)
+    assert torch.isfinite(out).all()
+    torch.testing.assert_close(out, scan_sequential(a, b), rtol=1e-9, atol=1e-9)

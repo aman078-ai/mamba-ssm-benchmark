@@ -1,0 +1,20 @@
+{
+  "mamba_fp32": {
+    "max_abs_logit_diff": 0.0054721832275390625,
+    "argmax_agreement": 1.0
+  },
+  "mamba_bf16": {
+    "max_abs_logit_diff": 0.125,
+    "argmax_agreement": 0.996666669845581
+  },
+  "mamba_64k_forward_finite": true,
+  "hybrid_fp32": {
+    "max_abs_logit_diff": 0.006429433822631836,
+    "argmax_agreement": 1.0
+  },
+  "hybrid_bf16": {
+    "max_abs_logit_diff": 0.125,
+    "argmax_agreement": 1.0
+  },
+  "hybrid_64k_forward_finite": null
+}

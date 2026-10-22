@@ -143,9 +143,9 @@ def _fwd_chunked_kernel(x_ptr, dt_ptr, A_ptr, B_ptr, C_ptr, h0_ptr, y_ptr, last_
 @triton.jit
 def _bwd_kernel(x_ptr, dt_ptr, A_ptr, B_ptr, C_ptr, h0_ptr, dy_ptr, dlast_ptr, hbuf_ptr,
                 dx_ptr, ddt_ptr, dA_part_ptr, dB_ptr, dC_ptr, dh0_ptr,
-                L, D, d_start, d_end, D_tile,
+                L, D, d_start, d_end, D_tile, n_dblk_total, dblk_offset,
                 N: tl.constexpr, BLOCK_D: tl.constexpr, METHOD: tl.constexpr, HAS_H0: tl.constexpr,
-                NUM_STAGES: tl.constexpr):
+                NUM_STAGES: tl.constexpr, ATOMIC: tl.constexpr):
     pid_b = tl.program_id(0)
     pid_d = tl.program_id(1)
     offs_d = d_start + pid_d * BLOCK_D + tl.arange(0, BLOCK_D)
@@ -162,7 +162,12 @@ def _bwd_kernel(x_ptr, dt_ptr, A_ptr, B_ptr, C_ptr, h0_ptr, dy_ptr, dlast_ptr, h
 
     row = pid_b * L * D + offs_d
     hb_base = hbuf_ptr + pid_b * L * D_tile * N + (offs_d - d_start)[:, None] * N + offs_n[None, :]
-    bn = pid_b * L * N + offs_n          # dB, dC are reduced over channel tiles with atomics
+    # dB, dC are sums over channel tiles: atomics into (B, L, N), or (deterministic mode) one partial
+    # per tile in (B, n_dblk, L, N), summed afterwards in a fixed order.
+    if ATOMIC:
+        bn = pid_b * L * N + offs_n
+    else:
+        bn = (pid_b * n_dblk_total + dblk_offset + pid_d) * L * N + offs_n
     for i in tl.range(0, L, num_stages=NUM_STAGES):
         t = L - 1 - i
         x = tl.load(x_ptr + row + t * D, mask=mask_d, other=0.0)
@@ -175,7 +180,10 @@ def _bwd_kernel(x_ptr, dt_ptr, A_ptr, B_ptr, C_ptr, h0_ptr, dy_ptr, dlast_ptr, h
         if HAS_H0:
             hp += tl.where(t == 0, h0, 0.0)
 
-        tl.atomic_add(dC_ptr + bn + t * N, tl.sum(dy[:, None] * h, axis=0))
+        if ATOMIC:
+            tl.atomic_add(dC_ptr + bn + t * N, tl.sum(dy[:, None] * h, axis=0))
+        else:
+            tl.store(dC_ptr + bn + t * N, tl.sum(dy[:, None] * h, axis=0))
         dh += dy[:, None] * Ct[None, :]                         # total dL/dh_t
         z = dt[:, None] * A
         if METHOD == 2:
@@ -206,7 +214,10 @@ def _bwd_kernel(x_ptr, dt_ptr, A_ptr, B_ptr, C_ptr, h0_ptr, dy_ptr, dlast_ptr, h
             dA_acc += da * dt[:, None] * u2 + dh * 0.5 * dt[:, None] * dt[:, None] * u2 * Bx
             dBt = tl.sum(dh * dt[:, None] * u * x[:, None], axis=0)
             dx = tl.sum(dh * dt[:, None] * u * Bt[None, :], axis=1)
-        tl.atomic_add(dB_ptr + bn + t * N, dBt)
+        if ATOMIC:
+            tl.atomic_add(dB_ptr + bn + t * N, dBt)
+        else:
+            tl.store(dB_ptr + bn + t * N, dBt)
         tl.store(dx_ptr + row + t * D, dx, mask=mask_d)
         tl.store(ddt_ptr + row + t * D, ddt, mask=mask_d)
         dh = dh * a                                               # flows to h_{t-1}
@@ -284,8 +295,11 @@ class TritonSelectiveScanFn(torch.autograd.Function):
         dx, ddelta = torch.empty_like(x), torch.empty_like(delta)
         bd = _block_d(Bsz, D)
         dA_part = torch.empty(Bsz, D, N, device=x.device)
-        dB = torch.zeros(Bsz, L, N, device=x.device)
-        dC = torch.zeros(Bsz, L, N, device=x.device)
+        atomic = not torch.are_deterministic_algorithms_enabled()
+        n_dblk = triton.cdiv(D, bd)
+        shape = (Bsz, L, N) if atomic else (Bsz, n_dblk, L, N)
+        dB = torch.zeros(shape, device=x.device)
+        dC = torch.zeros(shape, device=x.device)
         dh0 = torch.empty_like(h0) if h0 is not None else None
         # channel tiles sized so the recomputed-state scratch buffer stays within budget
         tile = max(bd, (HBUF_BUDGET // (Bsz * L * N)) // bd * bd)
@@ -296,10 +310,12 @@ class TritonSelectiveScanFn(torch.autograd.Function):
             grid = (Bsz, triton.cdiv(d1 - d0, bd))
             _bwd_kernel[grid](x, delta, A, Bm, Cm, h0 if h0 is not None else x, dy, dlast, hbuf,
                               dx, ddelta, dA_part, dB, dC, dh0 if dh0 is not None else x,
-                              L, D, d0, d1, d1 - d0,
+                              L, D, d0, d1, d1 - d0, n_dblk, d0 // bd,
                               N=N, BLOCK_D=bd, METHOD=METHODS[ctx.method],
-                              HAS_H0=h0 is not None, NUM_STAGES=NUM_STAGES, num_warps=NUM_WARPS)
+                              HAS_H0=h0 is not None, NUM_STAGES=NUM_STAGES, ATOMIC=atomic, num_warps=NUM_WARPS)
             del hbuf
+        if not atomic:
+            dB, dC = dB.sum(1), dC.sum(1)
         return dx, ddelta, dA_part.sum(0), dB, dC, dh0, None
 
 

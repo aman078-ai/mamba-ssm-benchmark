@@ -21,10 +21,10 @@ Status legend: **open**, **fixed (stage N)**, **mitigated** (documented, not rem
 | 9 | high | experimental design | Models not converged; ranking is budget-dependent. | val bpc still falling 0.006–0.01 per 250 steps at the end | mitigated (stage 0) |
 | 10 | high | baseline strength | Transformer uses a GELU MLP, weaker than the "Transformer++" (SwiGLU) baseline the Mamba paper uses. Impact unmeasured. | `models/common.py` | open |
 | 11 | high | reproducibility | Dependencies unpinned (`torch>=2.4`, `numpy`). | `requirements.txt` | fixed (stage 1): `requirements-lock.txt` |
-| 12 | high | testing | Triton kernels never run in CI (tests skip without a GPU). | `.github/workflows/tests.yml` | mitigated: GPU tests documented as a manual step (stage 2) |
-| 13 | medium | reproducibility | Triton backward uses atomics, so dB and dC differ run-to-run (up to 9.2e-5). | `results/audit/determinism.json` | scheduled (stage 2: deterministic mode) |
-| 14 | medium | numerics | bf16 full forward vs. bf16 token-by-token decode disagree on 0.33% of argmax predictions (fp32: max logit diff 5.5e-3). Expected for bf16, undocumented. | `results/audit/consistency.json` | scheduled (stage 2: GPU equivalence test with tolerances) |
-| 15 | medium | benchmarking | "Training throughput" excluded the optimizer step. | `benchmarks/bench_models.py` | scheduled (stage 2) |
+| 12 | high | testing | Triton kernels never run in CI (tests skip without a GPU). | `.github/workflows/tests.yml` | mitigated (stage 2): `tests/test_gpu.py` + `tests/test_triton.py` must be run locally on a GPU before each release |
+| 13 | medium | reproducibility | Triton backward uses atomics, so dB and dC differ run-to-run (up to 9.2e-5). | `results/audit/determinism.json` | fixed (stage 2): bitwise-deterministic mode under `torch.use_deterministic_algorithms(True)`, tested |
+| 14 | medium | numerics | bf16 full forward vs. bf16 token-by-token decode disagree on 0.33% of argmax predictions (fp32: max logit diff 5.5e-3). Expected for bf16, undocumented. | `results/audit/consistency.json` | fixed (stage 2): GPU equivalence test (fp32, 1e-4) for Mamba, hybrid and RetNet stacks; bf16 gap documented |
+| 15 | medium | benchmarking | "Training throughput" excluded the optimizer step. | `benchmarks/bench_models.py` | fixed (stage 2): `train_b16_l512_opt` includes clipping + AdamW; re-run scheduled (stage 3) |
 | 16 | medium | missing metrics | No prefill / time-to-first-token split, reserved or process memory, FLOPs, batch>1 decoding, official-kernel comparison. | — | partly scheduled (stages 1–2) |
 | 17 | medium | reproducibility | No experiment configuration files; no raw CSV. | — | fixed (stage 1): `configs/` + `experiments/run.py`, `results/csv/` |
 | 18 | medium | repository | No LICENSE or CITATION file. | — | fixed (stage 1): MIT `LICENSE`, `CITATION.cff` |
@@ -64,7 +64,7 @@ predict where it fails?
 |---|---|---|
 | 0 | Correct the record: README claims, units, memory cap, withdrawn findings | done |
 | 1 | Reproducibility: pinned environment, experiment configs, CSV export, environment capture, LICENSE, CITATION | done |
-| 2 | Tests and tooling: deterministic kernel mode, GPU equivalence, long-sequence stability, optimizer-inclusive throughput | pending |
+| 2 | Tests and tooling: deterministic kernel mode, GPU equivalence, long-sequence stability, optimizer-inclusive throughput | done |
 | 3 | Seed variance and per-architecture learning-rate tuning on the research models | pending |
 | 4 | Pilot of H1–H3 (one seed) with baselines; go/no-go | pending |
 | 5 | Full grid with 3 seeds and parameter-matched controls | pending |
