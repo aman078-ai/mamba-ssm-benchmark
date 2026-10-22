@@ -54,5 +54,5 @@ def save(obj, path):
 
 
 def env_info():
-    return {"gpu": torch.cuda.get_device_name(0), "torch": torch.__version__,
-            "cuda": torch.version.cuda, "vram_gib": torch.cuda.get_device_properties(0).total_memory / 2**30}
+    from runtime import environment
+    return environment()

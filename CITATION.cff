@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Mamba vs. Transformer, from scratch: selective state-space models, attention and hybrids on byte-level language modeling"
+authors:
+  - family-names: Shaik
+    given-names: Aman
+repository-code: "https://github.com/aman078-ai/mamba-ssm-benchmark"
+license: MIT
+version: 0.3.0-dev
+date-released: 2026-10-22
+keywords:
+  - state space models
+  - Mamba
+  - Transformer
+  - selective scan
+  - Triton
+  - length generalization

@@ -4,6 +4,18 @@ Each entry records what changed, which results it affects, and the numbers befor
 
 ## Unreleased
 
+### Stage 1: reproducibility infrastructure
+
+No model, kernel or training logic changed, so no result is affected.
+
+- `requirements-lock.txt` with the exact package versions behind `results/` (torch 2.7.1+cu126, triton-windows
+  3.3.1.post21, numpy 2.4.6, ...).
+- `runtime.environment()`: git commit, versions, GPU, driver, memory cap, clocks and other GPU processes, recorded in
+  every benchmark JSON (`env`) and every training run's `config.json` (`environment`).
+- `experiments/run.py` + `configs/`: resumable experiment grids from JSON (tested in `tests/test_experiments.py`).
+- `analysis/export_csv.py`: all results as CSV in `results/csv/`.
+- `docs/BENCHMARK_PROTOCOL.md`, MIT `LICENSE`, `CITATION.cff`.
+
 ### Stage 0: correct the record
 
 No code paths or experiments changed; only claims, labels and figures. Results files are unchanged.

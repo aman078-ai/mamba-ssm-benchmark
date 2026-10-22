@@ -14,20 +14,20 @@ Status legend: **open**, **fixed (stage N)**, **mitigated** (documented, not rem
 | 2 | critical | experimental design | Every quality number is a single seed (seed 0). | `results/enwik8/*/config.json` | mitigated (stage 0: labelled preliminary); scheduled (stage 3: seed variance) |
 | 3 | critical | experimental design | Synthetic-task conclusion was a training-budget artifact. | `results/audit/mqar_budget.json`: pure Mamba, 4-pair MQAR, 7.8% at 3,000 steps vs. 52.9% at 9,000 steps (re-run: 52.6% and 52.9%; the spread comes from the non-deterministic kernel, #13) | fixed (stage 0): claim withdrawn |
 | 4 | critical | experimental design | One learning rate for all architectures; no tuning. | `training/train_lm.py` defaults | scheduled (stage 3: per-architecture LR sweep) |
-| 5 | high | reporting | "4 GB" memory claims; PyTorch was capped at 2.97 GiB. | `results/logs/bench.log` | fixed (stage 0); environment capture scheduled (stage 1) |
+| 5 | high | reporting | "4 GB" memory claims; PyTorch was capped at 2.97 GiB. | `results/logs/bench.log` | fixed (stage 0); cap now recorded with every result (stage 1) |
 | 6 | high | benchmarking | Benchmarks ran with other applications on the GPU (game launcher + overlay, voice app, chat app). | `nvidia-smi` process list | mitigated (stage 0); clean re-run scheduled (stage 2/3) |
 | 7 | high | confound | No-selection ablation has 7.5% fewer parameters, one seed, compared at step 1,000 of 4,000. | `results/enwik8_ablation/*/config.json` | mitigated (stage 0); param-matched rerun scheduled (stage 5) |
 | 8 | high | missing baseline | Length extrapolation compared RoPE without any extension method; no NoPE/ALiBi baseline; 8K points missing (OOM). | `models/transformer.py`, `results/enwik8/eval.json` | scheduled (stage 4) |
 | 9 | high | experimental design | Models not converged; ranking is budget-dependent. | val bpc still falling 0.006–0.01 per 250 steps at the end | mitigated (stage 0) |
 | 10 | high | baseline strength | Transformer uses a GELU MLP, weaker than the "Transformer++" (SwiGLU) baseline the Mamba paper uses. Impact unmeasured. | `models/common.py` | open |
-| 11 | high | reproducibility | Dependencies unpinned (`torch>=2.4`, `numpy`). | `requirements.txt` | scheduled (stage 1) |
+| 11 | high | reproducibility | Dependencies unpinned (`torch>=2.4`, `numpy`). | `requirements.txt` | fixed (stage 1): `requirements-lock.txt` |
 | 12 | high | testing | Triton kernels never run in CI (tests skip without a GPU). | `.github/workflows/tests.yml` | mitigated: GPU tests documented as a manual step (stage 2) |
 | 13 | medium | reproducibility | Triton backward uses atomics, so dB and dC differ run-to-run (up to 9.2e-5). | `results/audit/determinism.json` | scheduled (stage 2: deterministic mode) |
 | 14 | medium | numerics | bf16 full forward vs. bf16 token-by-token decode disagree on 0.33% of argmax predictions (fp32: max logit diff 5.5e-3). Expected for bf16, undocumented. | `results/audit/consistency.json` | scheduled (stage 2: GPU equivalence test with tolerances) |
 | 15 | medium | benchmarking | "Training throughput" excluded the optimizer step. | `benchmarks/bench_models.py` | scheduled (stage 2) |
 | 16 | medium | missing metrics | No prefill / time-to-first-token split, reserved or process memory, FLOPs, batch>1 decoding, official-kernel comparison. | — | partly scheduled (stages 1–2) |
-| 17 | medium | reproducibility | No experiment configuration files; no raw CSV. | — | scheduled (stage 1) |
-| 18 | medium | repository | No LICENSE or CITATION file. | — | scheduled (stage 1) |
+| 17 | medium | reproducibility | No experiment configuration files; no raw CSV. | — | fixed (stage 1): `configs/` + `experiments/run.py`, `results/csv/` |
+| 18 | medium | repository | No LICENSE or CITATION file. | — | fixed (stage 1): MIT `LICENSE`, `CITATION.cff` |
 | 19 | medium | reporting | "bpc" undefined (it is bits per byte). | README | fixed (stage 0) |
 | 20 | low | repository | GitHub repository description still says "64–1024 tokens". | GitHub page | open (owner action) |
 
@@ -63,7 +63,7 @@ predict where it fails?
 | Stage | Goal | Status |
 |---|---|---|
 | 0 | Correct the record: README claims, units, memory cap, withdrawn findings | done |
-| 1 | Reproducibility: pinned environment, experiment configs, CSV export, environment capture, LICENSE, CITATION | pending |
+| 1 | Reproducibility: pinned environment, experiment configs, CSV export, environment capture, LICENSE, CITATION | done |
 | 2 | Tests and tooling: deterministic kernel mode, GPU equivalence, long-sequence stability, optimizer-inclusive throughput | pending |
 | 3 | Seed variance and per-architecture learning-rate tuning on the research models | pending |
 | 4 | Pilot of H1–H3 (one seed) with baselines; go/no-go | pending |

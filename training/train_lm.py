@@ -17,7 +17,7 @@ import torch.nn.functional as F
 
 from data.enwik8 import Enwik8
 from models.lm import PRESETS, build
-from runtime import setup_device
+from runtime import environment, setup_device
 
 LN2 = math.log(2)
 
@@ -83,7 +83,8 @@ def main(argv=None):
                              {"params": no_decay, "weight_decay": 0.0}],
                             lr=args.lr, betas=(0.9, 0.95), fused=device == "cuda")
     with open(os.path.join(out_dir, "config.json"), "w") as f:
-        json.dump({"args": vars(args), "model_cfg": model.cfg.to_dict(), "non_embedding_params": n_params}, f, indent=2)
+        json.dump({"args": vars(args), "model_cfg": model.cfg.to_dict(), "non_embedding_params": n_params,
+                   "environment": environment()}, f, indent=2)
 
     log = open(os.path.join(out_dir, "log.jsonl"), "w", buffering=1)
     gen = torch.Generator().manual_seed(args.seed)

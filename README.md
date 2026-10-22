@@ -451,14 +451,17 @@ and longer synthetic training.
 ```bash
 python -m venv .venv && .venv/Scripts/activate        # Linux/macOS: source .venv/bin/activate
 pip install torch==2.7.1 --index-url https://download.pytorch.org/whl/cu126
-pip install -r requirements.txt
+pip install -r requirements-lock.txt   # exact versions behind results/ (requirements.txt has looser bounds)
 python reproduce.py            # tests → train → eval → benchmarks → synthetic tasks → Δ analysis → plots
 python reproduce.py --quick    # smoke-test the whole pipeline in a few minutes
 python reproduce.py --only bench,plots
 ```
 
-Every number in this README comes from a JSON file under [`results/`](results), and every figure is produced by
-[`analysis/make_plots.py`](analysis/make_plots.py) from those files. enwik8 is downloaded from its official source
+Every number in this README comes from a JSON file under [`results/`](results) (also exported as CSV in
+[`results/csv/`](results/csv)), and every figure is produced by [`analysis/make_plots.py`](analysis/make_plots.py) from
+those files. New experiments are defined as JSON configs in [`configs/`](configs) and run with
+`python -m experiments.run configs/<name>.json` (resumable; each run records its full environment). Measurement rules
+are in [`docs/BENCHMARK_PROTOCOL.md`](docs/BENCHMARK_PROTOCOL.md). enwik8 is downloaded from its official source
 (`mattmahoney.net/dc/enwik8.zip`) and split 90M/5M/5M; the loader fails loudly instead of substituting data.
 
 ---
@@ -480,9 +483,11 @@ training/train_lm.py
 tasks/              synthetic tasks (MQAR, selective copying) and their training driver
 benchmarks/         scan algorithms, model speed/memory vs length, generation latency
 analysis/           evaluation, Δ analysis, plotting
-tests/              136 correctness tests
+tests/              correctness tests
 results/            all raw results (JSON / JSONL)
 plots/              all figures
+experiments/run.py  config-driven experiment grids (configs/*.json)
+docs/               AUDIT.md (findings + plan), BENCHMARK_PROTOCOL.md, index.html (interactive results)
 reproduce.py        one command for everything
 ```
 

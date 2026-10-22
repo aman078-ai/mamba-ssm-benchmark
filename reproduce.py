@@ -12,7 +12,7 @@ Stages, in order:
     bench      scan algorithms, full-model speed/memory, generation latency
     synthetic  MQAR recall sweep, selective copying
     delta      what the selection mechanism learned
-    plots      figures in plots/, tables in results/summary.md, text samples, docs/index.html
+    plots      figures in plots/, tables in results/summary.md, text samples, docs/index.html, results/csv/
 """
 
 import argparse
@@ -72,6 +72,7 @@ def main():
             subprocess.run([sys.executable, "-m", "analysis.summarize"], stdout=f, check=True)
         run("generate.py", "--n", "300", "--out", "results/samples.md")
         run("-m", "analysis.build_dashboard")
+        run("-m", "analysis.export_csv")
     if q:
         print(f"\nquick smoke run finished; outputs in {R}/ (delete it when done)")
 
