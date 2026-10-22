@@ -33,8 +33,8 @@ def fmt_len(L):
 def models_table():
     rows = []
     bench = j(f"{R}/bench/models.json") or {}
-    tp = bench.get("train_b16_l512", {})
-    print("| model | layers | non-embedding params | training throughput (tokens/s) | training memory |")
+    tp = bench.get("train_b16_l512_opt") or bench.get("train_b16_l512", {})   # prefer the optimizer-inclusive step
+    print("| model | layers | non-embedding params | training throughput incl. optimizer (tokens/s) | training memory |")
     print("|---|---|---|---|---|")
     for a in ARCHS:
         s = j(f"{R}/enwik8/{a}/summary.json")

@@ -38,8 +38,10 @@ what the selection mechanism writes into the state. Open it in a browser, or hos
 
 ## 1. Key findings
 
-Hardware: one RTX 3050 Laptop GPU. It has 4 GB, but other applications held part of it during the benchmarks, so
-PyTorch was capped at **2.97 GiB**; every "out of memory" point below is relative to that cap. "bpc" is bits per byte,
+Hardware: one RTX 3050 Laptop GPU. It has 4 GB, but other applications held part of it, so PyTorch was capped at
+**2.97 GiB**; every "out of memory" point below is relative to that cap. Speed numbers are from a re-run on 2026-10-23
+with the GPU-heavy background application closed (results/bench/; the earlier shared-GPU run is kept in
+results/bench/run1_shared_gpu/ and differs by under 5% except naive attention at 4K and the chunked scan at 64K). "bpc" is bits per byte,
 the standard enwik8 metric. Every model has about 4.7M non-embedding parameters and saw the same 32.8M training bytes
 in the same order.
 
@@ -56,10 +58,10 @@ PyTorch's `scaled_dot_product_attention`.
 
 | | attention, naive | attention, fused | Mamba scan, naive | Mamba scan, fused |
 |---|---|---|---|---|
-| forward pass, 4K tokens (batch 1) | 104 ms | **19 ms** | 235 ms | 45 ms |
-| forward pass, 128K tokens (batch 1) | out of memory from 8K | 5,763 ms | not run above 16K | **1,800 ms** |
-| training throughput, 16 × 512 (fwd + bwd only) | 64.9k tok/s | **105.8k tok/s** | 3.8k tok/s | 42.8k tok/s |
-| GPU time per generated token, 256K context | 11.46 ms | not measured | not measured | **0.94 ms** |
+| forward pass, 4K tokens (batch 1) | 129 ms | **18 ms** | 232 ms | 44 ms |
+| forward pass, 128K tokens (batch 1) | out of memory from 8K | 5,704 ms | not run above 16K | **1,796 ms** |
+| training throughput, 16 × 512, incl. optimizer step | 60.2k tok/s | **104.9k tok/s** | 3.8k tok/s | 42.4k tok/s |
+| GPU time per generated token, 256K context | 12.41 ms | not measured | not measured | **0.93 ms** |
 | cache / state memory, 256K context | 1,536 MB | 1,536 MB | 0.38 MB | 0.38 MB |
 
 1. **Quality: no ranking between Transformer and Mamba yet.** The hybrid (9 Mamba layers + 1 attention layer) has the
@@ -81,11 +83,11 @@ PyTorch's `scaled_dot_product_attention`.
    the generation cache (finding 4), not the forward pass. The earlier claim that "the quadratic wall arrives at 8K"
    compared naive attention with fused Mamba and is withdrawn.
 4. **Generation: the KV cache grows, the recurrent state does not.** Per generated token Mamba's GPU time is flat at
-   0.93 ms from 128 to 256K tokens of context, with a 0.38 MB state; the Transformer's grows 14× to 11.5 ms with a
+   0.92–0.93 ms from 128 to 256K tokens of context, with a 0.38 MB state; the Transformer's grows 14× to 12.4 ms with a
    1.5 GB cache. Decoding one token is bound by reading the cache, so a fused attention kernel likely changes this little,
    but it was not measured.
-5. **The fused scan kernel matters.** It is 8× (4K tokens) to 18.6× (64K) faster than the best of this project's own
-   PyTorch scans and uses 41× less memory; full-model training went from 3.8k to 42.8k tokens/s. It was not compared with
+5. **The fused scan kernel matters.** It is 9× (4K tokens) to 18.5× (64K) faster than the best of this project's own
+   PyTorch scans and uses 41× less memory; full-model training went from 3.8k to 42.4k tokens/s. It was not compared with
    the official `mamba_ssm` CUDA kernel, which does not install natively on Windows.
 6. **Ablations (preliminary).** Without selection, Mamba was 0.047 bpc worse after 1,000 steps, but that variant also has
    7.5% fewer parameters and only one seed was run, so the effect of selection is not yet isolated. Exact ZOH, Euler and
@@ -204,18 +206,18 @@ selective, decay like an LTI SSM.
 One `LM` class takes a layer pattern: `A` = attention + MLP, `M` = Mamba, `R` = retention + MLP. All four experiment
 models use d_model = 256 and are **parameter-matched to within about 2%**:
 
-| model | layers | non-embedding params | training throughput (tokens/s) | training memory |
+| model | layers | non-embedding params | training throughput incl. optimizer (tokens/s) | training memory |
 |---|---|---|---|---|
-| Transformer | `AAAAAA` | 4.72M | 64.9k | 1.22 GB |
-| Mamba | `MMMMMMMMMMM` | 4.82M | 42.8k | 1.81 GB |
-| RetNet | `RRRRRR` | 4.72M | 71.2k | 0.91 GB |
-| Hybrid | `MMMMMAMMMM` | 4.73M | 46.0k | 1.71 GB |
+| Transformer | `AAAAAA` | 4.72M | 60.2k | 1.20 GB |
+| Mamba | `MMMMMMMMMMM` | 4.82M | 42.4k | 1.81 GB |
+| RetNet | `RRRRRR` | 4.72M | 70.7k | 0.91 GB |
+| Hybrid | `MMMMMAMMMM` | 4.73M | 45.3k | 1.71 GB |
 
 ---
 
 ## 4. Verification
 
-`pytest` runs 136 tests (CI runs the CPU ones on every push):
+`pytest` runs 157 tests (CI runs the CPU ones on every push):
 
 | what is checked | how |
 |---|---|
@@ -245,17 +247,17 @@ One Mamba layer (1 sequence, 512 channels, 16 state dimensions), median of repea
 
 | scan | L=256 fwd / fwd+bwd (ms) | L=1K fwd / fwd+bwd (ms) | L=4K fwd / fwd+bwd (ms) | L=16K fwd / fwd+bwd (ms) | L=64K fwd / fwd+bwd (ms) | peak mem fwd+bwd @ max L |
 |---|---|---|---|---|---|---|
-| `reference` | 145.1 / 730.9 | 382.8 / 2515.8 | 1659.2 / 10232.2 | - | - | 672 MB @ 4K |
-| `sequential` | 28.1 / 93.4 | 115.7 / 365.2 | 1010.6 / 3248.5 | - | - | 729 MB @ 4K |
-| `hillis_steele` | 4.4 / 14.8 | 20.2 / 68.4 | 94.0 / 315.9 | 429.6 / 1428.7 | 1937.7 / 6385.0 | 1044 MB @ 64K |
-| `blelloch` | 4.1 / 14.1 | 9.8 / 37.3 | 36.8 / 144.7 | 148.3 / 582.5 | 597.2 / 2360.9 | 1172 MB @ 64K |
-| `chunked` | 4.0 / 12.9 | 6.4 / 24.2 | 19.7 / 93.0 | 119.7 / 444.2 | 912.2 / 2908.2 | 1045 MB @ 64K |
-| `triton` | 0.27 / 1.3 | 0.69 / 3.3 | 2.5 / 11.0 | 8.4 / 42.0 | 32.2 / 526.5 | 904 MB @ 64K |
+| `reference` | 79.9 / 501.7 | 344.5 / 1857.3 | 1261.3 / 7420.0 | - | - | 672 MB @ 4K |
+| `sequential` | 22.9 / 96.0 | 91.1 / 288.5 | 831.4 / 2278.5 | - | - | 729 MB @ 4K |
+| `hillis_steele` | 4.9 / 14.7 | 20.0 / 68.3 | 93.9 / 315.7 | 429.4 / 1428.2 | 1937.0 / 6382.5 | 1044 MB @ 64K |
+| `blelloch` | 2.9 / 14.3 | 9.4 / 36.8 | 36.5 / 144.0 | 147.2 / 580.2 | 593.4 / 2353.6 | 1172 MB @ 64K |
+| `chunked` | 2.5 / 10.9 | 5.0 / 25.2 | 19.3 / 92.4 | 96.5 / 420.8 | 708.6 / 2256.2 | 1045 MB @ 64K |
+| `triton` | 0.33 / 1.2 | 0.63 / 2.8 | 2.1 / 10.7 | 8.2 / 41.9 | 32.0 / 525.2 | 904 MB @ 64K |
 
 At 4K tokens the parallel scans are 11–51× faster than the sequential loop (Hillis–Steele 11×, Blelloch 27×, chunked
 51×). The work-efficient algorithms beat Hillis–Steele, whose O(L log L) work shows up directly as time on a
 bandwidth-bound GPU. All of the PyTorch scans pay to
-write `(L × 512 × 16)` float32 states to DRAM. The fused kernel doesn't, which accounts for its 8–18.6× margin over the best of them.
+write `(L × 512 × 16)` float32 states to DRAM. The fused kernel doesn't, which accounts for its 9–18.5× margin over the best of them.
 
 ### 5.2 Speed and memory vs. sequence length
 
@@ -269,27 +271,28 @@ vs. Mamba with the Triton scan); mixing the two compares kernels, not architectu
 
 | model | 1K | 4K | 16K | 64K | 128K | longest length that fits |
 |---|---|---|---|---|---|---|
-| Transformer | 17.0 | 104.3 | OOM | OOM | OOM | 4K |
-| Transformer (PyTorch fused attn.) | 14.8 | 19.0 | 126.1 | 1519.1 | 5763.1 | 128K |
-| Mamba | 24.2 | 44.5 | 187.4 | 848.9 | 1800.3 | 128K |
-| Mamba (pure-PyTorch scan) | 73.4 | 235.1 | 1373.0 | OOM | OOM | 16K |
-| RetNet | 30.9 | 31.2 | 76.6 | 305.7 | 648.1 | 128K |
-| Hybrid | 22.9 | 54.2 | OOM | OOM | OOM | 4K |
+| Transformer | 13.1 | 128.6 | OOM | OOM | OOM | 4K |
+| Transformer (PyTorch fused attn.) | 10.4 | 18.2 | 124.8 | 1505.8 | 5704.4 | 128K |
+| Mamba | 15.4 | 43.6 | 186.4 | 845.3 | 1795.9 | 128K |
+| Mamba (pure-PyTorch scan) | 61.2 | 231.8 | 1080.5 | OOM | OOM | 16K |
+| RetNet | 21.0 | 21.4 | 76.2 | 305.0 | 645.7 | 128K |
+| Hybrid | 14.6 | 57.1 | OOM | OOM | OOM | 4K |
 
 **Training step fwd+bwd, batch 1 (ms)**
 
 | model | 1K | 4K | 16K | 64K | 128K | longest length that fits |
 |---|---|---|---|---|---|---|
-| Transformer | 46.1 | OOM | OOM | OOM | OOM | 2K |
-| Transformer (PyTorch fused attn.) | 40.7 | 64.4 | 545.2 | OOM | OOM | 32K |
-| Mamba | 63.8 | 170.1 | OOM | OOM | OOM | 8K |
-| Mamba (pure-PyTorch scan) | 301.9 | 1104.3 | OOM | OOM | OOM | 8K |
-| RetNet | 72.1 | 72.3 | 220.9 | OOM | OOM | 16K |
-| Hybrid | 60.0 | 185.5 | OOM | OOM | OOM | 4K |
+| Transformer | 37.7 | OOM | OOM | OOM | OOM | 2K |
+| Transformer (PyTorch fused attn.) | 32.7 | 63.4 | 540.8 | OOM | OOM | 32K |
+| Mamba | 52.5 | 168.8 | OOM | OOM | OOM | 8K |
+| Mamba (pure-PyTorch scan) | 283.4 | 1095.1 | OOM | OOM | OOM | 8K |
+| RetNet | 67.5 | 81.3 | 219.8 | OOM | OOM | 16K |
+| Hybrid | 51.9 | 190.8 | OOM | OOM | OOM | 4K |
 
 - Naive pair: Mamba's pure-PyTorch scan is slower than naive attention at every length where both run.
-- Fused pair: fused attention is faster up to ~32K tokens (forward); Mamba's Triton scan is faster at 64K (849 vs.
-  1,519 ms) and 128K (1,800 vs. 5,763 ms). For training, fused attention is faster at every length where Mamba fits.
+- Fused pair: fused attention is faster below ~32K tokens (forward; at 32K they tie, 414 vs. 408 ms);
+  Mamba's Triton scan is faster at 64K (845 vs. 1,506 ms) and 128K (1,796 vs. 5,704 ms). For training, fused
+  attention is faster at every length where Mamba fits.
 
 ### 5.3 Generation: KV cache vs. recurrent state
 
@@ -303,10 +306,10 @@ GPU time per generated token (CUDA graph replay) · cache/state size
 
 | model | 128 ctx | 512 ctx | 2K ctx | 8K ctx | 32K ctx | 128K ctx | 256K ctx |
 |---|---|---|---|---|---|---|---|
-| Transformer | 0.80 ms · 0.75 MB | 0.71 ms · 3 MB | 0.77 ms · 12 MB | 1.02 ms · 48 MB | 1.95 ms · 192 MB | 6.05 ms · 768 MB | 11.46 ms · 1536 MB |
-| Mamba | 0.93 ms · 0.376 MB | 0.93 ms · 0.376 MB | 0.93 ms · 0.376 MB | 0.93 ms · 0.376 MB | 0.93 ms · 0.376 MB | 0.93 ms · 0.376 MB | 0.94 ms · 0.376 MB |
-| RetNet | 0.86 ms · 0.375 MB | 0.85 ms · 0.375 MB | 0.85 ms · 0.375 MB | 0.85 ms · 0.375 MB | 0.85 ms · 0.375 MB | 0.86 ms · 0.375 MB | 0.87 ms · 0.375 MB |
-| Hybrid | 0.88 ms · 0.4326 MB | 0.88 ms · 0.8076 MB | 0.89 ms · 2.308 MB | 0.94 ms · 8.308 MB | 1.09 ms · 32.31 MB | 1.76 ms · 128.3 MB | 2.64 ms · 256.3 MB |
+| Transformer | 0.88 ms · 0.75 MB | 0.75 ms · 3 MB | 0.82 ms · 12 MB | 1.08 ms · 48 MB | 2.05 ms · 192 MB | 6.55 ms · 768 MB | 12.41 ms · 1536 MB |
+| Mamba | 0.92 ms · 0.376 MB | 0.92 ms · 0.376 MB | 0.92 ms · 0.376 MB | 0.92 ms · 0.376 MB | 0.92 ms · 0.376 MB | 0.92 ms · 0.376 MB | 0.93 ms · 0.376 MB |
+| RetNet | 0.85 ms · 0.375 MB | 0.85 ms · 0.375 MB | 0.85 ms · 0.375 MB | 0.85 ms · 0.375 MB | 0.84 ms · 0.375 MB | 0.85 ms · 0.375 MB | 0.85 ms · 0.375 MB |
+| Hybrid | 0.88 ms · 0.4326 MB | 0.89 ms · 0.8076 MB | 0.90 ms · 2.308 MB | 0.94 ms · 8.308 MB | 1.09 ms · 32.31 MB | 1.82 ms · 128.3 MB | 2.79 ms · 256.3 MB |
 
 ### 5.4 Language modeling quality on enwik8
 
@@ -400,7 +403,7 @@ LTI ablation, by construction, cannot tell them apart:
 
 - **The naive scan is bandwidth-bound, not compute-bound.** The first full Mamba LM trained at 2.7k tokens/s, against
   45k for the Transformer. Profiling showed the PyTorch scans moving roughly 20 GB of `(B, L, D, N)` intermediates per
-  training step. Recomputation plus channel tiling fixed the memory; only the fused kernel fixed the speed (§5.1, 3.8k → 42.8k tokens/s).
+  training step. Recomputation plus channel tiling fixed the memory; only the fused kernel fixed the speed (§5.1, 3.8k → 42.4k tokens/s).
 - **Windows "sysmem fallback".** On Windows the NVIDIA driver does not raise out-of-memory: it silently pages GPU
   allocations into system RAM, and a job slowed from 0.2 s to 11 s per step. [`runtime.py`](runtime.py) caps PyTorch's
   allocator at the free VRAM so OOM becomes a clean exception. The benchmarks record that exception as the memory wall.
@@ -429,8 +432,9 @@ LTI ablation, by construction, cannot tell them apart:
 - **One seed per quality number.** Training runs are single-seed, so differences of a few hundredths of a bpc are within
   the noise one would expect from seed variation. Speed benchmarks report the median of repeated runs, with the
   interquartile range stored in the JSON.
-- **Shared GPU.** Benchmarks ran while other applications (a game launcher, a voice app, a chat app) held GPU memory,
-  so PyTorch was capped at 2.97 GiB and timings may include interference. A clean re-run is scheduled.
+- **Shared GPU.** The first benchmark run shared the GPU with a voice app using ~38% of it. The re-run without it
+  (2026-10-23) changed most numbers by under 5% and no conclusion. An idle game launcher and chat app still held some
+  VRAM, so PyTorch stayed capped at 2.97 GiB; laptop GPU clocks were not locked.
 - **Kernel quality.** The Triton kernel walks the sequence step by step inside each program. Mamba's production CUDA
   kernel also fuses the input projections and uses a chunked parallel scan in shared memory. At the training length
   (512) this project's Mamba is therefore still slower to train than the Transformer, even though it scales better.

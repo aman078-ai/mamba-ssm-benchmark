@@ -4,6 +4,14 @@ Each entry records what changed, which results it affects, and the numbers befor
 
 ## Unreleased
 
+### Clean benchmark re-run (2026-10-23)
+
+Re-ran all three benchmark suites with the voice app (≈38% GPU use) closed. Before → after: fused attention 128K
+forward 5,763 → 5,704 ms; Mamba 1,800 → 1,796 ms; Mamba training 42.8k → 43.1k tok/s (42.4k with the optimizer step);
+Transformer decode at 256K 11.46 → 12.41 ms; chunked scan at 64K 912 → 709 ms; naive attention at 4K 104 → 129 ms.
+No conclusion changed. README tables now use the clean run and optimizer-inclusive training throughput; the earlier
+run is kept in `results/bench/run1_shared_gpu/`.
+
 ### Stage 3: tuning, seed variance, measurement fix
 
 - Learning-rate sweep (6 rates) and 3-seed variance for the research models; see docs/AUDIT.md for the table.
