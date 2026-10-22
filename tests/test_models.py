@@ -139,3 +139,17 @@ def test_alibi_penalizes_distance():
     from models.transformer import alibi_slopes
     s = alibi_slopes(4)
     assert torch.all(s > 0) and torch.all(s[1:] < s[:-1])
+
+
+def test_scalar_decay_mamba_shares_decay_and_decodes_consistently():
+    """Mamba-2-style scalar decay: one A per channel for all state dims; cache decoding still exact."""
+    m = small("MM", a_mode="scalar")
+    mixer = m.blocks[0].mixer
+    _, A, _, _ = mixer.ssm_params(torch.randn(1, 3, mixer.d_inner, dtype=torch.float64))
+    assert torch.allclose(A, A[:, :1].expand_as(A))
+    x = torch.randint(0, 256, (2, 25))
+    with torch.no_grad():
+        full = m(x)
+        st = m.init_state(2, 25, x.device, torch.float64)
+        parts = [m(x[:, :9], st, 0)] + [m(x[:, t:t + 1], st, t) for t in range(9, 25)]
+    torch.testing.assert_close(torch.cat(parts, 1), full)

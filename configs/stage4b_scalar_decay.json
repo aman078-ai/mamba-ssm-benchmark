@@ -1,0 +1,52 @@
+{
+  "name": "stage4b_scalar_decay",
+  "description": "Follow-up pilot: does a Mamba-2-style scalar decay (one A per channel shared by all state dimensions) change length generalization, compared with the per-state S4D decay of the stage-4 pilot at the same state sizes? Same protocol as stage4_pilot (seed 0, 3,000 steps, L=256).",
+  "out": "results/research/stage4b_scalar_decay",
+  "common": {
+    "steps": 3000,
+    "warmup": 150,
+    "min_lr": 0.0001,
+    "eval_every": 500,
+    "eval_bytes": 1000000,
+    "seed": 0
+  },
+  "variants": {
+    "mamba_scalar_n16_L256": {
+      "model": "mamba",
+      "lr": 0.016,
+      "seq_len": 256,
+      "batch_size": 32,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 16,
+        "a_mode": "scalar"
+      }
+    },
+    "mamba_scalar_n64_L256": {
+      "model": "mamba",
+      "lr": 0.016,
+      "seq_len": 256,
+      "batch_size": 32,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 64,
+        "a_mode": "scalar"
+      }
+    }
+  },
+  "grid": {},
+  "post": [
+    [
+      "-m",
+      "analysis.length_generalization",
+      "--run_dir",
+      "{run_dir}",
+      "--max_len",
+      "16384",
+      "--position_windows",
+      "16"
+    ]
+  ]
+}

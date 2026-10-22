@@ -26,7 +26,7 @@ from models.scan import discretize, selective_scan
 class Mamba(nn.Module):
     def __init__(self, d_model, d_state=16, expand=2, d_conv=4, dt_rank=None, selective=True,
                  discretization="zoh", scan="chunked", d_block=None, chunk_size=None,
-                 dt_min=1e-3, dt_max=0.1):
+                 dt_min=1e-3, dt_max=0.1, a_mode="s4d"):
         super().__init__()
         self.d_inner = d_inner = expand * d_model
         self.d_state, self.d_conv = d_state, d_conv
@@ -53,7 +53,14 @@ class Mamba(nn.Module):
             self.B = nn.Parameter(torch.randn(d_state) / math.sqrt(d_state))
             self.C = nn.Parameter(torch.randn(d_state) / math.sqrt(d_state))
 
-        A = torch.arange(1, d_state + 1, dtype=torch.float32).repeat(d_inner, 1)
+        # a_mode="s4d" (Mamba-1): each (channel, state) has its own decay, S4D-real init A_n = -(n+1).
+        # a_mode="scalar" (Mamba-2-style): one decay per channel shared by all N state dimensions, init U[1, 16].
+        assert a_mode in ("s4d", "scalar"), a_mode
+        self.a_mode = a_mode
+        if a_mode == "s4d":
+            A = torch.arange(1, d_state + 1, dtype=torch.float32).repeat(d_inner, 1)
+        else:
+            A = torch.empty(d_inner, 1).uniform_(1.0, 16.0)
         self.A_log = nn.Parameter(torch.log(A))
         self.D = nn.Parameter(torch.ones(d_inner))
         self.out_proj = nn.Linear(d_inner, d_model, bias=False)
@@ -71,7 +78,10 @@ class Mamba(nn.Module):
             delta = F.softplus(self.dt_bias).expand(Bsz, L, -1)
             Bm = self.B.expand(Bsz, L, -1)
             Cm = self.C.expand(Bsz, L, -1)
-        return delta, -torch.exp(self.A_log.to(ct)), Bm, Cm
+        A = -torch.exp(self.A_log.to(ct))
+        if self.a_mode == "scalar":
+            A = A.expand(-1, self.d_state)
+        return delta, A, Bm, Cm
 
     def init_state(self, batch, max_len, device, dtype):
         return SimpleNamespace(

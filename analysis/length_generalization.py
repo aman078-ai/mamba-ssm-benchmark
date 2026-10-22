@@ -125,11 +125,13 @@ def mamba_stats(model, ds, L_long, train_len, device, chunk=1024):
     horizons = []
     for m in layers:
         mean_delta = (m.delta_sum / m.delta_n).clamp_min(1e-8)             # (d_inner,)
-        A = torch.exp(m.A_log.float())                                      # |A|, (d_inner, N)
+        A = torch.exp(m.A_log.float()).expand(-1, m.d_state)                # |A|, (d_inner, N)
         h = 1.0 / (A * mean_delta[:, None])                                 # (d_inner, N) in bytes
         q = torch.quantile(h.flatten(), torch.tensor([0.1, 0.5, 0.9, 0.99], device=h.device))
         horizons.append({"p10": q[0].item(), "median": q[1].item(), "p90": q[2].item(), "p99": q[3].item(),
-                         "max": h.max().item(), "frac_above_train_len": (h > train_len).float().mean().item()})
+                         "max": h.max().item(), "frac_above_train_len": (h > train_len).float().mean().item(),
+                         # median over channels for each state index n (S4D-real init: A_n = -(n+1))
+                         "median_by_state_index": h.median(dim=0).values.tolist()})
         m.record_delta = False
         for attr in ("last_delta", "delta_sum", "delta_n"):
             if hasattr(m, attr):

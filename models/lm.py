@@ -44,6 +44,7 @@ class LMConfig:
     expand: int = 2
     d_conv: int = 4
     selective: bool = True
+    a_mode: str = "s4d"                 # Mamba decay parameterization: s4d (per state) | scalar (shared, Mamba-2-style)
     discretization: str = "zoh"
     scan: str = "auto"
     d_block: int = 0
@@ -67,7 +68,7 @@ class Block(nn.Module):
             self.mixer = Mamba(cfg.d_model, cfg.d_state, cfg.expand, cfg.d_conv,
                                selective=cfg.selective, discretization=cfg.discretization,
                                scan=cfg.scan, d_block=cfg.d_block or None,
-                               chunk_size=cfg.chunk_size or None)
+                               chunk_size=cfg.chunk_size or None, a_mode=cfg.a_mode)
         elif kind == "R":
             self.mixer = Retention(cfg.d_model, cfg.n_head, cfg.retention_chunk)
         else:
