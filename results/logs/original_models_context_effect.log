@@ -1,0 +1,28 @@
+  L=   512  bpc=1.696124166489838
+  L=  1024  bpc=2.3388415155051514
+  L=  2048  bpc=3.2871637709686743
+  L=  4096  bpc=3.9277303185396386
+  L=  8192  bpc=4.296641754521885
+  context effect (full - short context, bits/byte): {'1-2x': 1.3389, '2-4x': 2.6463, '4-8x': 2.8236, '8-16x': 2.9586}
+saved results/enwik8/transformer/length_generalization.json
+  L=   512  bpc=1.6845828734616317
+  L=  1024  bpc=1.6709474801314674
+  L=  2048  bpc=1.6643294805895332
+  L=  4096  bpc=1.661199387885667
+  L=  8192  bpc=1.6598032693780032
+  context effect (full - short context, bits/byte): {'1-2x': -0.0028, '2-4x': 0.0002, '4-8x': -0.0004, '8-16x': -0.001}
+saved results/enwik8/mamba/length_generalization.json
+  L=   512  bpc=1.8222288416486778
+  L=  1024  bpc=1.8104391263024586
+  L=  2048  bpc=1.8045548019297173
+  L=  4096  bpc=1.8017449014503295
+  L=  8192  bpc=1.8003358137591579
+  context effect (full - short context, bits/byte): {'1-2x': -0.0023, '2-4x': -0.0007, '4-8x': -0.0011, '8-16x': -0.0008}
+saved results/enwik8/retnet/length_generalization.json
+  L=   512  bpc=1.6458505305070257
+  L=  1024  bpc=1.6185602141919384
+  L=  2048  bpc=1.6114945832812366
+  L=  4096  bpc=1.6220773975520815
+  L=  8192  bpc=1.6438584617808019
+  context effect (full - short context, bits/byte): {'1-2x': -0.0046, '2-4x': 0.0166, '4-8x': 0.0193, '8-16x': 0.047}
+saved results/enwik8/hybrid/length_generalization.json

@@ -4,6 +4,16 @@ Each entry records what changed, which results it affects, and the numbers befor
 
 ## Unreleased
 
+### Stage 3: tuning, seed variance, measurement fix
+
+- Learning-rate sweep (6 rates) and 3-seed variance for the research models; see docs/AUDIT.md for the table.
+  Chosen: Mamba 1.6e-2, Transformer 8e-3. Seed sd ≈ 0.005 bpc; tuned gap 0.163 bpc.
+- Attention gained NoPE / ALiBi position encodings and a chunked implementation for long-context evaluation.
+- New measurement, `context_effect`: the same bytes scored with full vs. ~training-length context. The earlier
+  position-band comparison was confounded by which text sits at which position (smoke test: -0.199 bpc by bands,
+  ~0.000 by the same-bytes measure).
+- README finding 2 corrected (audit #21).
+
 ### Stage 2: tests and tooling
 
 - Triton backward: under `torch.use_deterministic_algorithms(True)` dB/dC are reduced through per-tile partial buffers

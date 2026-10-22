@@ -11,9 +11,9 @@ Status legend: **open**, **fixed (stage N)**, **mitigated** (documented, not rem
 | # | Priority | Category | Finding | Evidence | Status |
 |---|---|---|---|---|---|
 | 1 | critical | unfair comparison | Headline efficiency claims compared naive attention with a fused Mamba kernel. | `results/bench/models.json`: fused attention runs a 128K forward pass and trains at 105.8k tok/s vs. Mamba's 42.8k. | fixed (stage 0): README now compares naive-naive and fused-fused |
-| 2 | critical | experimental design | Every quality number is a single seed (seed 0). | `results/enwik8/*/config.json` | mitigated (stage 0: labelled preliminary); scheduled (stage 3: seed variance) |
+| 2 | critical | experimental design | Every quality number is a single seed (seed 0). | `results/enwik8/*/config.json` | mitigated (stage 0); seed variance measured (stage 3: sd ≈ 0.005 bpc); multi-seed final runs in stage 5 |
 | 3 | critical | experimental design | Synthetic-task conclusion was a training-budget artifact. | `results/audit/mqar_budget.json`: pure Mamba, 4-pair MQAR, 7.8% at 3,000 steps vs. 52.9% at 9,000 steps (re-run: 52.6% and 52.9%; the spread comes from the non-deterministic kernel, #13) | fixed (stage 0): claim withdrawn |
-| 4 | critical | experimental design | One learning rate for all architectures; no tuning. | `training/train_lm.py` defaults | scheduled (stage 3: per-architecture LR sweep) |
+| 4 | critical | experimental design | One learning rate for all architectures; no tuning. | `training/train_lm.py` defaults | fixed for the research models (stage 3); original 4.7M runs stay labelled untuned |
 | 5 | high | reporting | "4 GB" memory claims; PyTorch was capped at 2.97 GiB. | `results/logs/bench.log` | fixed (stage 0); cap now recorded with every result (stage 1) |
 | 6 | high | benchmarking | Benchmarks ran with other applications on the GPU (game launcher + overlay, voice app, chat app). | `nvidia-smi` process list | mitigated (stage 0); clean re-run scheduled (stage 2/3) |
 | 7 | high | confound | No-selection ablation has 7.5% fewer parameters, one seed, compared at step 1,000 of 4,000. | `results/enwik8_ablation/*/config.json` | mitigated (stage 0); param-matched rerun scheduled (stage 5) |
@@ -30,7 +30,7 @@ Status legend: **open**, **fixed (stage N)**, **mitigated** (documented, not rem
 | 18 | medium | repository | No LICENSE or CITATION file. | — | fixed (stage 1): MIT `LICENSE`, `CITATION.cff` |
 | 19 | medium | reporting | "bpc" undefined (it is bits per byte). | README | fixed (stage 0) |
 | 20 | low | repository | GitHub repository description still says "64–1024 tokens". | GitHub page | open (owner action) |
-| 21 | high | analysis error | Window-level bpc improving with window length was read as "Mamba keeps using more context". It partly reflects fewer cold-start bytes per window; per-position loss shows Mamba plateaus after ~1–2K and the hybrid degrades at 2–4K. Found in stage 3. | `results/enwik8/eval.json` position_loss | fixed (stage 3): README finding 2 corrected; the study reports per-position loss, not only window-level bpc |
+| 21 | high | analysis error | Window-level bpc improving with window length was read as "Mamba keeps using more context". It reflects fewer cold-start bytes per window; position bands within a window are also confounded by which text sits where. Same-bytes measurement (full vs. ~512 context) at 8–16× the training length: Transformer +2.96, Mamba −0.001, RetNet −0.001, hybrid +0.047 bits/byte. | `results/enwik8/*/length_generalization.json` | fixed (stage 3): README finding 2 rewritten on the same-bytes measurement |
 
 Re-verified as holding: the test suite design (NumPy brute force, finite-difference gradients, ZOH vs. RK4, cache and
 recurrent-state equivalence, causality); a 64K-token forward pass of the trained Mamba stays finite; parameter matching
@@ -65,6 +65,25 @@ predict where it fails?
   positions, fixed in advance: 1–2×, 2–4×, 4–8×, 8–16× (and 16–32×) the training length. Negative = extra context helps
   (utilization); positive = it hurts (degradation or collapse).
 
+## Stage 3 results (validation split; research models, 1,500 steps of 16 × 512 bytes)
+
+Learning-rate sweep, seed 0 (`results/research/stage3_lr_sweep/`):
+
+| learning rate | 1e-3 | 2e-3 | 4e-3 | 8e-3 | 1.6e-2 | 3.2e-2 |
+|---|---|---|---|---|---|---|
+| Mamba (8 layers, d 128, N 16; 0.93M) | 2.034 | 1.974 | 1.949 | 1.940 | **1.936** | 1.958 |
+| Transformer, RoPE (5 layers, d 128; 0.98M) | 2.325 | 2.192 | 2.112 | **2.092** | 2.104 | 2.965 |
+
+Seed variance at the chosen rates (`results/research/stage3_seeds/`): Mamba 1.932 / 1.940 / 1.931 (mean 1.934, sd 0.005);
+Transformer 2.093 / 2.099 / 2.099 (mean 2.097, sd 0.004). The 0.163 bpc gap is about 36 pooled standard deviations.
+
+What this changes:
+- Single-seed differences below about 0.015 bpc (3 sd) are treated as noise in the pilot.
+- Re-running Mamba with the same seed moved it by 0.004 bpc (atomics in the kernel; Transformer re-runs are
+  bit-identical), so kernel nondeterminism is about as large as seed variance at this scale.
+- The best learning rates are 5–10× higher than the 1.5e-3 used for the original 4.7M comparison, which therefore ran
+  both architectures far from their optimum (supports finding 4).
+
 ## Stage checklist
 
 | Stage | Goal | Status |
@@ -72,7 +91,7 @@ predict where it fails?
 | 0 | Correct the record: README claims, units, memory cap, withdrawn findings | done |
 | 1 | Reproducibility: pinned environment, experiment configs, CSV export, environment capture, LICENSE, CITATION | done |
 | 2 | Tests and tooling: deterministic kernel mode, GPU equivalence, long-sequence stability, optimizer-inclusive throughput | done |
-| 3 | Seed variance and per-architecture learning-rate tuning on the research models | pending |
+| 3 | Seed variance and per-architecture learning-rate tuning on the research models | done |
 | 4 | Pilot of H1–H3 (one seed) with baselines; go/no-go | pending |
 | 5 | Full grid with 3 seeds and parameter-matched controls | pending |
 | 6 | Analysis, statistics, figures from CSV | pending |

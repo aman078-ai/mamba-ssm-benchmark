@@ -1,0 +1,38 @@
+[device] NVIDIA GeForce RTX 3050 Laptop GPU: 4.00 GiB total, PyTorch capped at 2.97 GiB
+[transformer_rope_seed0] layers=AAAAA non-embedding params=984,448 device=cuda
+[transformer_rope_seed0] step     0  val_bpc 7.9416  (0.0 min)
+[transformer_rope_seed0] step     0  train_bpc 7.936  55.7k tok/s
+[transformer_rope_seed0] step   100  train_bpc 3.793  99.1k tok/s
+[transformer_rope_seed0] step   200  train_bpc 3.145  99.5k tok/s
+[transformer_rope_seed0] step   250  val_bpc 3.0046  (0.3 min)
+[transformer_rope_seed0] step   300  train_bpc 2.731  99.6k tok/s
+[transformer_rope_seed0] step   400  train_bpc 2.745  99.7k tok/s
+[transformer_rope_seed0] step   500  val_bpc 2.5844  (0.7 min)
+[transformer_rope_seed0] step   500  train_bpc 2.573  99.7k tok/s
+[transformer_rope_seed0] step   600  train_bpc 2.441  99.8k tok/s
+[transformer_rope_seed0] step   700  train_bpc 2.431  99.8k tok/s
+[transformer_rope_seed0] step   750  val_bpc 2.3845  (1.0 min)
+[transformer_rope_seed0] step   800  train_bpc 2.571  99.8k tok/s
+[transformer_rope_seed0] step   900  train_bpc 2.457  99.8k tok/s
+[transformer_rope_seed0] step  1000  val_bpc 2.2402  (1.4 min)
+[transformer_rope_seed0] step  1000  train_bpc 2.169  99.8k tok/s
+[transformer_rope_seed0] step  1100  train_bpc 2.208  99.8k tok/s
+[transformer_rope_seed0] step  1200  train_bpc 2.264  99.8k tok/s
+[transformer_rope_seed0] step  1250  val_bpc 2.1315  (1.7 min)
+[transformer_rope_seed0] step  1300  train_bpc 2.001  99.8k tok/s
+[transformer_rope_seed0] step  1400  train_bpc 1.882  99.8k tok/s
+[transformer_rope_seed0] step  1500  val_bpc 2.0925  (2.1 min)
+{
+  "run": "transformer_rope_seed0",
+  "model": "transformer",
+  "layers": "AAAAA",
+  "non_embedding_params": 984448,
+  "steps": 1500,
+  "tokens": 12288000,
+  "seq_len": 512,
+  "final_val_bpc": 2.092463410399907,
+  "best_val_bpc": 2.092463410399907,
+  "train_time_min": 2.051149829977658,
+  "tokens_per_sec": 99846.43589017133,
+  "peak_train_mem_mb": 872.09716796875
+}
