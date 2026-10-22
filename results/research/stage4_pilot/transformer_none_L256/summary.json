@@ -1,0 +1,14 @@
+{
+  "run": "transformer_none_L256",
+  "model": "transformer",
+  "layers": "AAAAA",
+  "non_embedding_params": 984448,
+  "steps": 3000,
+  "tokens": 24576000,
+  "seq_len": 256,
+  "final_val_bpc": 2.3301751987268737,
+  "best_val_bpc": 2.3301751987268737,
+  "train_time_min": 2.429381323380706,
+  "tokens_per_sec": 168602.59690726697,
+  "peak_train_mem_mb": 550.84716796875
+}

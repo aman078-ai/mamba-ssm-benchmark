@@ -1,0 +1,9 @@
+  L=   256  bpc=1.8407152566137996
+  L=   512  bpc=1.820889374189829
+  L=  1024  bpc=1.8108188329822987
+  L=  2048  bpc=1.8059542106628494
+  L=  4096  bpc=1.803639696341415
+  L=  8192  bpc=1.8024963415815403
+  L= 16384  bpc=1.8019971464307787
+  context effect (full - short context, bits/byte): {'1-2x': -0.002, '2-4x': 0.0007, '4-8x': 0.0001, '8-16x': -0.0006, '16-32x': -0.001}
+saved results/research/stage4b_scalar_decay\mamba_scalar_n16_L256/length_generalization.json

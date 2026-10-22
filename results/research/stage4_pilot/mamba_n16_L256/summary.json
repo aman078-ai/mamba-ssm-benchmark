@@ -1,0 +1,14 @@
+{
+  "run": "mamba_n16_L256",
+  "model": "mamba",
+  "layers": "MMMMMMMM",
+  "non_embedding_params": 932992,
+  "steps": 3000,
+  "tokens": 24576000,
+  "seq_len": 256,
+  "final_val_bpc": 1.8378474622019019,
+  "best_val_bpc": 1.8378474622019019,
+  "train_time_min": 3.62902197499255,
+  "tokens_per_sec": 112867.87537318256,
+  "peak_train_mem_mb": 749.17724609375
+}

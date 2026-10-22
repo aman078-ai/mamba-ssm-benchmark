@@ -1,0 +1,212 @@
+{
+  "name": "stage5a_seeds",
+  "description": "Seeds 1 and 2 for every stage-4 pilot and scalar-decay configuration (seed 0 is in stage4_pilot / stage4b_scalar_decay); identical protocol.",
+  "out": "results/research/stage5a_seeds",
+  "common": {
+    "steps": 3000,
+    "warmup": 150,
+    "min_lr": 0.0001,
+    "eval_every": 500,
+    "eval_bytes": 1000000
+  },
+  "variants": {
+    "mamba_n4_L256": {
+      "model": "mamba",
+      "lr": 0.016,
+      "seq_len": 256,
+      "batch_size": 32,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 4
+      }
+    },
+    "mamba_n16_L256": {
+      "model": "mamba",
+      "lr": 0.016,
+      "seq_len": 256,
+      "batch_size": 32,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 16
+      }
+    },
+    "mamba_n64_L256": {
+      "model": "mamba",
+      "lr": 0.016,
+      "seq_len": 256,
+      "batch_size": 32,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 64
+      }
+    },
+    "mamba_lti_n16_L256": {
+      "model": "mamba",
+      "lr": 0.016,
+      "seq_len": 256,
+      "batch_size": 32,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 16,
+        "selective": false
+      }
+    },
+    "transformer_rope_L256": {
+      "model": "transformer",
+      "lr": 0.008,
+      "seq_len": 256,
+      "batch_size": 32,
+      "override": {
+        "d_model": 128,
+        "layers": "AAAAA",
+        "pos_encoding": "rope"
+      }
+    },
+    "transformer_none_L256": {
+      "model": "transformer",
+      "lr": 0.008,
+      "seq_len": 256,
+      "batch_size": 32,
+      "override": {
+        "d_model": 128,
+        "layers": "AAAAA",
+        "pos_encoding": "none"
+      }
+    },
+    "transformer_alibi_L256": {
+      "model": "transformer",
+      "lr": 0.008,
+      "seq_len": 256,
+      "batch_size": 32,
+      "override": {
+        "d_model": 128,
+        "layers": "AAAAA",
+        "pos_encoding": "alibi"
+      }
+    },
+    "mamba_n4_L1024": {
+      "model": "mamba",
+      "lr": 0.016,
+      "seq_len": 1024,
+      "batch_size": 8,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 4
+      }
+    },
+    "mamba_n16_L1024": {
+      "model": "mamba",
+      "lr": 0.016,
+      "seq_len": 1024,
+      "batch_size": 8,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 16
+      }
+    },
+    "mamba_n64_L1024": {
+      "model": "mamba",
+      "lr": 0.016,
+      "seq_len": 1024,
+      "batch_size": 8,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 64
+      }
+    },
+    "mamba_lti_n16_L1024": {
+      "model": "mamba",
+      "lr": 0.016,
+      "seq_len": 1024,
+      "batch_size": 8,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 16,
+        "selective": false
+      }
+    },
+    "transformer_rope_L1024": {
+      "model": "transformer",
+      "lr": 0.008,
+      "seq_len": 1024,
+      "batch_size": 8,
+      "override": {
+        "d_model": 128,
+        "layers": "AAAAA",
+        "pos_encoding": "rope"
+      }
+    },
+    "transformer_none_L1024": {
+      "model": "transformer",
+      "lr": 0.008,
+      "seq_len": 1024,
+      "batch_size": 8,
+      "override": {
+        "d_model": 128,
+        "layers": "AAAAA",
+        "pos_encoding": "none"
+      }
+    },
+    "transformer_alibi_L1024": {
+      "model": "transformer",
+      "lr": 0.008,
+      "seq_len": 1024,
+      "batch_size": 8,
+      "override": {
+        "d_model": 128,
+        "layers": "AAAAA",
+        "pos_encoding": "alibi"
+      }
+    },
+    "mamba_scalar_n16_L256": {
+      "model": "mamba",
+      "lr": 0.016,
+      "seq_len": 256,
+      "batch_size": 32,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 16,
+        "a_mode": "scalar"
+      }
+    },
+    "mamba_scalar_n64_L256": {
+      "model": "mamba",
+      "lr": 0.016,
+      "seq_len": 256,
+      "batch_size": 32,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 64,
+        "a_mode": "scalar"
+      }
+    }
+  },
+  "grid": {
+    "seed": [
+      1,
+      2
+    ]
+  },
+  "post": [
+    [
+      "-m",
+      "analysis.length_generalization",
+      "--run_dir",
+      "{run_dir}",
+      "--max_len",
+      "16384",
+      "--position_windows",
+      "16"
+    ]
+  ]
+}

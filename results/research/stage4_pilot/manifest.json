@@ -1,0 +1,471 @@
+{
+  "config": "configs/stage4_pilot.json",
+  "spec": {
+    "name": "stage4_pilot",
+    "description": "Pilot of H1-H3 (docs/AUDIT.md), one seed. Mamba state size {4,16,64} x training length {256,1024}; LTI Mamba and Transformers (RoPE/NoPE/ALiBi) as controls. 3,000 steps x 8,192 bytes (24.6M bytes), learning rates from stage3_lr_sweep (tuned at length 512, 1,500 steps; LTI and NoPE/ALiBi reuse their family's rate). Evaluation on the validation split only, up to 16K bytes.",
+    "out": "results/research/stage4_pilot",
+    "common": {
+      "steps": 3000,
+      "warmup": 150,
+      "min_lr": 0.0001,
+      "eval_every": 500,
+      "eval_bytes": 1000000,
+      "seed": 0
+    },
+    "variants": {
+      "mamba_n4_L256": {
+        "model": "mamba",
+        "lr": 0.016,
+        "seq_len": 256,
+        "batch_size": 32,
+        "override": {
+          "d_model": 128,
+          "layers": "MMMMMMMM",
+          "d_state": 4
+        }
+      },
+      "mamba_n16_L256": {
+        "model": "mamba",
+        "lr": 0.016,
+        "seq_len": 256,
+        "batch_size": 32,
+        "override": {
+          "d_model": 128,
+          "layers": "MMMMMMMM",
+          "d_state": 16
+        }
+      },
+      "mamba_n64_L256": {
+        "model": "mamba",
+        "lr": 0.016,
+        "seq_len": 256,
+        "batch_size": 32,
+        "override": {
+          "d_model": 128,
+          "layers": "MMMMMMMM",
+          "d_state": 64
+        }
+      },
+      "mamba_lti_n16_L256": {
+        "model": "mamba",
+        "lr": 0.016,
+        "seq_len": 256,
+        "batch_size": 32,
+        "override": {
+          "d_model": 128,
+          "layers": "MMMMMMMM",
+          "d_state": 16,
+          "selective": false
+        }
+      },
+      "transformer_rope_L256": {
+        "model": "transformer",
+        "lr": 0.008,
+        "seq_len": 256,
+        "batch_size": 32,
+        "override": {
+          "d_model": 128,
+          "layers": "AAAAA",
+          "pos_encoding": "rope"
+        }
+      },
+      "transformer_none_L256": {
+        "model": "transformer",
+        "lr": 0.008,
+        "seq_len": 256,
+        "batch_size": 32,
+        "override": {
+          "d_model": 128,
+          "layers": "AAAAA",
+          "pos_encoding": "none"
+        }
+      },
+      "transformer_alibi_L256": {
+        "model": "transformer",
+        "lr": 0.008,
+        "seq_len": 256,
+        "batch_size": 32,
+        "override": {
+          "d_model": 128,
+          "layers": "AAAAA",
+          "pos_encoding": "alibi"
+        }
+      },
+      "mamba_n4_L1024": {
+        "model": "mamba",
+        "lr": 0.016,
+        "seq_len": 1024,
+        "batch_size": 8,
+        "override": {
+          "d_model": 128,
+          "layers": "MMMMMMMM",
+          "d_state": 4
+        }
+      },
+      "mamba_n16_L1024": {
+        "model": "mamba",
+        "lr": 0.016,
+        "seq_len": 1024,
+        "batch_size": 8,
+        "override": {
+          "d_model": 128,
+          "layers": "MMMMMMMM",
+          "d_state": 16
+        }
+      },
+      "mamba_n64_L1024": {
+        "model": "mamba",
+        "lr": 0.016,
+        "seq_len": 1024,
+        "batch_size": 8,
+        "override": {
+          "d_model": 128,
+          "layers": "MMMMMMMM",
+          "d_state": 64
+        }
+      },
+      "mamba_lti_n16_L1024": {
+        "model": "mamba",
+        "lr": 0.016,
+        "seq_len": 1024,
+        "batch_size": 8,
+        "override": {
+          "d_model": 128,
+          "layers": "MMMMMMMM",
+          "d_state": 16,
+          "selective": false
+        }
+      },
+      "transformer_rope_L1024": {
+        "model": "transformer",
+        "lr": 0.008,
+        "seq_len": 1024,
+        "batch_size": 8,
+        "override": {
+          "d_model": 128,
+          "layers": "AAAAA",
+          "pos_encoding": "rope"
+        }
+      },
+      "transformer_none_L1024": {
+        "model": "transformer",
+        "lr": 0.008,
+        "seq_len": 1024,
+        "batch_size": 8,
+        "override": {
+          "d_model": 128,
+          "layers": "AAAAA",
+          "pos_encoding": "none"
+        }
+      },
+      "transformer_alibi_L1024": {
+        "model": "transformer",
+        "lr": 0.008,
+        "seq_len": 1024,
+        "batch_size": 8,
+        "override": {
+          "d_model": 128,
+          "layers": "AAAAA",
+          "pos_encoding": "alibi"
+        }
+      }
+    },
+    "grid": {},
+    "post": [
+      [
+        "-m",
+        "analysis.length_generalization",
+        "--run_dir",
+        "{run_dir}",
+        "--max_len",
+        "16384",
+        "--position_windows",
+        "16"
+      ]
+    ]
+  },
+  "runs": {
+    "mamba_n4_L256": {
+      "status": "done",
+      "args": {
+        "steps": 3000,
+        "warmup": 150,
+        "min_lr": 0.0001,
+        "eval_every": 500,
+        "eval_bytes": 1000000,
+        "seed": 0,
+        "model": "mamba",
+        "lr": 0.016,
+        "seq_len": 256,
+        "batch_size": 32,
+        "override": {
+          "d_model": 128,
+          "layers": "MMMMMMMM",
+          "d_state": 4
+        }
+      }
+    },
+    "mamba_n16_L256": {
+      "status": "done",
+      "args": {
+        "steps": 3000,
+        "warmup": 150,
+        "min_lr": 0.0001,
+        "eval_every": 500,
+        "eval_bytes": 1000000,
+        "seed": 0,
+        "model": "mamba",
+        "lr": 0.016,
+        "seq_len": 256,
+        "batch_size": 32,
+        "override": {
+          "d_model": 128,
+          "layers": "MMMMMMMM",
+          "d_state": 16
+        }
+      }
+    },
+    "mamba_n64_L256": {
+      "status": "done",
+      "args": {
+        "steps": 3000,
+        "warmup": 150,
+        "min_lr": 0.0001,
+        "eval_every": 500,
+        "eval_bytes": 1000000,
+        "seed": 0,
+        "model": "mamba",
+        "lr": 0.016,
+        "seq_len": 256,
+        "batch_size": 32,
+        "override": {
+          "d_model": 128,
+          "layers": "MMMMMMMM",
+          "d_state": 64
+        }
+      }
+    },
+    "mamba_lti_n16_L256": {
+      "status": "done",
+      "args": {
+        "steps": 3000,
+        "warmup": 150,
+        "min_lr": 0.0001,
+        "eval_every": 500,
+        "eval_bytes": 1000000,
+        "seed": 0,
+        "model": "mamba",
+        "lr": 0.016,
+        "seq_len": 256,
+        "batch_size": 32,
+        "override": {
+          "d_model": 128,
+          "layers": "MMMMMMMM",
+          "d_state": 16,
+          "selective": false
+        }
+      }
+    },
+    "transformer_rope_L256": {
+      "status": "done",
+      "args": {
+        "steps": 3000,
+        "warmup": 150,
+        "min_lr": 0.0001,
+        "eval_every": 500,
+        "eval_bytes": 1000000,
+        "seed": 0,
+        "model": "transformer",
+        "lr": 0.008,
+        "seq_len": 256,
+        "batch_size": 32,
+        "override": {
+          "d_model": 128,
+          "layers": "AAAAA",
+          "pos_encoding": "rope"
+        }
+      }
+    },
+    "transformer_none_L256": {
+      "status": "done",
+      "args": {
+        "steps": 3000,
+        "warmup": 150,
+        "min_lr": 0.0001,
+        "eval_every": 500,
+        "eval_bytes": 1000000,
+        "seed": 0,
+        "model": "transformer",
+        "lr": 0.008,
+        "seq_len": 256,
+        "batch_size": 32,
+        "override": {
+          "d_model": 128,
+          "layers": "AAAAA",
+          "pos_encoding": "none"
+        }
+      }
+    },
+    "transformer_alibi_L256": {
+      "status": "done",
+      "args": {
+        "steps": 3000,
+        "warmup": 150,
+        "min_lr": 0.0001,
+        "eval_every": 500,
+        "eval_bytes": 1000000,
+        "seed": 0,
+        "model": "transformer",
+        "lr": 0.008,
+        "seq_len": 256,
+        "batch_size": 32,
+        "override": {
+          "d_model": 128,
+          "layers": "AAAAA",
+          "pos_encoding": "alibi"
+        }
+      }
+    },
+    "mamba_n4_L1024": {
+      "status": "done",
+      "args": {
+        "steps": 3000,
+        "warmup": 150,
+        "min_lr": 0.0001,
+        "eval_every": 500,
+        "eval_bytes": 1000000,
+        "seed": 0,
+        "model": "mamba",
+        "lr": 0.016,
+        "seq_len": 1024,
+        "batch_size": 8,
+        "override": {
+          "d_model": 128,
+          "layers": "MMMMMMMM",
+          "d_state": 4
+        }
+      }
+    },
+    "mamba_n16_L1024": {
+      "status": "done",
+      "args": {
+        "steps": 3000,
+        "warmup": 150,
+        "min_lr": 0.0001,
+        "eval_every": 500,
+        "eval_bytes": 1000000,
+        "seed": 0,
+        "model": "mamba",
+        "lr": 0.016,
+        "seq_len": 1024,
+        "batch_size": 8,
+        "override": {
+          "d_model": 128,
+          "layers": "MMMMMMMM",
+          "d_state": 16
+        }
+      }
+    },
+    "mamba_n64_L1024": {
+      "status": "done",
+      "args": {
+        "steps": 3000,
+        "warmup": 150,
+        "min_lr": 0.0001,
+        "eval_every": 500,
+        "eval_bytes": 1000000,
+        "seed": 0,
+        "model": "mamba",
+        "lr": 0.016,
+        "seq_len": 1024,
+        "batch_size": 8,
+        "override": {
+          "d_model": 128,
+          "layers": "MMMMMMMM",
+          "d_state": 64
+        }
+      }
+    },
+    "mamba_lti_n16_L1024": {
+      "status": "done",
+      "args": {
+        "steps": 3000,
+        "warmup": 150,
+        "min_lr": 0.0001,
+        "eval_every": 500,
+        "eval_bytes": 1000000,
+        "seed": 0,
+        "model": "mamba",
+        "lr": 0.016,
+        "seq_len": 1024,
+        "batch_size": 8,
+        "override": {
+          "d_model": 128,
+          "layers": "MMMMMMMM",
+          "d_state": 16,
+          "selective": false
+        }
+      }
+    },
+    "transformer_rope_L1024": {
+      "status": "done",
+      "args": {
+        "steps": 3000,
+        "warmup": 150,
+        "min_lr": 0.0001,
+        "eval_every": 500,
+        "eval_bytes": 1000000,
+        "seed": 0,
+        "model": "transformer",
+        "lr": 0.008,
+        "seq_len": 1024,
+        "batch_size": 8,
+        "override": {
+          "d_model": 128,
+          "layers": "AAAAA",
+          "pos_encoding": "rope"
+        }
+      }
+    },
+    "transformer_none_L1024": {
+      "status": "done",
+      "args": {
+        "steps": 3000,
+        "warmup": 150,
+        "min_lr": 0.0001,
+        "eval_every": 500,
+        "eval_bytes": 1000000,
+        "seed": 0,
+        "model": "transformer",
+        "lr": 0.008,
+        "seq_len": 1024,
+        "batch_size": 8,
+        "override": {
+          "d_model": 128,
+          "layers": "AAAAA",
+          "pos_encoding": "none"
+        }
+      }
+    },
+    "transformer_alibi_L1024": {
+      "status": "done",
+      "args": {
+        "steps": 3000,
+        "warmup": 150,
+        "min_lr": 0.0001,
+        "eval_every": 500,
+        "eval_bytes": 1000000,
+        "seed": 0,
+        "model": "transformer",
+        "lr": 0.008,
+        "seq_len": 1024,
+        "batch_size": 8,
+        "override": {
+          "d_model": 128,
+          "layers": "AAAAA",
+          "pos_encoding": "alibi"
+        }
+      }
+    }
+  }
+}

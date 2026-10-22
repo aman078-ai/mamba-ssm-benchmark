@@ -1,0 +1,156 @@
+[
+  {
+    "run": "mamba_n16_L256",
+    "family": "Mamba (N=16)",
+    "train_len": 256,
+    "seed": 0,
+    "params": 932992,
+    "near_bpc": 1.8378487818803482,
+    "effect_2_4x": -0.0008214084812211044,
+    "effect_8_16x": -0.0004601463896801416,
+    "effect_16_32x": -0.000894011701519286
+  },
+  {
+    "run": "mamba_n4_L256",
+    "family": "Mamba (N=4)",
+    "train_len": 256,
+    "seed": 0,
+    "params": 859264,
+    "near_bpc": 1.8451989720098854,
+    "effect_2_4x": -0.0013827981833888759,
+    "effect_8_16x": 0.0005597979966457832,
+    "effect_16_32x": 0.000275319745055416
+  },
+  {
+    "run": "mamba_n64_L256",
+    "family": "Mamba (N=64)",
+    "train_len": 256,
+    "seed": 0,
+    "params": 1227904,
+    "near_bpc": 1.8388726086025942,
+    "effect_2_4x": -0.00015260388058120817,
+    "effect_8_16x": -0.0016251667547874727,
+    "effect_16_32x": -0.0009032745809177237
+  },
+  {
+    "run": "mamba_lti_n16_L256",
+    "family": "Mamba LTI (N=16)",
+    "train_len": 256,
+    "seed": 0,
+    "params": 834944,
+    "near_bpc": 1.8739677014816971,
+    "effect_2_4x": 0.0023796513480683927,
+    "effect_8_16x": 0.002152763965458296,
+    "effect_16_32x": 0.003310921777723911
+  },
+  {
+    "run": "transformer_alibi_L256",
+    "family": "Transformer (alibi)",
+    "train_len": 256,
+    "seed": 0,
+    "params": 984448,
+    "near_bpc": 1.900093675620113,
+    "effect_2_4x": -0.05839745936218468,
+    "effect_8_16x": -0.05108267148493465,
+    "effect_16_32x": -0.05052295151240043
+  },
+  {
+    "run": "transformer_none_L256",
+    "family": "Transformer (none)",
+    "train_len": 256,
+    "seed": 0,
+    "params": 984448,
+    "near_bpc": 2.330159444570078,
+    "effect_2_4x": 2.841891821262909,
+    "effect_8_16x": 3.3562624349689467,
+    "effect_16_32x": 3.5368075430746
+  },
+  {
+    "run": "transformer_rope_L256",
+    "family": "Transformer (rope)",
+    "train_len": 256,
+    "seed": 0,
+    "params": 984448,
+    "near_bpc": 1.927810221398199,
+    "effect_2_4x": 3.196300898449159,
+    "effect_8_16x": 2.802435464761723,
+    "effect_16_32x": 2.7855504875718196
+  },
+  {
+    "run": "mamba_n16_L1024",
+    "family": "Mamba (N=16)",
+    "train_len": 1024,
+    "seed": 0,
+    "params": 932992,
+    "near_bpc": 1.850442973184976,
+    "effect_2_4x": -0.00039187537406943057,
+    "effect_8_16x": -0.0004312904918832505,
+    "effect_16_32x": null
+  },
+  {
+    "run": "mamba_n4_L1024",
+    "family": "Mamba (N=4)",
+    "train_len": 1024,
+    "seed": 0,
+    "params": 859264,
+    "near_bpc": 1.8517790725668766,
+    "effect_2_4x": -0.00046785300073190803,
+    "effect_8_16x": 2.048266010678464e-05,
+    "effect_16_32x": null
+  },
+  {
+    "run": "mamba_n64_L1024",
+    "family": "Mamba (N=64)",
+    "train_len": 1024,
+    "seed": 0,
+    "params": 1227904,
+    "near_bpc": 1.8409831661528373,
+    "effect_2_4x": -0.000332759526951497,
+    "effect_8_16x": -0.0003051562576909529,
+    "effect_16_32x": null
+  },
+  {
+    "run": "mamba_lti_n16_L1024",
+    "family": "Mamba LTI (N=16)",
+    "train_len": 1024,
+    "seed": 0,
+    "params": 834944,
+    "near_bpc": 1.8809496956195049,
+    "effect_2_4x": -0.00017197535939254163,
+    "effect_8_16x": 8.402736850542613e-06,
+    "effect_16_32x": null
+  },
+  {
+    "run": "transformer_alibi_L1024",
+    "family": "Transformer (alibi)",
+    "train_len": 1024,
+    "seed": 0,
+    "params": 984448,
+    "near_bpc": 1.8588301441593973,
+    "effect_2_4x": -0.0055405175674890506,
+    "effect_8_16x": -0.007482297651321419,
+    "effect_16_32x": null
+  },
+  {
+    "run": "transformer_none_L1024",
+    "family": "Transformer (none)",
+    "train_len": 1024,
+    "seed": 0,
+    "params": 984448,
+    "near_bpc": 3.144524303783839,
+    "effect_2_4x": 0.7354188587790401,
+    "effect_8_16x": 0.9707123462061416,
+    "effect_16_32x": null
+  },
+  {
+    "run": "transformer_rope_L1024",
+    "family": "Transformer (rope)",
+    "train_len": 1024,
+    "seed": 0,
+    "params": 984448,
+    "near_bpc": 1.9756335542704069,
+    "effect_2_4x": 3.203049691149498,
+    "effect_8_16x": 3.224796080433508,
+    "effect_16_32x": null
+  }
+]

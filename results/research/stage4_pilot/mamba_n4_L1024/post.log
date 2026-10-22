@@ -1,0 +1,7 @@
+  L=  1024  bpc=1.8517790725668766
+  L=  2048  bpc=1.8452152785732288
+  L=  4096  bpc=1.8420966889712564
+  L=  8192  bpc=1.8405749470049944
+  L= 16384  bpc=1.8398920997576003
+  context effect (full - short context, bits/byte): {'1-2x': -0.0, '2-4x': -0.0005, '4-8x': -0.0003, '8-16x': 0.0}
+saved results/research/stage4_pilot\mamba_n4_L1024/length_generalization.json

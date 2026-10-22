@@ -1,0 +1,7 @@
+  L=  1024  bpc=1.8588301441593973
+  L=  2048  bpc=1.8285568388341293
+  L=  4096  bpc=1.8144958023220317
+  L=  8192  bpc=1.8068172872701844
+  L= 16384  bpc=1.8035855838329231
+  context effect (full - short context, bits/byte): {'1-2x': -0.0042, '2-4x': -0.0055, '4-8x': -0.0073, '8-16x': -0.0075}
+saved results/research/stage4_pilot\transformer_alibi_L1024/length_generalization.json

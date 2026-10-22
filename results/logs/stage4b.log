@@ -1,0 +1,4 @@
+[stage4b_scalar_decay] 2 runs -> results/research/stage4b_scalar_decay
+  [1/2] mamba_scalar_n16_L256
+  [2/2] mamba_scalar_n64_L256
+STAGE4B_DONE

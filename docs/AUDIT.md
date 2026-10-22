@@ -84,6 +84,38 @@ What this changes:
 - The best learning rates are 5–10× higher than the 1.5e-3 used for the original 4.7M comparison, which therefore ran
   both architectures far from their optimum (supports finding 4).
 
+## Stage 4 pilot results (one seed; validation split; `results/research/stage4_pilot/`, `stage4b_scalar_decay/`)
+
+Context effect = loss on the same bytes with full context minus loss with ~one training length of context
+(bits per byte; < 0 = extra context helps, > 0 = it hurts). Models ~0.8–1.2M parameters, 24.6M training bytes.
+
+| model | trained at 256: bpc at 256 | effect 2–4× | effect 8–16× | effect 16–32× | trained at 1024: effect 8–16× |
+|---|---|---|---|---|---|
+| Mamba, N = 4 | 1.845 | −0.001 | +0.001 | +0.000 | +0.000 |
+| Mamba, N = 16 | 1.838 | −0.001 | −0.000 | −0.001 | −0.000 |
+| Mamba, N = 64 | 1.839 | −0.000 | −0.002 | −0.001 | −0.000 |
+| Mamba, scalar decay, N = 16 | 1.841 | +0.001 | −0.001 | −0.001 | — |
+| Mamba, scalar decay, N = 64 | 1.847 | −0.001 | −0.001 | −0.001 | — |
+| Mamba without selection (LTI), N = 16 | 1.874 | +0.002 | +0.002 | +0.003 | +0.000 |
+| Transformer, ALiBi | 1.900 | **−0.058** | **−0.051** | **−0.051** | −0.007 |
+| Transformer, NoPE | 2.330 | +2.84 | +3.36 | +3.54 | +0.97 |
+| Transformer, RoPE | 1.928 | +3.20 | +2.80 | +2.79 | +3.23 |
+
+Mechanism measurements (Mamba runs):
+- Memory horizons are short: median over channels per state index is ~50–100 bytes for the slowest state index and
+  1–25 bytes for the fastest (S4D decay); ~8–9 bytes for every index with scalar decay. Only a thin tail of modes
+  reaches a few hundred bytes (99th percentile 240–1,350 bytes).
+- Horizons do not scale with training length (99th percentile, N = 16: 784 bytes trained at 256 vs. 679 at 1,024) and
+  shrink as N grows (S4D decay adds faster modes).
+- State RMS grows at most 1.5× from 1K to 16K bytes: no sign of state explosion.
+
+**Go/no-go.** H1 (a larger state collapses sooner) and H3 (horizons tied to training length) are not supported in this
+regime, and the follow-up rules out decay parameterization as the explanation: neither per-state (Mamba-1) nor scalar
+(Mamba-2-style) decay collapses at N = 64. Decision: **go, with the question reframed** as a boundary result —
+"small byte-level selective SSMs neither collapse nor use context beyond their training length, because the memory
+horizons they learn are short and independent of training length" — confirmed with seeds (stage 5a), plus a test of
+whether collapse appears once long memory is forced (stage 5b).
+
 ## Stage checklist
 
 | Stage | Goal | Status |
@@ -92,8 +124,8 @@ What this changes:
 | 1 | Reproducibility: pinned environment, experiment configs, CSV export, environment capture, LICENSE, CITATION | done |
 | 2 | Tests and tooling: deterministic kernel mode, GPU equivalence, long-sequence stability, optimizer-inclusive throughput | done |
 | 3 | Seed variance and per-architecture learning-rate tuning on the research models | done |
-| 4 | Pilot of H1–H3 (one seed) with baselines; go/no-go | pending |
-| 5 | Full grid with 3 seeds and parameter-matched controls | pending |
+| 4 | Pilot of H1–H3 (one seed) with baselines; go/no-go | done: go, reframed (see above) |
+| 5 | 5a: seeds 1–2 for every pilot configuration; 5b: forced-long-memory boundary test | 5a running |
 | 6 | Analysis, statistics, figures from CSV | pending |
 | 7 | Manuscript, release tag | pending |
 

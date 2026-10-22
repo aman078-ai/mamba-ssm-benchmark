@@ -1,2 +1,34 @@
 [stage4_pilot] 14 runs -> results/research/stage4_pilot
   [1/14] mamba_n4_L256
+  [2/14] mamba_n16_L256
+  [3/14] mamba_n64_L256
+  [4/14] mamba_lti_n16_L256
+  [5/14] transformer_rope_L256
+  [6/14] transformer_none_L256
+  [7/14] transformer_alibi_L256
+  [8/14] mamba_n4_L1024
+  [9/14] mamba_n16_L1024
+  [10/14] mamba_n64_L1024
+  [11/14] mamba_lti_n16_L1024
+  [12/14] transformer_rope_L1024
+  [13/14] transformer_none_L1024
+  [14/14] transformer_alibi_L1024
+stage4_pilot: 14 runs with length_generalization.json
+run                                    L   params   bpc@L  eff 2-4x eff 8-16x eff16-32x
+mamba_n16_L256                       256    0.93M   1.838    -0.001    -0.000    -0.001
+mamba_n4_L256                        256    0.86M   1.845    -0.001    +0.001    +0.000
+mamba_n64_L256                       256    1.23M   1.839    -0.000    -0.002    -0.001
+mamba_lti_n16_L256                   256    0.83M   1.874    +0.002    +0.002    +0.003
+transformer_alibi_L256               256    0.98M   1.900    -0.058    -0.051    -0.051
+transformer_none_L256                256    0.98M   2.330    +2.842    +3.356    +3.537
+transformer_rope_L256                256    0.98M   1.928    +3.196    +2.802    +2.786
+mamba_n16_L1024                     1024    0.93M   1.850    -0.000    -0.000       n/a
+mamba_n4_L1024                      1024    0.86M   1.852    -0.000    +0.000       n/a
+mamba_n64_L1024                     1024    1.23M   1.841    -0.000    -0.000       n/a
+mamba_lti_n16_L1024                 1024    0.83M   1.881    -0.000    +0.000       n/a
+transformer_alibi_L1024             1024    0.98M   1.859    -0.006    -0.007       n/a
+transformer_none_L1024              1024    0.98M   3.145    +0.735    +0.971       n/a
+transformer_rope_L1024              1024    0.98M   1.976    +3.203    +3.225       n/a
+saved results\research\stage4_pilot\scores.json
+saved plots to plots\research/
+PILOT_DONE

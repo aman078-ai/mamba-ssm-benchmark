@@ -1,0 +1,53 @@
+[device] NVIDIA GeForce RTX 3050 Laptop GPU: 4.00 GiB total, PyTorch capped at 2.97 GiB
+[transformer_none_L1024] layers=AAAAA non-embedding params=984,448 device=cuda
+[transformer_none_L1024] step     0  val_bpc 7.9410  (0.0 min)
+[transformer_none_L1024] step     0  train_bpc 7.927  36.7k tok/s
+[transformer_none_L1024] step   100  train_bpc 4.130  63.4k tok/s
+[transformer_none_L1024] step   200  train_bpc 3.966  63.6k tok/s
+[transformer_none_L1024] step   300  train_bpc 4.094  63.7k tok/s
+[transformer_none_L1024] step   400  train_bpc 3.691  63.7k tok/s
+[transformer_none_L1024] step   500  val_bpc 3.7669  (1.1 min)
+[transformer_none_L1024] step   500  train_bpc 3.808  63.7k tok/s
+[transformer_none_L1024] step   600  train_bpc 3.626  63.8k tok/s
+[transformer_none_L1024] step   700  train_bpc 3.860  63.8k tok/s
+[transformer_none_L1024] step   800  train_bpc 3.636  63.8k tok/s
+[transformer_none_L1024] step   900  train_bpc 3.734  63.8k tok/s
+[transformer_none_L1024] step  1000  val_bpc 3.6892  (2.1 min)
+[transformer_none_L1024] step  1000  train_bpc 3.728  63.8k tok/s
+[transformer_none_L1024] step  1100  train_bpc 3.602  63.8k tok/s
+[transformer_none_L1024] step  1200  train_bpc 3.538  63.8k tok/s
+[transformer_none_L1024] step  1300  train_bpc 3.608  63.8k tok/s
+[transformer_none_L1024] step  1400  train_bpc 3.670  63.8k tok/s
+[transformer_none_L1024] step  1500  val_bpc 3.5546  (3.2 min)
+[transformer_none_L1024] step  1500  train_bpc 3.422  63.8k tok/s
+[transformer_none_L1024] step  1600  train_bpc 3.582  63.8k tok/s
+[transformer_none_L1024] step  1700  train_bpc 3.432  63.8k tok/s
+[transformer_none_L1024] step  1800  train_bpc 3.564  63.8k tok/s
+[transformer_none_L1024] step  1900  train_bpc 3.580  63.8k tok/s
+[transformer_none_L1024] step  2000  val_bpc 3.4484  (4.3 min)
+[transformer_none_L1024] step  2000  train_bpc 3.430  63.8k tok/s
+[transformer_none_L1024] step  2100  train_bpc 3.508  63.8k tok/s
+[transformer_none_L1024] step  2200  train_bpc 3.514  63.8k tok/s
+[transformer_none_L1024] step  2300  train_bpc 3.018  63.8k tok/s
+[transformer_none_L1024] step  2400  train_bpc 3.183  63.8k tok/s
+[transformer_none_L1024] step  2500  val_bpc 3.2210  (5.3 min)
+[transformer_none_L1024] step  2500  train_bpc 3.026  63.8k tok/s
+[transformer_none_L1024] step  2600  train_bpc 3.227  63.8k tok/s
+[transformer_none_L1024] step  2700  train_bpc 2.979  63.8k tok/s
+[transformer_none_L1024] step  2800  train_bpc 2.936  63.8k tok/s
+[transformer_none_L1024] step  2900  train_bpc 2.733  63.8k tok/s
+[transformer_none_L1024] step  3000  val_bpc 3.1445  (6.4 min)
+{
+  "run": "transformer_none_L1024",
+  "model": "transformer",
+  "layers": "AAAAA",
+  "non_embedding_params": 984448,
+  "steps": 3000,
+  "tokens": 24576000,
+  "seq_len": 1024,
+  "final_val_bpc": 3.14452431506139,
+  "best_val_bpc": 3.14452431506139,
+  "train_time_min": 6.418138068363381,
+  "tokens_per_sec": 63819.13190977015,
+  "peak_train_mem_mb": 1515.53466796875
+}
