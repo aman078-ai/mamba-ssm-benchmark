@@ -148,21 +148,23 @@ pre { background: var(--surface); border: 1px solid var(--rule); border-radius: 
 
 <div class="page">
 <header>
-  <div class="eyebrow">Byte-level language modeling · RTX 3050 Laptop (4 GB)</div>
+  <div class="eyebrow">Byte-level language modeling · RTX 3050 Laptop (4 GB, 2.97 GiB usable)</div>
   <h1>Mamba vs Transformer, from scratch</h1>
   <p>A selective state-space model (Mamba/S6), a GPT-style Transformer, RetNet-style linear attention and a Mamba–attention
   hybrid, all written in plain PyTorch with a hand-written Triton kernel for the selective scan. The four models are
   parameter-matched at about 4.7M parameters and measured for speed, memory and quality as sequences get longer.
-  Every chart below is generated from the project's result files.</p>
+  Every chart below is generated from the project's result files. <b>Status: preliminary.</b> Quality numbers come
+  from one training seed with untuned learning rates; see docs/AUDIT.md for the open items.</p>
   <div class="env" id="env"></div>
   <div class="tiles" id="tiles"></div>
 </header>
 
 <section id="speed">
   <div class="eyebrow">Speed and memory</div>
-  <h2>Attention is quadratic in sequence length; the scan is linear</h2>
-  <p>One forward pass or training step at batch size 1, until the GPU runs out of memory (marked ×). Dashed lines are
-  reference implementations: PyTorch's fused attention kernel and Mamba with the pure-PyTorch scan instead of the Triton kernel.</p>
+  <h2>Efficiency depends on the kernel as much as the architecture</h2>
+  <p>One forward pass or training step at batch size 1, until PyTorch's 2.97 GiB memory cap is hit (marked ×). Compare
+  like with like: fused attention (PyTorch SDPA) with the fused Triton scan, or naive attention with the naive PyTorch scan.
+  With fused kernels on both sides, attention is faster up to about 32K tokens and Mamba is faster beyond.</p>
   <div class="fig">
     <div class="fig-head"><div class="legend" id="lg-speed"></div>
       <div class="seg" id="seg-speed"><button data-k="fwd:ms">Forward time</button><button data-k="fwd:peak_mb">Forward memory</button><button data-k="train:ms">Training step</button></div></div>
@@ -188,8 +190,9 @@ pre { background: var(--surface); border: 1px solid var(--rule); border-radius: 
 <section id="quality">
   <div class="eyebrow">Quality on enwik8</div>
   <h2>Same parameters, same data: who compresses Wikipedia best?</h2>
-  <p>Bits per character on the held-out test split (lower is better), after 32.8M training bytes each. The right chart
-  evaluates the same models on contexts longer than the 512 bytes they were trained on.</p>
+  <p>Bits per byte on the held-out test split (lower is better), after 32.8M training bytes each, one seed per model.
+  The right chart evaluates the same models on contexts longer than the 512 bytes they were trained on; the Transformer
+  uses rotary embeddings without any length-extension method.</p>
   <div class="tbl" id="t-q"></div>
   <div class="two">
     <div class="fig"><div class="fig-head"><div class="legend" id="lg-curve"></div></div><div class="chart" id="c-curve"></div></div>
@@ -202,7 +205,8 @@ pre { background: var(--surface); border: 1px solid var(--rule); border-radius: 
 <section id="ablation">
   <div class="eyebrow">Ablations</div>
   <h2>What happens without selection, and with other discretizations</h2>
-  <p>Mamba variants trained on the same data with the same learning-rate schedule, compared over their first 1,000 steps.</p>
+  <p>Mamba variants trained on the same data with the same learning-rate schedule, compared over their first 1,000 steps.
+  Preliminary: one seed, and the no-selection variant has 7.5% fewer parameters.</p>
   <div class="fig"><div class="fig-head"><div class="legend" id="lg-abl"></div></div><div class="chart" id="c-abl"></div></div>
 </section>
 
@@ -220,7 +224,8 @@ pre { background: var(--surface); border: 1px solid var(--rule); border-radius: 
   <div class="eyebrow">Synthetic tasks</div>
   <h2>Exact recall and selective copying</h2>
   <p>Small two-layer-sized models, 3,000 training steps each. Associative recall asks the model to retrieve the values of
-  N stored keys. Selective copying asks it to reproduce 8 tokens scattered among noise.</p>
+  N stored keys. Selective copying asks it to reproduce 8 tokens scattered among noise. These charts measure learning
+  speed under a fixed budget, not capability: pure Mamba reached 52.9% on 4-pair recall when trained for 9,000 steps.</p>
   <div class="two">
     <div class="fig"><div class="fig-head"><div class="legend" id="lg-mqar"></div></div><div class="chart" id="c-mqar"></div></div>
     <div class="fig"><div class="fig-head"><div class="legend"><span>Selective copying accuracy</span></div></div><div class="bars" id="b-sel"></div></div>
@@ -386,10 +391,12 @@ const tiles = [];
 const ms = D.models;
 const tested = Object.entries(ms).filter(([, m]) => m.test_bpc);
 if (tested.length) { const [n, m] = tested.reduce((a, b) => a[1].test_bpc < b[1].test_bpc ? a : b);
-  tiles.push([m.test_bpc.toFixed(3) + " bpc", `best enwik8 test score (${NAMES[n]}); lower is better`]); }
+  tiles.push([m.test_bpc.toFixed(3) + " bpc", `lowest enwik8 test bits per byte (${NAMES[n]}); one seed, preliminary`]); }
 if (D.bench_models) {
-  const fit = v => Math.max(0, ...D.bench_models.filter(r => r.variant === v && !r.fwd.oom).map(r => r.L));
-  tiles.push([fmtLen(fit("mamba")) + " vs " + fmtLen(fit("transformer")), "longest sequence one forward pass fits in 4 GB: Mamba vs Transformer"]);
+  const at = (v, L) => D.bench_models.find(r => r.variant === v && r.L === L && !r.fwd.oom);
+  const L = Math.max(...D.bench_models.filter(r => r.variant === "mamba" && !r.fwd.oom).map(r => r.L));
+  const a = at("transformer_sdpa", L), b = at("mamba", L);
+  if (a && b) tiles.push([(a.fwd.ms / b.fwd.ms).toFixed(1) + "× faster", `Mamba vs. fused attention, one forward pass at ${fmtLen(L)} tokens (fused attention wins below ~32K)`]);
 }
 if (D.bench_decode) {
   const big = Math.max(...D.bench_decode.map(r => r.context));

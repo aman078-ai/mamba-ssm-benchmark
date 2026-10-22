@@ -1,0 +1,4 @@
+{'arch': 'mamba', 'd_model': 64, 'n_kv': 4, 'seq_len': 128, 'lr': 0.001, 'steps': 3000, 'final_loss': 3.728314161300659, 'acc': 0.03515625, 'train_s': 102.73082009993959}
+{'arch': 'mamba', 'd_model': 64, 'n_kv': 4, 'seq_len': 128, 'lr': 0.0003, 'steps': 3000, 'final_loss': 4.158000469207764, 'acc': 0.01318359375, 'train_s': 103.54761429992504}
+{'arch': 'mamba', 'd_model': 64, 'n_kv': 4, 'seq_len': 128, 'lr': 0.003, 'steps': 9000, 'final_loss': 1.1337978839874268, 'acc': 0.529052734375, 'train_s': 328.78689630003646}
+saved results/audit\mqar_budget.json

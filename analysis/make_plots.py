@@ -42,6 +42,19 @@ def save(fig, name):
 
 
 # ------------------------------------------------------------------------------------------
+def memory_cap_mb(env):
+    """PyTorch's per-process memory cap during the benchmark (falls back to the value in bench.log)."""
+    if env.get("memory_cap_gib"):
+        return env["memory_cap_gib"] * 1024
+    log = os.path.join(R, "logs", "bench.log")
+    if os.path.exists(log):
+        import re
+        m = re.search(r"capped at ([0-9.]+) GiB", open(log, encoding="utf-8", errors="replace").read())
+        if m:
+            return float(m.group(1)) * 1024
+    return env["vram_gib"] * 1024
+
+
 def series(runs, key, metric, field="ms", filt=None):
     """-> {name: (xs, ys, oom_x)} from bench records."""
     out = {}
@@ -126,8 +139,9 @@ def fig_models():
         ref_slope(ax, x0, y0, min(x1, x0 * ylim[1] / y0), 1, "∝ L")
         ax.set_ylim(ylim)
         direct_labels(ax, [l for l in labels if "*" not in l[2]])
-    axes[1].axhline(d["env"]["vram_gib"] * 1024, color=INK_2, lw=0.9, ls="--")
-    axes[1].annotate(f"GPU memory ({d['env']['vram_gib']:.0f} GB)", (axes[1].get_xlim()[0], d["env"]["vram_gib"] * 1024),
+    cap = memory_cap_mb(d["env"])
+    axes[1].axhline(cap, color=INK_2, lw=0.9, ls="--")
+    axes[1].annotate(f"PyTorch memory cap ({cap / 1024:.2f} GiB)", (axes[1].get_xlim()[0], cap),
                      xytext=(4, 3), textcoords="offset points", fontsize=7.5, color=INK_2)
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=6, bbox_to_anchor=(0.5, -0.06))
@@ -405,17 +419,22 @@ def fig_hero():
             (m, "L", "fwd", "ms", "Forward pass time", "ms", "sequence length"),
             (m, "L", "fwd", "peak_mb", "Forward pass memory", "MB", "sequence length"),
             (dec, "context", None, "ms_graph", "GPU time per generated token", "ms / token", "tokens in context")]):
-        data = series(src["runs"], key, metric, field, filt=ARCHS)
-        labels = plot_lines(ax, data, ARCH, ARCHS)
+        order = ["transformer", "transformer_sdpa", "mamba", "mamba_torchscan"]
+        data = series(src["runs"], key, metric, field, filt=order)
+        labels = plot_lines(ax, data, ARCH, order)
         log_len_axis(ax)
         ax.set_yscale("log")
         ax.set_title(title, loc="left")
         ax.set_xlabel(xl)
         ax.set_ylabel(ylab)
-        direct_labels(ax, labels)
+        direct_labels(ax, [l for l in labels if "*" not in l[2]])
+    cap = memory_cap_mb(m["env"])
+    axes[1].axhline(cap, color=INK_2, lw=0.9, ls="--")
+    axes[1].annotate(f"memory cap {cap / 1024:.2f} GiB", (axes[1].get_xlim()[0], cap), xytext=(4, 3),
+                     textcoords="offset points", fontsize=7.5, color=INK_2)
     handles, labels_ = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels_, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.07))
-    fig.suptitle("Transformer vs. Mamba vs. RetNet vs. hybrid, all written from scratch (RTX 3050 Laptop, 4 GB)",
+    fig.legend(handles, labels_, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.08))
+    fig.suptitle("Compare like with like: fused attention vs. fused scan, or naive attention vs. naive scan (batch 1, bf16)",
                  x=0.01, ha="left", fontsize=12, color=INK, fontweight="bold")
     fig.tight_layout()
     save(fig, "hero.png")

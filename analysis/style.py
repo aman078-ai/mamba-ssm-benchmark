@@ -15,13 +15,13 @@ REF = "#a3a29c"   # reference slope lines
 # Categorical slots in fixed order (validated palette: blue, orange, aqua, yellow, magenta, green).
 SLOTS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300"]
 ARCH = {
-    "transformer": dict(color=SLOTS[0], marker="o", label="Transformer"),
-    "mamba": dict(color=SLOTS[1], marker="s", label="Mamba"),
+    "transformer": dict(color=SLOTS[0], marker="o", label="Transformer (naive attention)"),
+    "mamba": dict(color=SLOTS[1], marker="s", label="Mamba (fused Triton scan)"),
     "retnet": dict(color=SLOTS[2], marker="^", label="RetNet (linear attn.)"),
     "hybrid": dict(color=SLOTS[3], marker="D", label="Hybrid (Mamba + 1 attn.)"),
     # variants keep their parent's color and switch to a dashed line
-    "transformer_sdpa": dict(color=SLOTS[0], marker="o", label="Transformer (PyTorch fused attn.)", ls="--", mfc=SURFACE),
-    "mamba_torchscan": dict(color=SLOTS[1], marker="s", label="Mamba (pure-PyTorch scan)", ls="--", mfc=SURFACE),
+    "transformer_sdpa": dict(color=SLOTS[0], marker="o", label="Transformer (fused attention, PyTorch SDPA)", ls="--", mfc=SURFACE),
+    "mamba_torchscan": dict(color=SLOTS[1], marker="s", label="Mamba (naive PyTorch scan)", ls="--", mfc=SURFACE),
     "mamba_lti": dict(color=SLOTS[1], marker="s", label="Mamba w/o selection (LTI)", ls="--", mfc=SURFACE),
 }
 SCAN = {

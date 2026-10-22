@@ -4,6 +4,11 @@
 written from first principles in PyTorch, plus a hand-written Triton kernel for the selective scan. Benchmarked for
 speed, memory and quality on one 4 GB laptop GPU.**
 
+> **Status (October 2026): preliminary results, research upgrade in progress.** Every quality number below comes from a
+> single training seed with an untuned learning rate, and the models had not converged. An audit of this repository
+> ([`docs/AUDIT.md`](docs/AUDIT.md)) found several earlier claims overstated; they are corrected or withdrawn below, and
+> the open items are tracked there. Treat differences between models as hypotheses until the multi-seed runs land.
+
 No `nn.MultiheadAttention`, no FlashAttention, no `mamba_ssm`. Every mechanism (attention with RoPE and a KV cache, ZOH
 discretization, the selective recurrence, four parallel-scan algorithms, the scan's backward pass, a fused GPU kernel)
 is implemented here and checked against an independent reference in the test suite.
@@ -33,41 +38,61 @@ what the selection mechanism writes into the state. Open it in a browser, or hos
 
 ## 1. Key findings
 
-All numbers come from one RTX 3050 Laptop GPU (4 GB). Every model has about 4.7M non-embedding parameters and was
-trained on the same 32.8M bytes of enwik8.
+Hardware: one RTX 3050 Laptop GPU. It has 4 GB, but other applications held part of it during the benchmarks, so
+PyTorch was capped at **2.97 GiB**; every "out of memory" point below is relative to that cap. "bpc" is bits per byte,
+the standard enwik8 metric. Every model has about 4.7M non-embedding parameters and saw the same 32.8M training bytes
+in the same order.
 
-| | Transformer | Mamba | RetNet | **Hybrid** |
+**Quality (single seed, untuned, not converged: preliminary)**
+
+| | Transformer | Mamba | RetNet | Hybrid |
 |---|---|---|---|---|
-| enwik8 test bpc @ 512 (training length) | 1.651 | 1.673 | 1.802 | **1.608** |
-| test bpc @ 4K context (8× training length) | 3.905 | 1.631 | 1.765 | **1.554** |
-| longest sequence for one forward pass (4 GB; 128K was the largest tested) | 4K | **≥128K** | **≥128K** | 4K |
-| GPU time per generated token @ 256K context | 11.46 ms | 0.94 ms | **0.87 ms** | 2.64 ms |
-| cache / state size @ 256K context | 1536 MB | **0.38 MB** | **0.38 MB** | 256 MB |
-| training throughput (batch 16 × 512) | 64.9k tok/s | 42.8k tok/s | **71.2k tok/s** | 46.0k tok/s |
+| enwik8 test bpc, 512-byte context (= training length) | 1.651 | 1.673 | 1.802 | 1.608 |
+| enwik8 test bpc, 4K context (8× training length) | 3.905 | 1.631 | 1.765 | 1.554 |
 
-1. **Quality is a draw at the training length, and the hybrid wins.** At 512 bytes the Transformer (1.651 bpc) and
-   Mamba (1.673) are within the noise one would expect from a single seed. The Jamba-style hybrid (9 Mamba layers + 1
-   attention layer) is clearly best at **1.608**. Mamba learned fastest early on: 1.998 vs. 2.258 bpc after 1,000 steps.
-2. **The recurrent models generalize to longer contexts; the Transformer collapses.** Evaluated beyond its 512-byte
-   training length, the RoPE Transformer degrades from 1.62 to 3.91 bpc at 4K. Mamba keeps *improving* with more
-   context (1.657 → 1.629 at 8K) because its recurrent state has no notion of a maximum length. The hybrid inherits this:
-   it improves to 1.541 at 2K and is still at 1.554 at 4K, despite containing an attention layer.
-3. **The quadratic wall is real, and it arrives early.** Hand-written attention runs out of the 4 GB at 8K tokens
-   (forward) and 4K (training). Mamba runs a forward pass at **128K** tokens. Mamba is faster than this Transformer from
-   2K tokens on, and even PyTorch's fused attention kernel is 3.2× slower than Mamba at 128K.
-4. **Generation cost stays constant.** Per generated token, Mamba's GPU time is flat at 0.93 ms (RetNet: 0.85 ms) from
-   128 to 256K tokens of context, and its state is 0.38 MB. The Transformer's cost grows 14× over the same range, to
-   11.5 ms, with a 1.5 GB KV cache. The hybrid sits in between: one attention layer means 1/6 of the cache.
-5. **The fused kernel is what makes Mamba practical.** In the forward pass, the Triton scan is 8× faster than the
-   best pure-PyTorch scan at 4K tokens and 18.6× faster at 64K, and uses 41× less memory. Training the full Mamba model
-   went from 3.8k to 42.8k tokens/s (11×).
-6. **Selection matters, and discretization doesn't.** Freezing Δ, B, C (an LTI SSM) costs +0.047 bpc at equal steps.
-   Exact ZOH, Euler and bilinear discretization are indistinguishable (1.998 / 1.998 / 1.995).
-7. **What selection learned.** Δ spikes at word starts (1.76× the layer mean) and newlines (up to 2.6×), and drops
-   inside words (0.75×). The model writes new information at boundaries and carries the state through predictable bytes.
-8. **Exact recall is attention's strength.** On associative recall and selective copying, models with at least one
-   attention layer learn within 3,000 steps; pure Mamba does not yet. The hybrid is best: 99.0% recall with 4 pairs
-   and 100.0% selective copying, against 7.8% and 12.8% for pure Mamba. This matches the Zoology / Jamba findings.
+**Efficiency: compare like with like.** "Naive" = written in plain PyTorch, materializing intermediates; "fused" = a
+kernel that keeps intermediates on chip. Mamba's fused kernel is this project's Triton kernel; attention's is
+PyTorch's `scaled_dot_product_attention`.
+
+| | attention, naive | attention, fused | Mamba scan, naive | Mamba scan, fused |
+|---|---|---|---|---|
+| forward pass, 4K tokens (batch 1) | 104 ms | **19 ms** | 235 ms | 45 ms |
+| forward pass, 128K tokens (batch 1) | out of memory from 8K | 5,763 ms | not run above 16K | **1,800 ms** |
+| training throughput, 16 × 512 (fwd + bwd only) | 64.9k tok/s | **105.8k tok/s** | 3.8k tok/s | 42.8k tok/s |
+| GPU time per generated token, 256K context | 11.46 ms | not measured | not measured | **0.94 ms** |
+| cache / state memory, 256K context | 1,536 MB | 1,536 MB | 0.38 MB | 0.38 MB |
+
+1. **Quality: no ranking between Transformer and Mamba yet.** The hybrid (9 Mamba layers + 1 attention layer) has the
+   lowest test bpc (1.608), the Transformer 1.651 and Mamba 1.673. With one seed and untuned learning rates, the
+   0.022 bpc Transformer–Mamba gap is not evidence of either being better. *Status: preliminary; seed variance and
+   per-architecture tuning are scheduled (docs/AUDIT.md, stages 3–5).*
+2. **Beyond the training length, the RoPE Transformer collapses and the recurrent models keep improving.** The
+   Transformer goes from 1.62 to 3.91 bpc at 4K. That is the known behavior of rotary embeddings used without any
+   length-extension method, and no NoPE, ALiBi or interpolation baseline was run. Mamba improves with more context
+   (1.657 → 1.629 at 8K, 16× its training length). Published work disagrees on when Mamba extrapolates (DeciMamba,
+   Stuffed Mamba, Mamba Modulation; §10); explaining this observation is the project's research question.
+3. **Efficiency depends as much on the kernel as on the architecture.** With a fused kernel on both sides, attention
+   is faster up to roughly 32K tokens and trains 2.5× faster at 512 tokens; Mamba is 3.2× faster at 128K. Naive
+   attention, which materializes the T×T score matrix, runs out of the 2.97 GiB at 8K tokens; fused attention reaches
+   128K and, in a single forward pass, used *less* memory than Mamba at every length tested. Mamba's memory advantage is
+   the generation cache (finding 4), not the forward pass. The earlier claim that "the quadratic wall arrives at 8K"
+   compared naive attention with fused Mamba and is withdrawn.
+4. **Generation: the KV cache grows, the recurrent state does not.** Per generated token Mamba's GPU time is flat at
+   0.93 ms from 128 to 256K tokens of context, with a 0.38 MB state; the Transformer's grows 14× to 11.5 ms with a
+   1.5 GB cache. Decoding one token is bound by reading the cache, so a fused attention kernel likely changes this little,
+   but it was not measured.
+5. **The fused scan kernel matters.** It is 8× (4K tokens) to 18.6× (64K) faster than the best of this project's own
+   PyTorch scans and uses 41× less memory; full-model training went from 3.8k to 42.8k tokens/s. It was not compared with
+   the official `mamba_ssm` CUDA kernel, which does not install natively on Windows.
+6. **Ablations (preliminary).** Without selection, Mamba was 0.047 bpc worse after 1,000 steps, but that variant also has
+   7.5% fewer parameters and only one seed was run, so the effect of selection is not yet isolated. Exact ZOH, Euler and
+   bilinear discretization were indistinguishable (1.998 / 1.998 / 1.995).
+7. **What selection learned (descriptive).** Δ is larger at word starts (1.76× the layer mean in layer 8) and newlines
+   (up to 2.6×) and smaller inside words (0.75×).
+8. **Withdrawn: "exact recall is attention's strength."** The synthetic-task comparison measured learning speed under a
+   fixed 3,000-step budget, not capability. Re-check: pure Mamba on 4-pair recall reached 1.3–3.5% after 3,000
+   steps at other learning rates, but **52.9% after 9,000 steps**, against 7.8% after 3,000 steps
+   in the original run ([`results/audit/mqar_budget.json`](results/audit/mqar_budget.json)).
 
 ---
 
@@ -93,8 +118,10 @@ system, equivalent to one long convolution. It cannot decide to ignore a token b
 keeps the state and skips the token. The price is that the convolution trick no longer works. The model needs a
 *scan*, which this project implements four ways plus a fused kernel.
 
-**The open question this project measures:** does the efficient architecture cost accuracy? Where is the speed
-crossover on real hardware? And what can a fixed-size state *not* do?
+**Research question (in progress).** Most of the comparisons above reproduce published results. The open question this
+project now targets: in small selective SSMs trained on byte-level text, how do state size and training length decide
+whether the model generalizes beyond its training context, and does the learned step size Δ predict where it fails?
+See [`docs/AUDIT.md`](docs/AUDIT.md) for the plan.
 
 ---
 
@@ -229,7 +256,9 @@ write `(L × 512 × 16)` float32 states to DRAM. The fused kernel doesn't, which
 
 ### 5.2 Speed and memory vs. sequence length
 
-Batch 1, bf16 autocast, ~4.7M-parameter models; × marks the length that ran out of memory.
+Batch 1, bf16 autocast, ~4.7M-parameter models; × marks the length that ran out of memory (PyTorch capped at 2.97 GiB).
+Compare the naive pair (Transformer vs. Mamba with the pure-PyTorch scan) or the fused pair (PyTorch fused attention
+vs. Mamba with the Triton scan); mixing the two compares kernels, not architectures.
 
 ![Inference and training time and memory vs sequence length](plots/speed_memory_vs_length.png)
 
@@ -255,8 +284,9 @@ Batch 1, bf16 autocast, ~4.7M-parameter models; × marks the length that ran out
 | RetNet | 72.1 | 72.3 | 220.9 | OOM | OOM | 16K |
 | Hybrid | 60.0 | 185.5 | OOM | OOM | OOM | 4K |
 
-- crossover (fwd): Mamba faster than Transformer from L = 2K
-- crossover (train): Mamba faster than Transformer from L = 4K
+- Naive pair: Mamba's pure-PyTorch scan is slower than naive attention at every length where both run.
+- Fused pair: fused attention is faster up to ~32K tokens (forward); Mamba's Triton scan is faster at 64K (849 vs.
+  1,519 ms) and 128K (1,800 vs. 5,763 ms). For training, fused attention is faster at every length where Mamba fits.
 
 ### 5.3 Generation: KV cache vs. recurrent state
 
@@ -278,8 +308,9 @@ GPU time per generated token (CUDA graph replay) · cache/state size
 ### 5.4 Language modeling quality on enwik8
 
 AdamW (β = 0.9, 0.95; weight decay 0.1), learning rate 1.5e-3 with 200 warmup steps and cosine decay to 1e-4, batch
-16 × 512 bytes, 4,000 steps (32.8M bytes), bf16 autocast, gradient clipping at 1.0, seed 0. The test set is the full
-5 MB held-out split. Longer-context columns use the first 2 MB of it.
+16 × 512 bytes, 4,000 steps (32.8M bytes), bf16 autocast, gradient clipping at 1.0, **seed 0 only**. The learning rate
+was not tuned for any architecture. "bpc" is bits per byte (the standard enwik8 metric; multi-byte UTF-8 characters
+count as several bytes). The test set is the full 5 MB held-out split; longer-context columns use its first 2 MB.
 
 ![Validation curves, length extrapolation and per-position loss](plots/enwik8_quality.png)
 
@@ -299,7 +330,8 @@ produce wiki-markup-shaped English at this scale.
 
 ### 5.5 Ablations: selection and discretization
 
-Same data, same 4,000-step learning-rate schedule, compared over the first 1,000 steps:
+Same data, same 4,000-step learning-rate schedule, compared over the first 1,000 steps. **Preliminary:** one seed,
+and the no-selection variant has 7.5% fewer parameters (4.46M vs. 4.82M), so its gap mixes two effects.
 
 ![Mamba ablations](plots/mamba_ablations.png)
 
@@ -332,11 +364,10 @@ Two-layer-sized models (d_model = 64, roughly 100–130K parameters), 3,000 step
 | RetNet | 99K | **71.7%** | 32.1% | 17.2% | 12.5% | 10.5% | 8.0% |
 | Hybrid | 115K | **100.0%** | 18.4% | 14.3% | 12.5% | 11.7% | 7.0% |
 
-At this training budget, attention is the component that learns exact retrieval quickly. Pure Mamba and the LTI
-ablation are both near chance on selective copying after 3,000 steps; the Mamba paper trains this task for 400K. So
-this result is about learning speed at small scale, not a proof of what Mamba can never do. Adding one attention layer
-to a Mamba stack (the hybrid) gives the best of both: perfect selective copying, 99% recall at 4 pairs, and the best
-enwik8 score.
+**These tables measure learning speed under a fixed 3,000-step budget, not capability.** A re-check of pure Mamba on
+4-pair recall reached 52.9% after 9,000 steps (7.8% after 3,000), so the earlier conclusion that
+"exact recall is attention's strength" is withdrawn. A fair comparison needs per-architecture tuning and training to a
+fixed accuracy or to convergence.
 
 ### 5.7 What the selection mechanism learned
 
@@ -386,13 +417,15 @@ LTI ablation, by construction, cannot tell them apart:
 ## 7. Limitations
 
 - **Small scale.** The models have about 4.7M parameters and see 32.8M training bytes (about a third of an enwik8
-  epoch). They are far from converged, and published enwik8 results use models 10–100× larger. The comparison is fair
-  *at this budget*. The Mamba paper reports that the ranking shifts in Mamba's favor at 100M+ parameters.
+  epoch). They are far from converged, and published enwik8 results use models 10–100× larger, so rankings may change
+  with budget and scale.
 - **No per-architecture tuning.** Every model uses the same optimizer, learning rate (1.5e-3), schedule and batch. The
   Mamba paper tunes learning rates per architecture, so a tuned Mamba would likely do better.
 - **One seed per quality number.** Training runs are single-seed, so differences of a few hundredths of a bpc are within
   the noise one would expect from seed variation. Speed benchmarks report the median of repeated runs, with the
   interquartile range stored in the JSON.
+- **Shared GPU.** Benchmarks ran while other applications (a game launcher, a voice app, a chat app) held GPU memory,
+  so PyTorch was capped at 2.97 GiB and timings may include interference. A clean re-run is scheduled.
 - **Kernel quality.** The Triton kernel walks the sequence step by step inside each program. Mamba's production CUDA
   kernel also fuses the input projections and uses a chunked parallel scan in shared memory. At the training length
   (512) this project's Mamba is therefore still slower to train than the Transformer, even though it scales better.
@@ -466,3 +499,12 @@ reproduce.py        one command for everything
 - Blelloch (1990). *Prefix Sums and Their Applications*; Hillis & Steele (1986). *Data Parallel Algorithms.*
 - Lieber et al. (2024). *Jamba: A Hybrid Transformer-Mamba Language Model.*
 - Mahoney. *Large Text Compression Benchmark* (enwik8).
+- Dao & Gu (2024). *Transformers are SSMs* (Mamba-2, state space duality).
+- Waleffe et al. (2024). *An Empirical Study of Mamba-based Language Models* (arXiv 2406.07887).
+- Jelassi et al. (2024). *Repeat After Me: Transformers are Better than State Space Models at Copying.*
+- Wang et al. (2024). *MambaByte: Token-free Selective State Space Model.*
+- Ben-Kish et al. (2025). *DeciMamba: Exploring the Length Extrapolation Potential of Mamba.*
+- Chen et al. (2024). *Stuffed Mamba: State Collapse and State Capacity of RNN-Based Long-Context Modeling* (arXiv 2410.07145).
+- *Mamba Modulation: On the Length Generalization of Mamba Models* (2025, arXiv 2509.19633).
+- *Characterizing State Space Model and Hybrid Language Model Performance with Long Context* (2025, arXiv 2507.12442).
+- Martin & Cundy (2018). *Parallelizing Linear Recurrent Neural Nets Over Sequence Length.*
