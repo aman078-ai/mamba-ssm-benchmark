@@ -1,0 +1,36 @@
+[stage5a_seeds] 32 runs -> results/research/stage5a_seeds
+  [1/32] mamba_n4_L256_seed1  (done, skipping)
+  [2/32] mamba_n4_L256_seed2  (done, skipping)
+  [3/32] mamba_n16_L256_seed1  (done, skipping)
+  [4/32] mamba_n16_L256_seed2  (done, skipping)
+  [5/32] mamba_n64_L256_seed1
+  [6/32] mamba_n64_L256_seed2
+  [7/32] mamba_lti_n16_L256_seed1
+  [8/32] mamba_lti_n16_L256_seed2
+  [9/32] transformer_rope_L256_seed1
+  [10/32] transformer_rope_L256_seed2
+  [11/32] transformer_none_L256_seed1
+  [12/32] transformer_none_L256_seed2
+  [13/32] transformer_alibi_L256_seed1
+  [14/32] transformer_alibi_L256_seed2
+  [15/32] mamba_n4_L1024_seed1
+  [16/32] mamba_n4_L1024_seed2
+  [17/32] mamba_n16_L1024_seed1
+  [18/32] mamba_n16_L1024_seed2
+  [19/32] mamba_n64_L1024_seed1
+  [20/32] mamba_n64_L1024_seed2
+      -> failed (exit 1); see results/research/stage5a_seeds\mamba_n64_L1024_seed2
+  [21/32] mamba_lti_n16_L1024_seed1
+      -> failed (exit 1); see results/research/stage5a_seeds\mamba_lti_n16_L1024_seed1
+  [22/32] mamba_lti_n16_L1024_seed2
+  [23/32] transformer_rope_L1024_seed1
+  [24/32] transformer_rope_L1024_seed2
+  [25/32] transformer_none_L1024_seed1
+  [26/32] transformer_none_L1024_seed2
+  [27/32] transformer_alibi_L1024_seed1
+  [28/32] transformer_alibi_L1024_seed2
+  [29/32] mamba_scalar_n16_L256_seed1
+  [30/32] mamba_scalar_n16_L256_seed2
+  [31/32] mamba_scalar_n64_L256_seed1
+  [32/32] mamba_scalar_n64_L256_seed2
+STAGE5A_DONE

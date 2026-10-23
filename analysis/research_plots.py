@@ -25,11 +25,13 @@ def family(cfg):
         return f"Transformer ({m.get('pos_encoding', 'rope')})"
     if not m.get("selective", True):
         return f"Mamba LTI (N={m['d_state']})"
+    if m.get("a_mode", "s4d") == "scalar":
+        return f"Mamba scalar decay (N={m['d_state']})"
     return f"Mamba (N={m['d_state']})"
 
 
 COLORS = {"Mamba (N=4)": SLOTS[3], "Mamba (N=16)": SLOTS[1], "Mamba (N=64)": SLOTS[4],
-          "Mamba LTI (N=16)": SLOTS[5], "Transformer (rope)": SLOTS[0], "Transformer (none)": SLOTS[2],
+          "Mamba LTI (N=16)": SLOTS[5], "Mamba scalar decay (N=16)": "#b5532a", "Mamba scalar decay (N=64)": "#7a2e0e", "Transformer (rope)": SLOTS[0], "Transformer (none)": SLOTS[2],
           "Transformer (alibi)": "#4a3aa7"}
 
 

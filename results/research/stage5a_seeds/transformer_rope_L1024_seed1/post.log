@@ -1,0 +1,7 @@
+  L=  1024  bpc=1.9826516503041656
+  L=  2048  bpc=2.7946088985506075
+  L=  4096  bpc=4.037880802533651
+  L=  8192  bpc=4.645010781978966
+  L= 16384  bpc=4.9194929331050155
+  context effect (full - short context, bits/byte): {'1-2x': 1.6048, '2-4x': 3.1801, '4-8x': 3.2357, '8-16x': 3.2123}
+saved results/research/stage5a_seeds\transformer_rope_L1024_seed1/length_generalization.json

@@ -1,0 +1,7 @@
+  L=  1024  bpc=1.8475717397451477
+  L=  2048  bpc=1.8407946026827988
+  L=  4096  bpc=1.8375591607374218
+  L=  8192  bpc=1.8359265745429847
+  L= 16384  bpc=1.8351861553983677
+  context effect (full - short context, bits/byte): {'1-2x': -0.0002, '2-4x': -0.0005, '4-8x': -0.0003, '8-16x': -0.0004}
+saved results/research/stage5a_seeds\mamba_n64_L1024_seed1/length_generalization.json

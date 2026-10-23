@@ -1,0 +1,53 @@
+[device] NVIDIA GeForce RTX 3050 Laptop GPU: 4.00 GiB total, PyTorch capped at 2.97 GiB
+[mamba_scalar_n16_L256_seed2] layers=MMMMMMMM non-embedding params=902,272 device=cuda
+[mamba_scalar_n16_L256_seed2] step     0  val_bpc 7.9089  (0.0 min)
+[mamba_scalar_n16_L256_seed2] step     0  train_bpc 7.899  49.0k tok/s
+[mamba_scalar_n16_L256_seed2] step   100  train_bpc 2.789  112.0k tok/s
+[mamba_scalar_n16_L256_seed2] step   200  train_bpc 2.634  112.6k tok/s
+[mamba_scalar_n16_L256_seed2] step   300  train_bpc 2.489  112.7k tok/s
+[mamba_scalar_n16_L256_seed2] step   400  train_bpc 2.306  112.6k tok/s
+[mamba_scalar_n16_L256_seed2] step   500  val_bpc 2.2964  (0.6 min)
+[mamba_scalar_n16_L256_seed2] step   500  train_bpc 2.372  112.8k tok/s
+[mamba_scalar_n16_L256_seed2] step   600  train_bpc 2.221  112.8k tok/s
+[mamba_scalar_n16_L256_seed2] step   700  train_bpc 2.125  112.9k tok/s
+[mamba_scalar_n16_L256_seed2] step   800  train_bpc 2.153  112.9k tok/s
+[mamba_scalar_n16_L256_seed2] step   900  train_bpc 2.185  112.9k tok/s
+[mamba_scalar_n16_L256_seed2] step  1000  val_bpc 2.1494  (1.2 min)
+[mamba_scalar_n16_L256_seed2] step  1000  train_bpc 2.146  112.9k tok/s
+[mamba_scalar_n16_L256_seed2] step  1100  train_bpc 2.048  112.9k tok/s
+[mamba_scalar_n16_L256_seed2] step  1200  train_bpc 1.982  113.0k tok/s
+[mamba_scalar_n16_L256_seed2] step  1300  train_bpc 1.924  113.0k tok/s
+[mamba_scalar_n16_L256_seed2] step  1400  train_bpc 1.955  112.9k tok/s
+[mamba_scalar_n16_L256_seed2] step  1500  val_bpc 2.0404  (1.8 min)
+[mamba_scalar_n16_L256_seed2] step  1500  train_bpc 1.943  112.9k tok/s
+[mamba_scalar_n16_L256_seed2] step  1600  train_bpc 1.968  112.8k tok/s
+[mamba_scalar_n16_L256_seed2] step  1700  train_bpc 1.880  112.8k tok/s
+[mamba_scalar_n16_L256_seed2] step  1800  train_bpc 1.927  112.8k tok/s
+[mamba_scalar_n16_L256_seed2] step  1900  train_bpc 2.090  112.8k tok/s
+[mamba_scalar_n16_L256_seed2] step  2000  val_bpc 1.9434  (2.4 min)
+[mamba_scalar_n16_L256_seed2] step  2000  train_bpc 1.911  112.7k tok/s
+[mamba_scalar_n16_L256_seed2] step  2100  train_bpc 1.881  112.8k tok/s
+[mamba_scalar_n16_L256_seed2] step  2200  train_bpc 1.852  112.7k tok/s
+[mamba_scalar_n16_L256_seed2] step  2300  train_bpc 1.895  112.7k tok/s
+[mamba_scalar_n16_L256_seed2] step  2400  train_bpc 1.974  112.7k tok/s
+[mamba_scalar_n16_L256_seed2] step  2500  val_bpc 1.8675  (3.0 min)
+[mamba_scalar_n16_L256_seed2] step  2500  train_bpc 1.760  112.6k tok/s
+[mamba_scalar_n16_L256_seed2] step  2600  train_bpc 1.865  112.7k tok/s
+[mamba_scalar_n16_L256_seed2] step  2700  train_bpc 1.740  112.7k tok/s
+[mamba_scalar_n16_L256_seed2] step  2800  train_bpc 1.844  112.7k tok/s
+[mamba_scalar_n16_L256_seed2] step  2900  train_bpc 1.782  112.7k tok/s
+[mamba_scalar_n16_L256_seed2] step  3000  val_bpc 1.8357  (3.6 min)
+{
+  "run": "mamba_scalar_n16_L256_seed2",
+  "model": "mamba",
+  "layers": "MMMMMMMM",
+  "non_embedding_params": 902272,
+  "steps": 3000,
+  "tokens": 24576000,
+  "seq_len": 256,
+  "final_val_bpc": 1.8357405344480526,
+  "best_val_bpc": 1.8357405344480526,
+  "train_time_min": 3.6340213749945787,
+  "tokens_per_sec": 112712.60065183604,
+  "peak_train_mem_mb": 748.70849609375
+}

@@ -4,6 +4,18 @@ Each entry records what changed, which results it affects, and the numbers befor
 
 ## Unreleased
 
+### Stage 5: seeds, passkey boundary test, paper draft
+
+- 5a: seeds 1–2 for every pilot configuration; `analysis/aggregate_seeds.py` writes mean, sd and 95% t-intervals to
+  `results/research/aggregate.{json,md}`. The pilot conclusions hold (Mamba context effect within ±0.003 bits per byte;
+  ALiBi −0.041 ± 0.021).
+- 5b: passkey training (`data/passkey.py`, `--passkey_len`, `analysis/passkey_eval.py`). No Mamba variant learned
+  recall; ALiBi did. Passkey-trained Mamba collapses beyond the training length (+5 to +41 bits per byte at 8–16×,
+  vs. ≈0 after plain training) because it learns to predict the RECALL marker from absolute position.
+- 5c: `--passkey_random_end` randomizes the RECALL position; collapse roughly halves but remains.
+  `analysis/passkey_text_control.py` adds the marker-presence control and the RECALL-position probe.
+- Paper draft: `docs/paper/paper.md`. Figure: `plots/research/passkey.png`.
+
 ### Clean benchmark re-run (2026-10-23)
 
 Re-ran all three benchmark suites with the voice app (≈38% GPU use) closed. Before → after: fused attention 128K

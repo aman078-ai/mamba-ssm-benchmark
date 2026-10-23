@@ -1,0 +1,64 @@
+{
+  "name": "stage5c_passkey_random",
+  "description": "Stage 5b with the RECALL block at a random position in each training window (gap 128-494 bytes as in 5b), removing the positional cue that 5b models exploited. 6,000 steps x 16 x 512 bytes, seed 0.",
+  "out": "results/research/stage5c_passkey_random",
+  "common": {
+    "steps": 6000,
+    "seq_len": 512,
+    "batch_size": 16,
+    "warmup": 200,
+    "min_lr": 0.0001,
+    "eval_every": 1000,
+    "eval_bytes": 1000000,
+    "seed": 0,
+    "passkey_len": 8,
+    "passkey_random_end": true
+  },
+  "variants": {
+    "mamba_s4d_n16": {
+      "model": "mamba",
+      "lr": 0.016,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 16,
+        "a_mode": "s4d"
+      }
+    },
+    "mamba_scalar_n64": {
+      "model": "mamba",
+      "lr": 0.016,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 64,
+        "a_mode": "scalar"
+      }
+    }
+  },
+  "grid": {},
+  "post": [
+    [
+      "-m",
+      "analysis.passkey_eval",
+      "--run_dir",
+      "{run_dir}"
+    ],
+    [
+      "-m",
+      "analysis.length_generalization",
+      "--run_dir",
+      "{run_dir}",
+      "--max_len",
+      "16384",
+      "--position_windows",
+      "16"
+    ],
+    [
+      "-m",
+      "analysis.passkey_text_control",
+      "--run_dir",
+      "{run_dir}"
+    ]
+  ]
+}

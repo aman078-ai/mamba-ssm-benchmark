@@ -1,0 +1,9 @@
+[stage5b_passkey] 7 runs -> results/research/stage5b_passkey
+  [1/7] mamba_s4d_n16
+  [2/7] mamba_s4d_n64
+  [3/7] mamba_scalar_n16
+  [4/7] mamba_scalar_n64
+  [5/7] mamba_lti_n16
+  [6/7] transformer_alibi
+  [7/7] transformer_rope
+STAGE5B_DONE

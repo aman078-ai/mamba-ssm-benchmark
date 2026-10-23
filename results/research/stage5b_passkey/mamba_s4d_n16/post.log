@@ -1,0 +1,16 @@
+  gap    256: {'byte_acc': 0.04541015625, 'key_exact': 0.0, 'bits_per_key_byte': 4.704280747086127, 'n': 256}
+  gap    512: {'byte_acc': 0.03662109375, 'key_exact': 0.0, 'bits_per_key_byte': 4.706252356195618, 'n': 256}
+  gap   1024: {'byte_acc': 0.0, 'key_exact': 0.0, 'bits_per_key_byte': 17.19700858103366, 'n': 256}
+  gap   2048: {'byte_acc': 0.0, 'key_exact': 0.0, 'bits_per_key_byte': 25.271596102834337, 'n': 256}
+  gap   4096: {'byte_acc': 0.0, 'key_exact': 0.0, 'bits_per_key_byte': 27.214105403834285, 'n': 128}
+  gap   8192: {'byte_acc': 0.0, 'key_exact': 0.0, 'bits_per_key_byte': 27.65349493542583, 'n': 128}
+  gap  16384: {'byte_acc': 0.0, 'key_exact': 0.0, 'bits_per_key_byte': 27.28848996412426, 'n': 128}
+saved results/research/stage5b_passkey\mamba_s4d_n16/passkey.json
+  L=   512  bpc=1.7889672750957284
+  L=  1024  bpc=15.542026055844035
+  L=  2048  bpc=24.59282284250074
+  L=  4096  bpc=29.188489241943117
+  L=  8192  bpc=31.469098824643655
+  L= 16384  bpc=32.51507398521605
+  context effect (full - short context, bits/byte): {'1-2x': 27.7941, '2-4x': 31.9583, '4-8x': 32.0672, '8-16x': 32.062, '16-32x': 31.8845}
+saved results/research/stage5b_passkey\mamba_s4d_n16/length_generalization.json

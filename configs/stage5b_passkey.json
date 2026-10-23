@@ -1,0 +1,105 @@
+{
+  "name": "stage5b_passkey",
+  "description": "Boundary test: every 512-byte training window contains an 8-letter passkey stored 128-494 bytes before it must be recalled, forcing long-horizon memory. 6,000 steps x 16 x 512 bytes, seed 0. Evaluated on passkey recall at gaps 256 to 16K and on plain-text length generalization.",
+  "out": "results/research/stage5b_passkey",
+  "common": {
+    "steps": 6000,
+    "seq_len": 512,
+    "batch_size": 16,
+    "warmup": 200,
+    "min_lr": 0.0001,
+    "eval_every": 1000,
+    "eval_bytes": 1000000,
+    "seed": 0,
+    "passkey_len": 8
+  },
+  "variants": {
+    "mamba_s4d_n16": {
+      "model": "mamba",
+      "lr": 0.016,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 16,
+        "a_mode": "s4d"
+      }
+    },
+    "mamba_s4d_n64": {
+      "model": "mamba",
+      "lr": 0.016,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 64,
+        "a_mode": "s4d"
+      }
+    },
+    "mamba_scalar_n16": {
+      "model": "mamba",
+      "lr": 0.016,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 16,
+        "a_mode": "scalar"
+      }
+    },
+    "mamba_scalar_n64": {
+      "model": "mamba",
+      "lr": 0.016,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 64,
+        "a_mode": "scalar"
+      }
+    },
+    "mamba_lti_n16": {
+      "model": "mamba",
+      "lr": 0.016,
+      "override": {
+        "d_model": 128,
+        "layers": "MMMMMMMM",
+        "d_state": 16,
+        "selective": false
+      }
+    },
+    "transformer_alibi": {
+      "model": "transformer",
+      "lr": 0.008,
+      "override": {
+        "d_model": 128,
+        "layers": "AAAAA",
+        "pos_encoding": "alibi"
+      }
+    },
+    "transformer_rope": {
+      "model": "transformer",
+      "lr": 0.008,
+      "override": {
+        "d_model": 128,
+        "layers": "AAAAA",
+        "pos_encoding": "rope"
+      }
+    }
+  },
+  "grid": {},
+  "post": [
+    [
+      "-m",
+      "analysis.passkey_eval",
+      "--run_dir",
+      "{run_dir}"
+    ],
+    [
+      "-m",
+      "analysis.length_generalization",
+      "--run_dir",
+      "{run_dir}",
+      "--max_len",
+      "16384",
+      "--position_windows",
+      "16"
+    ]
+  ]
+}

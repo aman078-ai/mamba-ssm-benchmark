@@ -1,0 +1,51 @@
+{
+  "train_len": 512,
+  "recall_marker_prediction": {
+    "first_position_p_gt_half": 569,
+    "mean_p_before_L_minus_32": 0.028189904987812042,
+    "mean_p_after_L": 0.8911167979240417
+  },
+  "gap": 8192,
+  "n": 16,
+  "with_store_marker": {
+    "0-256": 1.9529316425323486,
+    "256-512": 1.884710431098938,
+    "512-1024": 3.3048746585845947,
+    "1024-2048": 10.836200714111328,
+    "2048-4096": 17.238527297973633,
+    "4096-8192": 19.828815460205078,
+    "8192-8273": 20.342792510986328
+  },
+  "plain_text": {
+    "0-256": 1.9466571807861328,
+    "256-512": 2.029533624649048,
+    "512-1024": 4.581689834594727,
+    "1024-2048": 11.685750961303711,
+    "2048-4096": 17.42679786682129,
+    "4096-8192": 19.849811553955078,
+    "8192-8273": 20.346662521362305
+  },
+  "environment": {
+    "timestamp": "2026-10-23T19:17:12+05:30",
+    "git_commit": "5d6b4b801588856a18d0b7a70072bc7c3a87d107",
+    "git_dirty": true,
+    "python": "3.11.0",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "cpu": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "torch": "2.7.1+cu126",
+    "cuda": "12.6",
+    "tf32_matmul": true,
+    "deterministic_algorithms": false,
+    "triton": "3.3.1",
+    "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "vram_gib": 3.99951171875,
+    "memory_cap_gib": 1.3671875,
+    "driver": "592.82",
+    "gpu_clocks_mhz": "1912 MHz, 5871 MHz",
+    "other_gpu_processes": [
+      "EpicGamesLauncher.exe",
+      "EOSOverlayRenderer-Win64-Shipping.exe",
+      "python.exe"
+    ]
+  }
+}

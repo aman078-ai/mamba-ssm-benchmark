@@ -1,0 +1,16 @@
+  gap    256: {'byte_acc': 1.0, 'key_exact': 1.0, 'bits_per_key_byte': 0.005635056986483849, 'n': 256}
+  gap    512: {'byte_acc': 0.9990234375, 'key_exact': 0.9921875, 'bits_per_key_byte': 0.014218520045865617, 'n': 256}
+  gap   1024: {'byte_acc': 0.5703125, 'key_exact': 0.13671875, 'bits_per_key_byte': 1.9514325778443034, 'n': 256}
+  gap   2048: None
+  gap   4096: None
+  gap   8192: None
+  gap  16384: None
+saved results/research/stage5b_passkey\transformer_alibi/passkey.json
+  L=   512  bpc=1.8236477018646047
+  L=  1024  bpc=4.108999823914348
+  L=  2048  bpc=5.848121359359055
+  L=  4096  bpc=6.748258637820149
+  L=  8192  bpc=7.196019563092438
+  L= 16384  bpc=7.426642602736273
+  context effect (full - short context, bits/byte): {'1-2x': 5.4075, '2-4x': 6.6723, '4-8x': 6.8708, '8-16x': 6.2651, '16-32x': 6.2254}
+saved results/research/stage5b_passkey\transformer_alibi/length_generalization.json

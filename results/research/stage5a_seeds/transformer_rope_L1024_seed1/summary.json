@@ -1,0 +1,14 @@
+{
+  "run": "transformer_rope_L1024_seed1",
+  "model": "transformer",
+  "layers": "AAAAA",
+  "non_embedding_params": 984448,
+  "steps": 3000,
+  "tokens": 24576000,
+  "seq_len": 1024,
+  "final_val_bpc": 1.9826516333878392,
+  "best_val_bpc": 1.9826516333878392,
+  "train_time_min": 8.367122721730265,
+  "tokens_per_sec": 48953.50691298304,
+  "peak_train_mem_mb": 1516.15966796875
+}

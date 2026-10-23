@@ -4,10 +4,11 @@
 written from first principles in PyTorch, plus a hand-written Triton kernel for the selective scan. Benchmarked for
 speed, memory and quality on one 4 GB laptop GPU.**
 
-> **Status (October 2026): preliminary results, research upgrade in progress.** Every quality number below comes from a
-> single training seed with an untuned learning rate, and the models had not converged. An audit of this repository
-> ([`docs/AUDIT.md`](docs/AUDIT.md)) found several earlier claims overstated; they are corrected or withdrawn below, and
-> the open items are tracked there. Treat differences between models as hypotheses until the multi-seed runs land.
+> **Status (October 2026).** The architecture comparison in section 1 comes from a single training seed with an
+> untuned learning rate, and the models had not converged; treat differences between those models as hypotheses. The
+> research study (end of section 2, [paper draft](docs/paper/paper.md)) uses tuned learning rates and 3 seeds. An audit
+> of this repository ([`docs/AUDIT.md`](docs/AUDIT.md)) found several earlier claims overstated; they are corrected or
+> withdrawn below.
 
 No `nn.MultiheadAttention`, no FlashAttention, no `mamba_ssm`. Every mechanism (attention with RoPE and a KV cache, ZOH
 discretization, the selective recurrence, four parallel-scan algorithms, the scan's backward pass, a fused GPU kernel)
@@ -123,10 +124,22 @@ system, equivalent to one long convolution. It cannot decide to ignore a token b
 keeps the state and skips the token. The price is that the convolution trick no longer works. The model needs a
 *scan*, which this project implements four ways plus a fused kernel.
 
-**Research question (in progress).** Most of the comparisons above reproduce published results. The open question this
-project now targets: in small selective SSMs trained on byte-level text, how do state size and training length decide
-whether the model generalizes beyond its training context, and does the learned step size Δ predict where it fails?
-See [`docs/AUDIT.md`](docs/AUDIT.md) for the plan.
+**Research study: length generalization of small selective SSMs.** Most of the comparisons above reproduce published
+results. The research part of the project ([paper draft](docs/paper/paper.md), [audit and plan](docs/AUDIT.md)) asks
+how ~1M-parameter byte-level Mamba models behave beyond their training length, with 3 seeds per configuration:
+
+- Every Mamba variant (state size 4–64, per-state or Mamba-2-style scalar decay, with or without selection) is
+  **stable up to 32× its training length but gains nothing from the extra context** (|effect| ≤ 0.003 bits per byte,
+  measured on the same bytes with full vs. training-length context). RoPE and NoPE Transformers collapse (+2.8 to
+  +3.1); only ALiBi improves (−0.04).
+- The reason: the memory horizons Mamba learns are short (median 1–100 bytes per state index), do not grow with
+  training length, and shrink as the state grows, so the state never fills.
+- A passkey task meant to force long memory exposed a different failure. Every Mamba variant (and ALiBi) learned to
+  predict *from position alone* where the passkey marker ended each training window, and beyond the training length
+  that learned clock fires on ordinary text: +5 to +41 bits per byte. Randomizing the marker's position halves the
+  effect but does not remove it. No Mamba variant learned the recall itself; ALiBi did (100% at gap 256).
+
+![Passkey experiments: collapse on plain text after passkey training, and recall by gap](plots/research/passkey.png)
 
 ---
 
@@ -217,7 +230,7 @@ models use d_model = 256 and are **parameter-matched to within about 2%**:
 
 ## 4. Verification
 
-`pytest` runs 157 tests (CI runs the CPU ones on every push):
+`pytest` runs 160 tests (CI runs the CPU ones on every push):
 
 | what is checked | how |
 |---|---|
@@ -234,6 +247,7 @@ models use d_model = 256 and are **parameter-matched to within about 2%**:
 | fused vs. manual attention | identical outputs |
 | state size | KV cache grows linearly with max length; Mamba / retention state is constant |
 | learning | each architecture overfits a small batch |
+| passkey insertion | STORE / RECALL blocks at the requested gap, the same key stored and recalled, the loss mask covers exactly the recalled bytes, random RECALL positions vary |
 
 ---
 

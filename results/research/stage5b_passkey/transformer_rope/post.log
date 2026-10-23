@@ -1,0 +1,16 @@
+  gap    256: {'byte_acc': 0.03515625, 'key_exact': 0.0, 'bits_per_key_byte': 4.701521027479057, 'n': 256}
+  gap    512: {'byte_acc': 0.037109375, 'key_exact': 0.0, 'bits_per_key_byte': 4.7054387062743865, 'n': 256}
+  gap   1024: {'byte_acc': 0.04150390625, 'key_exact': 0.0, 'bits_per_key_byte': 4.73725747448449, 'n': 256}
+  gap   2048: None
+  gap   4096: None
+  gap   8192: None
+  gap  16384: None
+saved results/research/stage5b_passkey\transformer_rope/passkey.json
+  L=   512  bpc=1.8711485146681903
+  L=  1024  bpc=3.5839146191651703
+  L=  2048  bpc=4.506857321536787
+  L=  4096  bpc=4.861317658716004
+  L=  8192  bpc=4.9200651334813745
+  L= 16384  bpc=4.8727186987743485
+  context effect (full - short context, bits/byte): {'1-2x': 3.2718, '2-4x': 3.2981, '4-8x': 2.9829, '8-16x': 2.8971, '16-32x': 2.8028}
+saved results/research/stage5b_passkey\transformer_rope/length_generalization.json

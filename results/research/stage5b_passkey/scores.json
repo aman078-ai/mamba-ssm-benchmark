@@ -1,0 +1,79 @@
+[
+  {
+    "run": "mamba_s4d_n16",
+    "family": "Mamba (N=16)",
+    "train_len": 512,
+    "seed": 0,
+    "params": 932992,
+    "near_bpc": 1.7889672750957284,
+    "effect_2_4x": 31.958251987364388,
+    "effect_8_16x": 32.0620249430338,
+    "effect_16_32x": 31.884513565893712
+  },
+  {
+    "run": "mamba_s4d_n64",
+    "family": "Mamba (N=64)",
+    "train_len": 512,
+    "seed": 0,
+    "params": 1227904,
+    "near_bpc": 1.8249469628970327,
+    "effect_2_4x": 30.022032951819753,
+    "effect_8_16x": 30.66471698362079,
+    "effect_16_32x": 31.008263679574206
+  },
+  {
+    "run": "mamba_lti_n16",
+    "family": "Mamba LTI (N=16)",
+    "train_len": 512,
+    "seed": 0,
+    "params": 834944,
+    "near_bpc": 2.5595552858596373,
+    "effect_2_4x": 18.899932032795675,
+    "effect_8_16x": 4.898609146771203,
+    "effect_16_32x": 4.733609571974871
+  },
+  {
+    "run": "mamba_scalar_n16",
+    "family": "Mamba scalar decay (N=16)",
+    "train_len": 512,
+    "seed": 0,
+    "params": 902272,
+    "near_bpc": 3.71944639389474,
+    "effect_2_4x": 19.241943439624837,
+    "effect_8_16x": 24.072269239632412,
+    "effect_16_32x": 21.949604586209322
+  },
+  {
+    "run": "mamba_scalar_n64",
+    "family": "Mamba scalar decay (N=64)",
+    "train_len": 512,
+    "seed": 0,
+    "params": 1098880,
+    "near_bpc": 2.264338579767212,
+    "effect_2_4x": 44.378906965823525,
+    "effect_8_16x": 41.44630351880013,
+    "effect_16_32x": 37.50407832764373
+  },
+  {
+    "run": "transformer_alibi",
+    "family": "Transformer (alibi)",
+    "train_len": 512,
+    "seed": 0,
+    "params": 984448,
+    "near_bpc": 1.8236477018646047,
+    "effect_2_4x": 6.672325989090524,
+    "effect_8_16x": 6.265078166131741,
+    "effect_16_32x": 6.225428167914598
+  },
+  {
+    "run": "transformer_rope",
+    "family": "Transformer (rope)",
+    "train_len": 512,
+    "seed": 0,
+    "params": 984448,
+    "near_bpc": 1.8711485146681903,
+    "effect_2_4x": 3.298130020207194,
+    "effect_8_16x": 2.897065027291508,
+    "effect_16_32x": 2.80279290920371
+  }
+]

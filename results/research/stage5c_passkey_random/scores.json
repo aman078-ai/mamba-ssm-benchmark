@@ -1,0 +1,24 @@
+[
+  {
+    "run": "mamba_s4d_n16",
+    "family": "Mamba (N=16)",
+    "train_len": 512,
+    "seed": 0,
+    "params": 932992,
+    "near_bpc": 1.8134770540287715,
+    "effect_2_4x": 6.241874825820946,
+    "effect_8_16x": 15.191693021756448,
+    "effect_16_32x": 16.19033444755379
+  },
+  {
+    "run": "mamba_scalar_n64",
+    "family": "Mamba scalar decay (N=64)",
+    "train_len": 512,
+    "seed": 0,
+    "params": 1098880,
+    "near_bpc": 1.8573969559132482,
+    "effect_2_4x": 9.785790906305827,
+    "effect_8_16x": 17.879337107607018,
+    "effect_16_32x": 18.62649673019757
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "run": "transformer_alibi",
+  "model": "transformer",
+  "layers": "AAAAA",
+  "non_embedding_params": 984448,
+  "steps": 6000,
+  "tokens": 49152000,
+  "seq_len": 512,
+  "final_val_bpc": 1.8236469297479212,
+  "best_val_bpc": 1.8236469297479212,
+  "train_time_min": 19.38509669324461,
+  "tokens_per_sec": 42259.26818747713,
+  "peak_train_mem_mb": 871.794921875
+}

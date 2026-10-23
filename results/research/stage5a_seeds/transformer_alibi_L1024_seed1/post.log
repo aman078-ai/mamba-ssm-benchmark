@@ -1,0 +1,7 @@
+  L=  1024  bpc=1.8668797639391537
+  L=  2048  bpc=1.8352097734092903
+  L=  4096  bpc=1.820027040673776
+  L=  8192  bpc=1.811428074474511
+  L= 16384  bpc=1.8079291410110736
+  context effect (full - short context, bits/byte): {'1-2x': -0.0068, '2-4x': -0.0084, '4-8x': -0.0124, '8-16x': -0.011}
+saved results/research/stage5a_seeds\transformer_alibi_L1024_seed1/length_generalization.json

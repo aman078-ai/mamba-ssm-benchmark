@@ -116,6 +116,39 @@ regime, and the follow-up rules out decay parameterization as the explanation: n
 horizons they learn are short and independent of training length" — confirmed with seeds (stage 5a), plus a test of
 whether collapse appears once long memory is forced (stage 5b).
 
+## Stage 5 results
+
+**5a, seeds.** Seeds 1–2 for every pilot configuration ([`results/research/aggregate.md`](../results/research/aggregate.md),
+`plots/research/final_context_effect.png`). The pilot holds: every Mamba configuration has a context effect within
+±0.003 bits per byte up to 32×; RoPE and NoPE collapse; ALiBi −0.041 ± 0.021 (95% CI). Two runs at L = 1024 died at step
+2,400 without a traceback and were re-run.
+
+**5b, passkey (fixed RECALL position).** An 8-letter key stored 128–494 bytes before a RECALL block that ends every
+512-byte training window; 6,000 steps, seed 0.
+
+| model | keys recalled at gap 256 / 512 / 1024 | context effect 8–16× on plain text | P(RECALL) > 0.5 from position |
+|---|---|---|---|
+| Mamba, N = 16 | 0 / 0 / 0% | +32.1 | 508 |
+| Mamba, N = 64 | 0 / 0 / 0% | +30.7 | 503 |
+| Mamba, scalar decay, N = 16 | 0 / 0 / 0% | +24.1 | 406 |
+| Mamba, scalar decay, N = 64 | 0 / 0 / 0% | +41.4 | 460 |
+| Mamba LTI, N = 16 | 0 / 0 / 0% | +4.9 | 485 |
+| Transformer, ALiBi | 100 / 99 / 14% | +6.3 | 485 |
+| Transformer, RoPE | 0 / 0 / 0% | +2.9 | 503 (mean 0.16 after 512) |
+
+The RECALL marker always sat at position 503. The models learned to predict it from position, and beyond the training
+length predict it on ordinary text (~30 bits per byte each time). State RMS grows 9–16× from 1K to 16K (≤ 1.5× after
+plain training). Control: adding the STORE marker every training window contained does not change the collapse
+(`analysis/passkey_text_control.py`).
+
+**5c, random RECALL position.** Same as 5b with the RECALL block placed at random. Mamba N = 16: +32.1 → +15.2 at 8–16×,
+onset 508 → 753; scalar decay N = 64: +41.4 → +17.9, onset 460 → 569. Recall still at chance. Every window still has
+exactly one RECALL, so the probability of meeting it still rises to 1 by the window's end.
+
+**Conclusion for RQ3.** Not answered: no Mamba variant learned the recall in this budget, so long memory was never
+forced. What the experiment does show is that a training signal tied to absolute position within the window makes
+Mamba build a non-forgetting counter, and that counter produces collapse beyond the training length.
+
 ## Stage checklist
 
 | Stage | Goal | Status |
@@ -125,8 +158,8 @@ whether collapse appears once long memory is forced (stage 5b).
 | 2 | Tests and tooling: deterministic kernel mode, GPU equivalence, long-sequence stability, optimizer-inclusive throughput | done |
 | 3 | Seed variance and per-architecture learning-rate tuning on the research models | done |
 | 4 | Pilot of H1–H3 (one seed) with baselines; go/no-go | done: go, reframed (see above) |
-| 5 | 5a: seeds 1–2 for every pilot configuration; 5b: forced-long-memory boundary test | 5a running |
-| 6 | Analysis, statistics, figures from CSV | pending |
-| 7 | Manuscript, release tag | pending |
+| 5 | 5a: seeds 1–2 for every pilot configuration; 5b: forced-long-memory boundary test; 5c: position control | done |
+| 6 | Analysis, statistics, figures from CSV | done (`analysis/aggregate_seeds.py`, `analysis/passkey_plots.py`, `results/csv/`) |
+| 7 | Manuscript, release tag | draft in `docs/paper/paper.md`; release tag not created |
 
 Before/after records for each stage are in [`CHANGELOG.md`](../CHANGELOG.md).

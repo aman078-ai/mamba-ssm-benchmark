@@ -1,0 +1,9 @@
+  L=   256  bpc=2.3135953859829788
+  L=   512  bpc=2.610639979695413
+  L=  1024  bpc=3.4971566852966265
+  L=  2048  bpc=4.216333863630076
+  L=  4096  bpc=4.662078385360794
+  L=  8192  bpc=4.941611142536569
+  L= 16384  bpc=5.081334071540318
+  context effect (full - short context, bits/byte): {'1-2x': 0.632, '2-4x': 2.1587, '4-8x': 2.5576, '8-16x': 2.68, '16-32x': 2.8826}
+saved results/research/stage5a_seeds\transformer_none_L256_seed1/length_generalization.json

@@ -1,0 +1,83 @@
+[device] NVIDIA GeForce RTX 3050 Laptop GPU: 4.00 GiB total, PyTorch capped at 1.37 GiB
+[mamba_scalar_n64] layers=MMMMMMMM non-embedding params=1,098,880 device=cuda
+[mamba_scalar_n64] step     0  val_bpc 7.9330  (0.0 min)
+[mamba_scalar_n64] step     0  train_bpc 7.923  9.7k tok/s
+[mamba_scalar_n64] step   100  train_bpc 3.146  11.4k tok/s
+[mamba_scalar_n64] step   200  train_bpc 2.545  11.5k tok/s
+[mamba_scalar_n64] step   300  train_bpc 2.590  11.5k tok/s
+[mamba_scalar_n64] step   400  train_bpc 2.607  11.5k tok/s
+[mamba_scalar_n64] step   500  train_bpc 2.637  11.5k tok/s
+[mamba_scalar_n64] step   600  train_bpc 2.475  11.5k tok/s
+[mamba_scalar_n64] step   700  train_bpc 2.378  11.5k tok/s
+[mamba_scalar_n64] step   800  train_bpc 2.347  11.5k tok/s
+[mamba_scalar_n64] step   900  train_bpc 2.380  11.7k tok/s
+[mamba_scalar_n64] step  1000  val_bpc 2.2310  (11.6 min)
+[mamba_scalar_n64] step  1000  train_bpc 2.443  11.8k tok/s
+[mamba_scalar_n64] step  1100  train_bpc 2.346  11.8k tok/s
+[mamba_scalar_n64] step  1200  train_bpc 2.162  11.8k tok/s
+[mamba_scalar_n64] step  1300  train_bpc 2.272  11.8k tok/s
+[mamba_scalar_n64] step  1400  train_bpc 2.106  11.8k tok/s
+[mamba_scalar_n64] step  1500  train_bpc 2.348  11.8k tok/s
+[mamba_scalar_n64] step  1600  train_bpc 2.185  11.8k tok/s
+[mamba_scalar_n64] step  1700  train_bpc 2.295  11.8k tok/s
+[mamba_scalar_n64] step  1800  train_bpc 2.185  11.8k tok/s
+[mamba_scalar_n64] step  1900  train_bpc 2.052  11.8k tok/s
+[mamba_scalar_n64] step  2000  val_bpc 2.1249  (23.1 min)
+[mamba_scalar_n64] step  2000  train_bpc 2.279  11.8k tok/s
+[mamba_scalar_n64] step  2100  train_bpc 2.284  11.8k tok/s
+[mamba_scalar_n64] step  2200  train_bpc 2.255  11.8k tok/s
+[mamba_scalar_n64] step  2300  train_bpc 2.099  11.8k tok/s
+[mamba_scalar_n64] step  2400  train_bpc 2.182  11.8k tok/s
+[mamba_scalar_n64] step  2500  train_bpc 2.248  11.8k tok/s
+[mamba_scalar_n64] step  2600  train_bpc 2.153  11.8k tok/s
+[mamba_scalar_n64] step  2700  train_bpc 2.152  11.8k tok/s
+[mamba_scalar_n64] step  2800  train_bpc 2.226  11.8k tok/s
+[mamba_scalar_n64] step  2900  train_bpc 2.211  11.8k tok/s
+[mamba_scalar_n64] step  3000  val_bpc 2.0455  (34.4 min)
+[mamba_scalar_n64] step  3000  train_bpc 2.020  11.9k tok/s
+[mamba_scalar_n64] step  3100  train_bpc 2.228  11.9k tok/s
+[mamba_scalar_n64] step  3200  train_bpc 2.328  11.9k tok/s
+[mamba_scalar_n64] step  3300  train_bpc 2.026  11.9k tok/s
+[mamba_scalar_n64] step  3400  train_bpc 1.979  11.9k tok/s
+[mamba_scalar_n64] step  3500  train_bpc 2.017  11.8k tok/s
+[mamba_scalar_n64] step  3600  train_bpc 2.169  11.8k tok/s
+[mamba_scalar_n64] step  3700  train_bpc 2.308  11.8k tok/s
+[mamba_scalar_n64] step  3800  train_bpc 1.965  11.8k tok/s
+[mamba_scalar_n64] step  3900  train_bpc 2.039  11.8k tok/s
+[mamba_scalar_n64] step  4000  val_bpc 1.9728  (45.8 min)
+[mamba_scalar_n64] step  4000  train_bpc 1.941  11.9k tok/s
+[mamba_scalar_n64] step  4100  train_bpc 1.854  11.9k tok/s
+[mamba_scalar_n64] step  4200  train_bpc 2.000  11.9k tok/s
+[mamba_scalar_n64] step  4300  train_bpc 2.050  11.9k tok/s
+[mamba_scalar_n64] step  4400  train_bpc 1.900  11.9k tok/s
+[mamba_scalar_n64] step  4500  train_bpc 2.114  11.9k tok/s
+[mamba_scalar_n64] step  4600  train_bpc 1.959  11.9k tok/s
+[mamba_scalar_n64] step  4700  train_bpc 1.914  11.9k tok/s
+[mamba_scalar_n64] step  4800  train_bpc 1.824  11.9k tok/s
+[mamba_scalar_n64] step  4900  train_bpc 2.010  11.9k tok/s
+[mamba_scalar_n64] step  5000  val_bpc 1.9009  (57.5 min)
+[mamba_scalar_n64] step  5000  train_bpc 1.973  11.9k tok/s
+[mamba_scalar_n64] step  5100  train_bpc 1.849  11.9k tok/s
+[mamba_scalar_n64] step  5200  train_bpc 1.914  11.9k tok/s
+[mamba_scalar_n64] step  5300  train_bpc 1.905  11.9k tok/s
+[mamba_scalar_n64] step  5400  train_bpc 1.844  11.8k tok/s
+[mamba_scalar_n64] step  5500  train_bpc 1.830  11.8k tok/s
+[mamba_scalar_n64] step  5600  train_bpc 1.945  11.8k tok/s
+[mamba_scalar_n64] step  5700  train_bpc 2.038  11.8k tok/s
+[mamba_scalar_n64] step  5800  train_bpc 1.939  11.8k tok/s
+[mamba_scalar_n64] step  5900  train_bpc 1.843  11.8k tok/s
+[mamba_scalar_n64] step  6000  val_bpc 1.8574  (69.3 min)
+{
+  "run": "mamba_scalar_n64",
+  "model": "mamba",
+  "layers": "MMMMMMMM",
+  "non_embedding_params": 1098880,
+  "steps": 6000,
+  "tokens": 49152000,
+  "seq_len": 512,
+  "final_val_bpc": 1.8573966804592126,
+  "best_val_bpc": 1.8573966804592126,
+  "train_time_min": 69.30825432835263,
+  "tokens_per_sec": 11819.659980454615,
+  "peak_train_mem_mb": 1175.52880859375
+}

@@ -1,0 +1,9 @@
+  L=   256  bpc=1.9277962782107911
+  L=   512  bpc=2.825588725995453
+  L=  1024  bpc=3.8412630353510533
+  L=  2048  bpc=4.369086948220324
+  L=  4096  bpc=4.6317775740889395
+  L=  8192  bpc=4.725463217240356
+  L= 16384  bpc=4.754029862597644
+  context effect (full - short context, bits/byte): {'1-2x': 1.8643, '2-4x': 2.9502, '4-8x': 2.917, '8-16x': 2.793, '16-32x': 2.8524}
+saved results/research/stage5a_seeds\transformer_rope_L256_seed2/length_generalization.json

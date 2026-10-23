@@ -1,0 +1,4 @@
+[stage5c_passkey_random] 2 runs -> results/research/stage5c_passkey_random
+  [1/2] mamba_s4d_n16
+  [2/2] mamba_scalar_n64
+STAGE5C_DONE
