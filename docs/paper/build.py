@@ -372,6 +372,7 @@ def to_tex(meta, blocks):
 \usepackage{booktabs}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage{microtype}
+\usepackage{xcolor}
 \usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
 \graphicspath{{figures/}}
 \title{""" + tex_escape(meta["title"]) + r"""}
