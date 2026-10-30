@@ -131,9 +131,11 @@ models behave beyond their training length. Main study: 6 Mamba variants and 3 T
 lengths, 3 seeds each (48 runs).
 
 - Every Mamba variant (state size 4–64, per-state or Mamba-2-style scalar decay, with or without selection) is
-  **stable up to 32× its training length but gains nothing from the extra context**: all seed means are within
-  0.004 bits per byte of zero, measured on the same bytes with full vs. about one training length of context. RoPE and
-  NoPE Transformers degrade by up to 3.4 bits per byte; only ALiBi improves (−0.041 ± 0.021).
+  **stable on 16,384-byte inputs (32× the training length at L = 256, 16× at L = 1024) but shows no measurable
+  benefit from the extra context**: all seed means are within 0.004 bits per byte of zero, measured on the same bytes
+  with full vs. about one training length of context. RoPE and NoPE Transformers degrade by up to 3.4 bits per byte;
+  only ALiBi shows a clear gain (−0.041 ± 0.021 at L = 256; at L = 1024 its −0.009 ± 0.004 is below the paper's
+  0.01 resolution).
 - The learned decay rates forget most information within tens of bytes (median horizon 2–38 bytes), and the horizon
   distribution does not change when the training length is quadrupled. A small fraction of modes is much slower, so
   horizons are consistent with, but do not prove, the absence of context use.
@@ -491,6 +493,26 @@ those files. New experiments are defined as JSON configs in [`configs/`](configs
 are in [`docs/BENCHMARK_PROTOCOL.md`](docs/BENCHMARK_PROTOCOL.md). enwik8 is downloaded from its official source
 (`mattmahoney.net/dc/enwik8.zip`) and split 90M/5M/5M; the loader fails loudly instead of substituting data.
 
+
+### Reproducing the research paper
+
+```bash
+# every table and figure of docs/paper/paper.pdf, from the result files in results/research/ (minutes, CPU only)
+python -m analysis.aggregate_seeds
+python -m analysis.paper_tables
+python -m analysis.paper_figures
+python docs/paper/build.py        # paper.html, paper.pdf (needs Microsoft Edge) and docs/paper/latex/ for Overleaf/arXiv
+
+# re-running the experiments themselves (GPU; roughly 15 GPU-hours of training on an RTX 3050 Laptop)
+python -m experiments.run configs/stage4_pilot.json          # and stage4b_scalar_decay, stage5a_seeds (main study)
+python -m experiments.run configs/stage5b_passkey.json       # and stage5c_passkey_random, stage5d_passkey_stream_*
+bash experiments/post_stage5d.sh                             # follow-up evaluations and the test-split check
+```
+
+Checked on 2026-10-30 from a fresh clone: the 161 tests pass and the scripts above regenerate every table, figure,
+aggregate file and CSV byte-for-byte from the committed results. Retraining from scratch was not repeated; model
+checkpoints (`*.pt`) are not in the repository because of their size.
+
 ---
 
 ## 9. Repository layout
@@ -506,15 +528,18 @@ models/
 kernels/
   triton_scan.py    fused selective-scan forward + backward kernels
 data/enwik8.py      download, 90/5/5 split, random-window and sequential batches
+data/passkey.py      passkey insertion: fixed-end, random-end and position-free protocols
 training/train_lm.py
 tasks/              synthetic tasks (MQAR, selective copying) and their training driver
 benchmarks/         scan algorithms, model speed/memory vs length, generation latency
-analysis/           evaluation, Δ analysis, plotting
+analysis/           evaluation, Δ analysis, plotting; length_generalization, passkey_*, paper_tables/figures
 tests/              correctness tests
-results/            all raw results (JSON / JSONL)
+results/            all raw results (JSON / JSONL); research study in results/research/
 plots/              all figures
-experiments/run.py  config-driven experiment grids (configs/*.json)
+experiments/run.py  config-driven experiment grids (configs/*.json); post_stage5d.sh follow-up evaluations
 docs/               AUDIT.md (findings + plan), BENCHMARK_PROTOCOL.md, index.html (interactive results)
+docs/paper/         research paper: paper.md (source), paper.pdf, latex/ (Overleaf/arXiv), refs.bib,
+                    CLAIMS.md (claim-by-claim evidence), LITERATURE.md, build.py
 reproduce.py        one command for everything
 ```
 

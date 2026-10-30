@@ -227,7 +227,9 @@ def html_ref(e):
     venue = e.get("booktitle") or e.get("journal") or e.get("howpublished") or ""
     extra = "".join(f", {bib_plain(e[k])}" for k in ("volume", "pages") if k in e)
     note = f". {bib_plain(e['note'])}" if "note" in e else ""
-    return f"{html.escape(a)}. {html.escape(bib_plain(e['title']))}. <i>{html.escape(bib_plain(venue))}</i>{extra}, {e['year']}{html.escape(note)}."
+    title = bib_plain(e["title"])
+    title += "" if title[-1] in "?!." else "."
+    return f"{html.escape(a)}. {html.escape(title)} <i>{html.escape(bib_plain(venue))}</i>{extra}, {e['year']}{html.escape(note)}."
 
 
 TEMPLATE = r"""<!doctype html>
@@ -264,7 +266,7 @@ TEMPLATE = r"""<!doctype html>
   figcaption, .caption { font-size: 9.2pt; text-align: left; margin-top: 4pt; }
   .table { margin: 10pt 0; break-inside: avoid; }
   .table .caption { margin: 0 0 4pt; }
-  table { border-collapse: collapse; width: 100%; font-size: 8.8pt; border-top: 1.2px solid #000; border-bottom: 1.2px solid #000; }
+  table { border-collapse: collapse; width: 100%; font-size: 8.2pt; border-top: 1.2px solid #000; border-bottom: 1.2px solid #000; }
   th { border-bottom: 0.8px solid #000; font-weight: bold; }
   th, td { padding: 2pt 4pt; text-align: left; vertical-align: top; }
   td + td { white-space: nowrap; }

@@ -64,18 +64,21 @@ def main_rows():
         L = lgs[0]["train_len"]
         rows.append({"label": label(cfg), "L": L, "params": cfg["non_embedding_params"], "n": len(dirs),
                      "bpc": stats([lg["bpc_by_length"][str(L)] for lg in lgs]),
-                     "ce": {b: stats([lg["context_effect"].get(b) for lg in lgs]) for b in ("1-2x", "2-4x", "8-16x", "16-32x")},
+                     "ce": {b: stats([lg["context_effect"].get(b) for lg in lgs])
+                            for b in ("1-2x", "2-4x", "4-8x", "8-16x", "16-32x")},
                      "lgs": lgs})
     rows.sort(key=lambda r: (r["L"], ORDER.index(r["label"])))
     return rows
 
 
 def table_main(rows):
-    lines = ["| Model | $L$ | Params | bpc at $L$ | CE 1–2× | CE 2–4× | CE 8–16× | CE 16–32× |", "|---|---|---|---|---|---|---|---|"]
+    lines = ["| Model | $L$ | Params | bpc at $L$ | CE 1–2× | CE 2–4× | CE 4–8× | CE 8–16× | CE 16–32× |",
+             "|---|---|---|---|---|---|---|---|---|"]
     for r in rows:
         ce = r["ce"]
         lines.append(f"| {r['label']} | {r['L']} | {r['params'] / 1e6:.2f}M | {ms(r['bpc'])} | {ms(ce['1-2x'], signed=True)} | "
-                     f"{ms(ce['2-4x'], signed=True)} | {ms(ce['8-16x'], signed=True)} | {ms(ce['16-32x'], signed=True)} |")
+                     f"{ms(ce['2-4x'], signed=True)} | {ms(ce['4-8x'], signed=True)} | {ms(ce['8-16x'], signed=True)} | "
+                     f"{ms(ce['16-32x'], signed=True)} |")
     return "\n".join(lines)
 
 

@@ -74,3 +74,14 @@ The draft's characterization of DeciMamba ("receptive field limited by training 
 forget when the state is large relative to the training length) and Mamba Modulation (spectrum of A) was checked
 against the full text (arXiv HTML). Earlier wording "Stuffed Mamba reports state collapse" was adjusted: the
 current version of that paper speaks of "inability to forget" and over-retention.
+
+## Final review (2026-10-30)
+
+| # | Claim | Evidence | Verified | Status |
+|---|---|---|---|---|
+| F1 | Evaluation range: 32× L for L = 256, 16× L for L = 1024 (W = 16,384) | `context_effect()` bands that fit in W; `aggregate.json` has no 16–32× band at L = 1024 | yes | abstract and results corrected |
+| F2 | ALiBi at L = 1024: −0.009 ± 0.004 (all three seeds negative: −0.007, −0.011, −0.009) | `aggregate.json` | yes | reported as unresolved (below 0.01) |
+| F3 | 4–8× band exists for all 48 runs | `aggregate.json` | yes | added to Table 1 |
+| F4 | Stage-5d code = commit 26d3233 | uncommitted diff limited to data/passkey.py and training/train_lm.py, both last modified 20:02 before the 20:04 launch; no model/kernel change since 2026-10-22 | yes | stated in Appendix E |
+| F5 | Fresh clone regenerates tables/figures byte-for-byte; 161 tests pass | clone of GitHub `6034aa0` and of the final commit | yes | stated; retraining not verified |
+| F6 | "~15 GPU-hours of training" | sum of `train_time_s` over 81 research runs = 24.7 h, of which ~11 h is a sleep stall in two stage-5d runs | yes | stated as roughly 15 |

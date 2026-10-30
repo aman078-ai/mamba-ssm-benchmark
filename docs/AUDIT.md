@@ -174,6 +174,24 @@ Checked every number in the paper against the raw results (`docs/paper/CLAIMS.md
 - The same-bytes measure is not new (Khandelwal et al. 2018; Sun et al. 2021); the paper no longer presents it as a
   contribution.
 
+## Final review before release (2026-10-30)
+
+Problems found in the manuscript and fixed:
+- The abstract and results said every Mamba variant is stable "up to 32×" the training length; the 16,384-byte
+  evaluation window is 32× for L = 256 but 16× for L = 1024. Both ranges are now stated.
+- ALiBi at L = 1024 (−0.009 ± 0.004) was called an improvement, although the methods treat differences below 0.01 bits
+  per byte as unresolved. It is now reported as consistent in sign but unresolved; likewise the ~0.003 gain of Mamba in
+  the 1–2× band. "Uses none of the extra context" became "no measurable benefit".
+- The main table omitted the 4–8× band defined in the methods; it is now included (data existed).
+- Notation: D was both the number of channels and the skip parameter (now E); S_ab was undefined; two captions had
+  hand-typed cross-references.
+- Citations: the claim that rotary embeddings extrapolate poorly cited the RoPE paper, which does not show it (now
+  cited to Press et al. 2022); the NoPE and LongMamba/MambaExtend descriptions were made precise; "?." in a reference.
+- Discussion: "ALiBi's gain bounds how much there is to gain" overstated what a lower-bound measurement shows.
+- Paper metadata was not valid YAML (unquoted colons).
+- Reproducibility appendix now states exactly what was verified (fresh clone: tests, byte-identical tables/figures)
+  and what was not (retraining, per-model analyses needing checkpoints).
+
 ## Stage checklist
 
 | Stage | Goal | Status |
