@@ -1,8 +1,8 @@
 ---
 title: Stable but Short-Sighted: Length Generalization of Small Selective State-Space Models on Byte-Level Text
-author: Aman Shaik
-affiliation: Independent researcher (B.E. Artificial Intelligence and Data Science, Osmania University, 2026)
-email: amanziyan2004@gmail.com
+author: Aman Shaik, Mohammed Ali Khan, Shaik Moosa Kalam
+affiliation: Independent researchers
+email: Contact: amanziyan2004@gmail.com
 date: Technical report, draft of October 2026. Code and data: github.com/aman078-ai/mamba-ssm-benchmark
 ---
 
@@ -168,7 +168,7 @@ In a controlled small-scale setting, selective state-space models trained on byt
 
 # Acknowledgements and disclosure of AI assistance {#sec:ack}
 
-This work was done without external funding on personal hardware. Large language model assistants (Anthropic's Claude) were used extensively for implementation, running experiments, analysis scripts, literature search and drafting of this text. The author designed the study, reviewed all code, results and text, and is responsible for every claim; the AI tools are not authors. All numbers in tables and figures are generated from the released result files by the released scripts.
+This work was done without external funding on personal hardware. Large language model assistants (Anthropic's Claude) were used extensively for implementation, running experiments, analysis scripts, literature search and drafting of this text. The authors designed the study, reviewed all code, results and text, and are responsible for every claim; the AI tools are not authors. All numbers in tables and figures are generated from the released result files by the released scripts.
 
 # Appendix
 
