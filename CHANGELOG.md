@@ -2,7 +2,11 @@
 
 Each entry records what changed, which results it affects, and the numbers before and after.
 
-## Unreleased
+## v1.0 (2026-10-30)
+
+Paper released as a preprint on Zenodo: https://doi.org/10.5281/zenodo.23802965 (version 1.0). The PDF on Zenodo was
+built from `docs/paper/paper.md` at this release. README shows the DOI and citation; `CITATION.cff` has a
+preferred-citation entry.
 
 ### Stage 5d and manuscript (2026-10-29/30)
 

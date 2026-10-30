@@ -1,12 +1,18 @@
 # Mamba vs. Transformer, from scratch
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23802965.svg)](https://doi.org/10.5281/zenodo.23802965)
+
+**Paper (preprint):** Shaik, A., Khan, M. A., & Kalam, S. M. (2026). *Stable but Short-Sighted: Length Generalization of
+Small Selective State-Space Models on Byte-Level Text.* Zenodo. https://doi.org/10.5281/zenodo.23802965
+([PDF in this repository](docs/paper/paper.pdf), not peer reviewed)
+
 **A selective state-space model (Mamba/S6), a GPT-style Transformer, RetNet-style linear attention and a hybrid, all
 written from first principles in PyTorch, plus a hand-written Triton kernel for the selective scan. Benchmarked for
 speed, memory and quality on one 4 GB laptop GPU.**
 
 > **Status (October 2026).** The architecture comparison in section 1 comes from a single training seed with an
 > untuned learning rate, and the models had not converged; treat differences between those models as hypotheses. The
-> research study (end of section 2, [paper draft](docs/paper/paper.md)) uses tuned learning rates and 3 seeds. An audit
+> research study (end of section 2, [paper](docs/paper/paper.pdf)) uses tuned learning rates and 3 seeds. An audit
 > of this repository ([`docs/AUDIT.md`](docs/AUDIT.md)) found several earlier claims overstated; they are corrected or
 > withdrawn below.
 
@@ -546,6 +552,19 @@ reproduce.py        one command for everything
 ---
 
 ## 10. References
+
+**Citing this work:** see [`CITATION.cff`](CITATION.cff) (GitHub shows a "Cite this repository" button), or
+
+```bibtex
+@misc{shaik2026stable,
+  title     = {Stable but Short-Sighted: Length Generalization of Small Selective State-Space Models on Byte-Level Text},
+  author    = {Shaik, Aman and Khan, Mohammed Ali and Kalam, Shaik Moosa},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.23802965},
+  note      = {Preprint, version 1.0}
+}
+```
 
 - Gu & Dao (2023). *Mamba: Linear-Time Sequence Modeling with Selective State Spaces.*
 - Gu, Goel & Ré (2022). *Efficiently Modeling Long Sequences with Structured State Spaces (S4)*; Gu et al. (2022), *On the

@@ -1,13 +1,13 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
+message: "If you use this software or its results, please cite the paper below."
 title: "Mamba vs. Transformer, from scratch: selective state-space models, attention and hybrids on byte-level language modeling"
 authors:
   - family-names: Shaik
     given-names: Aman
 repository-code: "https://github.com/aman078-ai/mamba-ssm-benchmark"
 license: MIT
-version: 0.3.0-dev
-date-released: 2026-10-22
+version: 1.0.0
+date-released: 2026-10-30
 keywords:
   - state space models
   - Mamba
@@ -15,3 +15,19 @@ keywords:
   - selective scan
   - Triton
   - length generalization
+preferred-citation:
+  type: article
+  title: "Stable but Short-Sighted: Length Generalization of Small Selective State-Space Models on Byte-Level Text"
+  authors:
+    - family-names: Shaik
+      given-names: Aman
+    - family-names: Khan
+      given-names: Mohammed Ali
+    - family-names: Kalam
+      given-names: Shaik Moosa
+  year: 2026
+  publisher:
+    name: Zenodo
+  doi: "10.5281/zenodo.23802965"
+  url: "https://doi.org/10.5281/zenodo.23802965"
+  notes: "Preprint, version 1.0 (not peer reviewed)"

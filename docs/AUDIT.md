@@ -203,6 +203,6 @@ Problems found in the manuscript and fixed:
 | 4 | Pilot of H1–H3 (one seed) with baselines; go/no-go | done: go, reframed (see above) |
 | 5 | 5a: seeds 1–2 for every pilot configuration; 5b: forced-long-memory boundary test; 5c: position control; 5d: position-free protocol, 3 seeds | done |
 | 6 | Analysis, statistics, figures from CSV | done (`analysis/aggregate_seeds.py`, `analysis/passkey_plots.py`, `results/csv/`) |
-| 7 | Manuscript, release tag | manuscript complete (`docs/paper/`: paper.md, paper.pdf, latex/); test-split confirmation in Appendix C; release tag not created (needs the author's approval) |
+| 7 | Manuscript, release tag | done: preprint on Zenodo, DOI 10.5281/zenodo.23802965 (2026-10-30); release tag v1.0 |
 
 Before/after records for each stage are in [`CHANGELOG.md`](../CHANGELOG.md).
