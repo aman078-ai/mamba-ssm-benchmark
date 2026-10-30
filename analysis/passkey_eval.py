@@ -22,9 +22,9 @@ from runtime import environment, setup_device
 
 
 @torch.no_grad()
-def evaluate(model, text, gap, key_len, n, device, seed=0):
+def evaluate(model, text, gap, key_len, n, device, seed=0, batch_tokens=65536):
     g = torch.Generator().manual_seed(seed + gap)
-    bs = max(1, min(64, 65536 // (gap + 128)))
+    bs = max(1, min(64, batch_tokens // (gap + 128)))
     hits = keys_ok = total = 0
     nll = 0.0
     while total < n:
@@ -47,17 +47,20 @@ def main():
     ap.add_argument("--run_dir", required=True)
     ap.add_argument("--max_gap", type=int, default=16384)
     ap.add_argument("--n", type=int, default=256)
+    ap.add_argument("--batch_tokens", type=int, default=65536,
+                    help="tokens per evaluation batch; lower it for attention models at long gaps (draws different samples from the same distribution)")
     args = ap.parse_args()
     device = setup_device(verbose=False)
     cfg = json.load(open(os.path.join(args.run_dir, "config.json")))
     L, key_len = cfg["args"]["seq_len"], cfg["args"].get("passkey_len") or 8
     model = load(args.run_dir, device)
     text = Enwik8().splits["valid"]
-    gaps = [L // 2] + [L * 2 ** k for k in range(10) if L * 2 ** k <= args.max_gap]
+    gaps = [L // 8, L // 4, L // 2] + [L * 2 ** k for k in range(10) if L * 2 ** k <= args.max_gap]
     out = {"train_len": L, "key_len": key_len, "chance_byte_acc": 1 / 26, "by_gap": {}}
     for gap in gaps:
         try:
-            out["by_gap"][gap] = evaluate(model, text, gap, key_len, args.n if gap <= 4 * L else args.n // 2, device)
+            out["by_gap"][gap] = evaluate(model, text, gap, key_len, args.n if gap <= 4 * L else args.n // 2, device,
+                                           batch_tokens=args.batch_tokens)
         except torch.OutOfMemoryError:
             torch.cuda.empty_cache()
             out["by_gap"][gap] = None

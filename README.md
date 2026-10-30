@@ -125,21 +125,25 @@ keeps the state and skips the token. The price is that the convolution trick no 
 *scan*, which this project implements four ways plus a fused kernel.
 
 **Research study: length generalization of small selective SSMs.** Most of the comparisons above reproduce published
-results. The research part of the project ([paper draft](docs/paper/paper.md), [audit and plan](docs/AUDIT.md)) asks
-how ~1M-parameter byte-level Mamba models behave beyond their training length, with 3 seeds per configuration:
+results. The research part of the project ([paper](docs/paper/paper.pdf), [source](docs/paper/paper.md),
+[claim-by-claim evidence](docs/paper/CLAIMS.md), [audit log](docs/AUDIT.md)) asks how ~1M-parameter byte-level Mamba
+models behave beyond their training length. Main study: 6 Mamba variants and 3 Transformer position schemes, 2 training
+lengths, 3 seeds each (48 runs).
 
 - Every Mamba variant (state size 4–64, per-state or Mamba-2-style scalar decay, with or without selection) is
-  **stable up to 32× its training length but gains nothing from the extra context** (|effect| ≤ 0.003 bits per byte,
-  measured on the same bytes with full vs. training-length context). RoPE and NoPE Transformers collapse (+2.8 to
-  +3.1); only ALiBi improves (−0.04).
-- The reason: the memory horizons Mamba learns are short (median 1–100 bytes per state index), do not grow with
-  training length, and shrink as the state grows, so the state never fills.
-- A passkey task meant to force long memory exposed a different failure. Every Mamba variant (and ALiBi) learned to
-  predict *from position alone* where the passkey marker ended each training window, and beyond the training length
-  that learned clock fires on ordinary text: +5 to +41 bits per byte. Randomizing the marker's position halves the
-  effect but does not remove it. No Mamba variant learned the recall itself; ALiBi did (100% at gap 256).
+  **stable up to 32× its training length but gains nothing from the extra context**: all seed means are within
+  0.004 bits per byte of zero, measured on the same bytes with full vs. about one training length of context. RoPE and
+  NoPE Transformers degrade by up to 3.4 bits per byte; only ALiBi improves (−0.041 ± 0.021).
+- The learned decay rates forget most information within tens of bytes (median horizon 2–38 bytes), and the horizon
+  distribution does not change when the training length is quadrupled. A small fraction of modes is much slower, so
+  horizons are consistent with, but do not prove, the absence of context use.
+- Exploratory passkey experiments: when the passkey's RECALL marker sat at a fixed position in every training window,
+  every Mamba variant (and ALiBi) learned to predict the marker *from position alone*, and beyond the training length
+  failed by +5 to +41 bits per byte. A position-free version of the task (marker in half of the windows, position
+  independent of the window boundary) **removed the failure in all three seeds**. No Mamba model learned the recall
+  itself in any protocol, even at gaps far inside the training length; ALiBi did.
 
-![Passkey experiments: collapse on plain text after passkey training, and recall by gap](plots/research/passkey.png)
+![Passkey experiments: P(RECALL marker) by position, context effect and recall by gap](plots/research/paper_passkey.png)
 
 ---
 
@@ -230,7 +234,7 @@ models use d_model = 256 and are **parameter-matched to within about 2%**:
 
 ## 4. Verification
 
-`pytest` runs 160 tests (CI runs the CPU ones on every push):
+`pytest` runs 161 tests (CI runs the CPU ones on every push):
 
 | what is checked | how |
 |---|---|

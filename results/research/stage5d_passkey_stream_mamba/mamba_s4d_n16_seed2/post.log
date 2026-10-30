@@ -1,0 +1,26 @@
+  gap     64: {'byte_acc': 0.0419921875, 'key_exact': 0.0, 'bits_per_key_byte': 4.704377487327237, 'n': 256}
+  gap    128: {'byte_acc': 0.03662109375, 'key_exact': 0.0, 'bits_per_key_byte': 4.705441801962102, 'n': 256}
+  gap    256: {'byte_acc': 0.0439453125, 'key_exact': 0.0, 'bits_per_key_byte': 4.704730739692109, 'n': 256}
+  gap    512: {'byte_acc': 0.041015625, 'key_exact': 0.0, 'bits_per_key_byte': 4.704453417667593, 'n': 256}
+  gap   1024: {'byte_acc': 0.037109375, 'key_exact': 0.0, 'bits_per_key_byte': 4.705299271340199, 'n': 256}
+  gap   2048: {'byte_acc': 0.03515625, 'key_exact': 0.0, 'bits_per_key_byte': 4.703717245930575, 'n': 256}
+  gap   4096: {'byte_acc': 0.0478515625, 'key_exact': 0.0, 'bits_per_key_byte': 4.702229166043985, 'n': 128}
+  gap   8192: {'byte_acc': 0.03515625, 'key_exact': 0.0, 'bits_per_key_byte': 4.707744558291371, 'n': 128}
+  gap  16384: {'byte_acc': 0.0517578125, 'key_exact': 0.0, 'bits_per_key_byte': 4.700177649495336, 'n': 128}
+saved results/research/stage5d_passkey_stream_mamba\mamba_s4d_n16_seed2/passkey.json
+  L=   512  bpc=1.714863824455353
+  L=  1024  bpc=1.6997390646991455
+  L=  2048  bpc=1.6922080966647999
+  L=  4096  bpc=1.688401675137946
+  L=  8192  bpc=1.6865071452693066
+  L= 16384  bpc=1.6856894636236364
+  context effect (full - short context, bits/byte): {'1-2x': -0.0017, '2-4x': -0.0031, '4-8x': -0.002, '8-16x': -0.0023, '16-32x': -0.003}
+saved results/research/stage5d_passkey_stream_mamba\mamba_s4d_n16_seed2/length_generalization.json
+  P(RECALL) on plain text: {'first_position_p_gt_half': None, 'mean_p_before_L_minus_32': 0.0005292731220833957, 'mean_p_after_L': 0.000547046831343323}
+         0-256: with marker   1.909   plain   1.883
+       256-512: with marker   1.823   plain   1.823
+      512-1024: with marker   1.643   plain   1.643
+     1024-2048: with marker   1.704   plain   1.704
+     2048-4096: with marker   1.719   plain   1.718
+     4096-8192: with marker   1.810   plain   1.810
+     8192-8273: with marker   1.768   plain   1.769

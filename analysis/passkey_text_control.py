@@ -72,8 +72,9 @@ def main():
         p = model(buf[:, :4 * L].to(device)).float().softmax(-1)[..., RECALL].mean(0).cpu()
     on = (p > 0.5).nonzero()
     recall_pred = {"first_position_p_gt_half": int(on[0]) if len(on) else None,
-                   "mean_p_before_L_minus_32": p[:L - 32].mean().item(), "mean_p_after_L": p[L:].mean().item()}
-    print(f"  P(RECALL) on plain text: {recall_pred}")
+                   "mean_p_before_L_minus_32": p[:L - 32].mean().item(), "mean_p_after_L": p[L:].mean().item(),
+                   "p_by_position": [round(v, 5) for v in p.tolist()]}
+    print(f"  P(RECALL) on plain text: { {k: v for k, v in recall_pred.items() if k != 'p_by_position'} }")
     out = {"train_len": L, "recall_marker_prediction": recall_pred, "gap": args.gap, "n": args.n, "with_store_marker": with_marker,
            "plain_text": plain_loss, "environment": environment()}
     for k in with_marker:

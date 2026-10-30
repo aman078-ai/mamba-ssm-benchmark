@@ -1,0 +1,122 @@
+[device] NVIDIA GeForce RTX 3050 Laptop GPU: 4.00 GiB total, PyTorch capped at 1.42 GiB
+[transformer_alibi_seed0] layers=AAAAA non-embedding params=984,448 device=cuda
+[transformer_alibi_seed0] step     0  val_bpc 7.9457  (0.0 min)
+[transformer_alibi_seed0] step     0  train_bpc 7.944  18.2k tok/s
+[transformer_alibi_seed0] step   100  train_bpc 3.761  27.6k tok/s
+[transformer_alibi_seed0] step   200  train_bpc 3.365  27.6k tok/s
+[transformer_alibi_seed0] step   300  train_bpc 3.019  27.6k tok/s
+[transformer_alibi_seed0] step   400  train_bpc 2.902  27.6k tok/s
+[transformer_alibi_seed0] step   500  train_bpc 2.668  27.5k tok/s
+[transformer_alibi_seed0] step   600  train_bpc 2.616  27.5k tok/s
+[transformer_alibi_seed0] step   700  train_bpc 2.722  27.5k tok/s
+[transformer_alibi_seed0] step   800  train_bpc 2.424  27.5k tok/s
+[transformer_alibi_seed0] step   900  train_bpc 2.415  27.5k tok/s
+[transformer_alibi_seed0] step  1000  train_bpc 2.366  27.5k tok/s
+[transformer_alibi_seed0] step  1100  train_bpc 2.249  27.5k tok/s
+[transformer_alibi_seed0] step  1200  train_bpc 2.413  27.5k tok/s
+[transformer_alibi_seed0] step  1300  train_bpc 2.175  27.5k tok/s
+[transformer_alibi_seed0] step  1400  train_bpc 2.340  27.5k tok/s
+[transformer_alibi_seed0] step  1500  train_bpc 2.176  27.5k tok/s
+[transformer_alibi_seed0] step  1600  train_bpc 2.348  27.6k tok/s
+[transformer_alibi_seed0] step  1700  train_bpc 2.127  27.6k tok/s
+[transformer_alibi_seed0] step  1800  train_bpc 2.015  27.6k tok/s
+[transformer_alibi_seed0] step  1900  train_bpc 2.181  27.6k tok/s
+[transformer_alibi_seed0] step  2000  val_bpc 2.1111  (9.9 min)
+[transformer_alibi_seed0] step  2000  train_bpc 2.180  27.6k tok/s
+[transformer_alibi_seed0] step  2100  train_bpc 2.063  27.6k tok/s
+[transformer_alibi_seed0] step  2200  train_bpc 2.121  27.7k tok/s
+[transformer_alibi_seed0] step  2300  train_bpc 1.982  27.7k tok/s
+[transformer_alibi_seed0] step  2400  train_bpc 2.094  27.7k tok/s
+[transformer_alibi_seed0] step  2500  train_bpc 2.092  27.7k tok/s
+[transformer_alibi_seed0] step  2600  train_bpc 1.979  27.7k tok/s
+[transformer_alibi_seed0] step  2700  train_bpc 2.163  27.7k tok/s
+[transformer_alibi_seed0] step  2800  train_bpc 1.913  27.7k tok/s
+[transformer_alibi_seed0] step  2900  train_bpc 2.037  27.7k tok/s
+[transformer_alibi_seed0] step  3000  train_bpc 2.132  27.7k tok/s
+[transformer_alibi_seed0] step  3100  train_bpc 2.073  27.7k tok/s
+[transformer_alibi_seed0] step  3200  train_bpc 1.980  27.7k tok/s
+[transformer_alibi_seed0] step  3300  train_bpc 2.131  27.7k tok/s
+[transformer_alibi_seed0] step  3400  train_bpc 2.164  27.7k tok/s
+[transformer_alibi_seed0] step  3500  train_bpc 1.809  27.7k tok/s
+[transformer_alibi_seed0] step  3600  train_bpc 2.037  27.7k tok/s
+[transformer_alibi_seed0] step  3700  train_bpc 2.018  27.7k tok/s
+[transformer_alibi_seed0] step  3800  train_bpc 2.051  27.7k tok/s
+[transformer_alibi_seed0] step  3900  train_bpc 1.963  27.7k tok/s
+[transformer_alibi_seed0] step  4000  val_bpc 1.9685  (19.7 min)
+[transformer_alibi_seed0] step  4000  train_bpc 1.901  27.7k tok/s
+[transformer_alibi_seed0] step  4100  train_bpc 1.958  27.7k tok/s
+[transformer_alibi_seed0] step  4200  train_bpc 1.976  27.7k tok/s
+[transformer_alibi_seed0] step  4300  train_bpc 1.893  27.7k tok/s
+[transformer_alibi_seed0] step  4400  train_bpc 1.824  27.7k tok/s
+[transformer_alibi_seed0] step  4500  train_bpc 2.002  27.7k tok/s
+[transformer_alibi_seed0] step  4600  train_bpc 1.857  27.7k tok/s
+[transformer_alibi_seed0] step  4700  train_bpc 1.979  27.7k tok/s
+[transformer_alibi_seed0] step  4800  train_bpc 1.779  27.7k tok/s
+[transformer_alibi_seed0] step  4900  train_bpc 1.979  27.7k tok/s
+[transformer_alibi_seed0] step  5000  train_bpc 1.731  27.8k tok/s
+[transformer_alibi_seed0] step  5100  train_bpc 1.877  27.8k tok/s
+[transformer_alibi_seed0] step  5200  train_bpc 1.920  27.8k tok/s
+[transformer_alibi_seed0] step  5300  train_bpc 1.962  27.8k tok/s
+[transformer_alibi_seed0] step  5400  train_bpc 1.865  27.8k tok/s
+[transformer_alibi_seed0] step  5500  train_bpc 1.938  27.8k tok/s
+[transformer_alibi_seed0] step  5600  train_bpc 1.874  27.8k tok/s
+[transformer_alibi_seed0] step  5700  train_bpc 2.001  27.8k tok/s
+[transformer_alibi_seed0] step  5800  train_bpc 1.609  27.8k tok/s
+[transformer_alibi_seed0] step  5900  train_bpc 1.815  27.8k tok/s
+[transformer_alibi_seed0] step  6000  val_bpc 1.8516  (29.5 min)
+[transformer_alibi_seed0] step  6000  train_bpc 1.811  27.8k tok/s
+[transformer_alibi_seed0] step  6100  train_bpc 1.979  27.8k tok/s
+[transformer_alibi_seed0] step  6200  train_bpc 1.841  27.8k tok/s
+[transformer_alibi_seed0] step  6300  train_bpc 1.766  27.9k tok/s
+[transformer_alibi_seed0] step  6400  train_bpc 1.802  28.0k tok/s
+[transformer_alibi_seed0] step  6500  train_bpc 1.825  28.1k tok/s
+[transformer_alibi_seed0] step  6600  train_bpc 1.874  28.2k tok/s
+[transformer_alibi_seed0] step  6700  train_bpc 1.786  28.3k tok/s
+[transformer_alibi_seed0] step  6800  train_bpc 1.920  28.3k tok/s
+[transformer_alibi_seed0] step  6900  train_bpc 1.964  28.4k tok/s
+[transformer_alibi_seed0] step  7000  train_bpc 1.803  28.4k tok/s
+[transformer_alibi_seed0] step  7100  train_bpc 1.801  28.4k tok/s
+[transformer_alibi_seed0] step  7200  train_bpc 1.618  28.4k tok/s
+[transformer_alibi_seed0] step  7300  train_bpc 1.750  28.4k tok/s
+[transformer_alibi_seed0] step  7400  train_bpc 1.678  28.4k tok/s
+[transformer_alibi_seed0] step  7500  train_bpc 1.817  28.4k tok/s
+[transformer_alibi_seed0] step  7600  train_bpc 1.811  28.4k tok/s
+[transformer_alibi_seed0] step  7700  train_bpc 1.585  28.4k tok/s
+[transformer_alibi_seed0] step  7800  train_bpc 1.722  28.4k tok/s
+[transformer_alibi_seed0] step  7900  train_bpc 1.727  28.4k tok/s
+[transformer_alibi_seed0] step  8000  val_bpc 1.7444  (38.5 min)
+[transformer_alibi_seed0] step  8000  train_bpc 1.702  28.4k tok/s
+[transformer_alibi_seed0] step  8100  train_bpc 1.831  28.4k tok/s
+[transformer_alibi_seed0] step  8200  train_bpc 1.472  28.4k tok/s
+[transformer_alibi_seed0] step  8300  train_bpc 1.635  28.4k tok/s
+[transformer_alibi_seed0] step  8400  train_bpc 1.841  28.4k tok/s
+[transformer_alibi_seed0] step  8500  train_bpc 1.715  28.4k tok/s
+[transformer_alibi_seed0] step  8600  train_bpc 1.810  28.3k tok/s
+[transformer_alibi_seed0] step  8700  train_bpc 1.731  28.3k tok/s
+[transformer_alibi_seed0] step  8800  train_bpc 1.747  28.3k tok/s
+[transformer_alibi_seed0] step  8900  train_bpc 1.624  28.3k tok/s
+[transformer_alibi_seed0] step  9000  train_bpc 1.749  28.3k tok/s
+[transformer_alibi_seed0] step  9100  train_bpc 1.719  28.3k tok/s
+[transformer_alibi_seed0] step  9200  train_bpc 1.778  28.3k tok/s
+[transformer_alibi_seed0] step  9300  train_bpc 1.805  28.3k tok/s
+[transformer_alibi_seed0] step  9400  train_bpc 1.732  3.4k tok/s
+[transformer_alibi_seed0] step  9500  train_bpc 1.606  3.4k tok/s
+[transformer_alibi_seed0] step  9600  train_bpc 1.804  3.4k tok/s
+[transformer_alibi_seed0] step  9700  train_bpc 1.831  3.5k tok/s
+[transformer_alibi_seed0] step  9800  train_bpc 1.668  3.5k tok/s
+[transformer_alibi_seed0] step  9900  train_bpc 1.692  3.5k tok/s
+[transformer_alibi_seed0] step 10000  val_bpc 1.6881  (384.7 min)
+{
+  "run": "transformer_alibi_seed0",
+  "model": "transformer",
+  "layers": "AAAAA",
+  "non_embedding_params": 984448,
+  "steps": 10000,
+  "tokens": 81920000,
+  "seq_len": 512,
+  "final_val_bpc": 1.68809743091147,
+  "best_val_bpc": 1.68809743091147,
+  "train_time_min": 384.7171523999811,
+  "tokens_per_sec": 3548.9276337589167,
+  "peak_train_mem_mb": 871.794921875
+}

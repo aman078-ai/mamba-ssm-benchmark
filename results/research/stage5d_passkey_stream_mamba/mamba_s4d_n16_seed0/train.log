@@ -1,0 +1,122 @@
+[device] NVIDIA GeForce RTX 3050 Laptop GPU: 4.00 GiB total, PyTorch capped at 1.42 GiB
+[mamba_s4d_n16_seed0] layers=MMMMMMMM non-embedding params=932,992 device=cuda
+[mamba_s4d_n16_seed0] step     0  val_bpc 7.9228  (0.0 min)
+[mamba_s4d_n16_seed0] step     0  train_bpc 7.910  14.7k tok/s
+[mamba_s4d_n16_seed0] step   100  train_bpc 3.111  27.6k tok/s
+[mamba_s4d_n16_seed0] step   200  train_bpc 2.734  27.6k tok/s
+[mamba_s4d_n16_seed0] step   300  train_bpc 2.541  27.6k tok/s
+[mamba_s4d_n16_seed0] step   400  train_bpc 2.418  27.6k tok/s
+[mamba_s4d_n16_seed0] step   500  train_bpc 2.353  27.5k tok/s
+[mamba_s4d_n16_seed0] step   600  train_bpc 2.284  27.5k tok/s
+[mamba_s4d_n16_seed0] step   700  train_bpc 2.358  27.5k tok/s
+[mamba_s4d_n16_seed0] step   800  train_bpc 2.180  27.5k tok/s
+[mamba_s4d_n16_seed0] step   900  train_bpc 2.271  27.5k tok/s
+[mamba_s4d_n16_seed0] step  1000  train_bpc 2.177  27.5k tok/s
+[mamba_s4d_n16_seed0] step  1100  train_bpc 2.085  27.5k tok/s
+[mamba_s4d_n16_seed0] step  1200  train_bpc 2.355  27.5k tok/s
+[mamba_s4d_n16_seed0] step  1300  train_bpc 2.082  27.5k tok/s
+[mamba_s4d_n16_seed0] step  1400  train_bpc 2.337  27.5k tok/s
+[mamba_s4d_n16_seed0] step  1500  train_bpc 2.152  27.5k tok/s
+[mamba_s4d_n16_seed0] step  1600  train_bpc 2.307  27.5k tok/s
+[mamba_s4d_n16_seed0] step  1700  train_bpc 2.097  27.5k tok/s
+[mamba_s4d_n16_seed0] step  1800  train_bpc 2.038  27.5k tok/s
+[mamba_s4d_n16_seed0] step  1900  train_bpc 2.191  27.6k tok/s
+[mamba_s4d_n16_seed0] step  2000  val_bpc 2.1118  (9.9 min)
+[mamba_s4d_n16_seed0] step  2000  train_bpc 2.203  27.6k tok/s
+[mamba_s4d_n16_seed0] step  2100  train_bpc 2.189  27.5k tok/s
+[mamba_s4d_n16_seed0] step  2200  train_bpc 2.158  27.5k tok/s
+[mamba_s4d_n16_seed0] step  2300  train_bpc 1.957  27.5k tok/s
+[mamba_s4d_n16_seed0] step  2400  train_bpc 2.062  27.5k tok/s
+[mamba_s4d_n16_seed0] step  2500  train_bpc 2.083  27.5k tok/s
+[mamba_s4d_n16_seed0] step  2600  train_bpc 1.989  27.4k tok/s
+[mamba_s4d_n16_seed0] step  2700  train_bpc 2.231  27.4k tok/s
+[mamba_s4d_n16_seed0] step  2800  train_bpc 2.056  27.5k tok/s
+[mamba_s4d_n16_seed0] step  2900  train_bpc 2.092  27.5k tok/s
+[mamba_s4d_n16_seed0] step  3000  train_bpc 2.255  27.5k tok/s
+[mamba_s4d_n16_seed0] step  3100  train_bpc 2.099  27.5k tok/s
+[mamba_s4d_n16_seed0] step  3200  train_bpc 2.030  27.5k tok/s
+[mamba_s4d_n16_seed0] step  3300  train_bpc 2.201  27.5k tok/s
+[mamba_s4d_n16_seed0] step  3400  train_bpc 2.282  27.5k tok/s
+[mamba_s4d_n16_seed0] step  3500  train_bpc 1.899  27.5k tok/s
+[mamba_s4d_n16_seed0] step  3600  train_bpc 2.111  27.5k tok/s
+[mamba_s4d_n16_seed0] step  3700  train_bpc 2.065  27.5k tok/s
+[mamba_s4d_n16_seed0] step  3800  train_bpc 2.087  27.5k tok/s
+[mamba_s4d_n16_seed0] step  3900  train_bpc 2.040  27.5k tok/s
+[mamba_s4d_n16_seed0] step  4000  val_bpc 2.0122  (19.9 min)
+[mamba_s4d_n16_seed0] step  4000  train_bpc 2.034  27.5k tok/s
+[mamba_s4d_n16_seed0] step  4100  train_bpc 2.054  27.5k tok/s
+[mamba_s4d_n16_seed0] step  4200  train_bpc 2.094  27.5k tok/s
+[mamba_s4d_n16_seed0] step  4300  train_bpc 2.011  27.5k tok/s
+[mamba_s4d_n16_seed0] step  4400  train_bpc 1.866  27.5k tok/s
+[mamba_s4d_n16_seed0] step  4500  train_bpc 2.097  27.5k tok/s
+[mamba_s4d_n16_seed0] step  4600  train_bpc 2.014  27.5k tok/s
+[mamba_s4d_n16_seed0] step  4700  train_bpc 2.019  27.4k tok/s
+[mamba_s4d_n16_seed0] step  4800  train_bpc 1.864  27.4k tok/s
+[mamba_s4d_n16_seed0] step  4900  train_bpc 2.052  27.4k tok/s
+[mamba_s4d_n16_seed0] step  5000  train_bpc 1.814  27.4k tok/s
+[mamba_s4d_n16_seed0] step  5100  train_bpc 1.938  27.4k tok/s
+[mamba_s4d_n16_seed0] step  5200  train_bpc 2.023  27.4k tok/s
+[mamba_s4d_n16_seed0] step  5300  train_bpc 2.039  27.4k tok/s
+[mamba_s4d_n16_seed0] step  5400  train_bpc 1.974  27.4k tok/s
+[mamba_s4d_n16_seed0] step  5500  train_bpc 2.014  27.4k tok/s
+[mamba_s4d_n16_seed0] step  5600  train_bpc 1.942  27.4k tok/s
+[mamba_s4d_n16_seed0] step  5700  train_bpc 2.039  27.4k tok/s
+[mamba_s4d_n16_seed0] step  5800  train_bpc 1.688  27.4k tok/s
+[mamba_s4d_n16_seed0] step  5900  train_bpc 1.877  27.4k tok/s
+[mamba_s4d_n16_seed0] step  6000  val_bpc 1.9029  (29.9 min)
+[mamba_s4d_n16_seed0] step  6000  train_bpc 1.867  27.4k tok/s
+[mamba_s4d_n16_seed0] step  6100  train_bpc 2.022  27.4k tok/s
+[mamba_s4d_n16_seed0] step  6200  train_bpc 1.878  27.4k tok/s
+[mamba_s4d_n16_seed0] step  6300  train_bpc 1.774  27.5k tok/s
+[mamba_s4d_n16_seed0] step  6400  train_bpc 1.900  27.7k tok/s
+[mamba_s4d_n16_seed0] step  6500  train_bpc 1.981  27.8k tok/s
+[mamba_s4d_n16_seed0] step  6600  train_bpc 2.043  27.9k tok/s
+[mamba_s4d_n16_seed0] step  6700  train_bpc 1.836  28.0k tok/s
+[mamba_s4d_n16_seed0] step  6800  train_bpc 2.053  28.2k tok/s
+[mamba_s4d_n16_seed0] step  6900  train_bpc 2.086  28.3k tok/s
+[mamba_s4d_n16_seed0] step  7000  train_bpc 1.886  28.3k tok/s
+[mamba_s4d_n16_seed0] step  7100  train_bpc 1.917  28.2k tok/s
+[mamba_s4d_n16_seed0] step  7200  train_bpc 1.668  28.2k tok/s
+[mamba_s4d_n16_seed0] step  7300  train_bpc 1.865  28.2k tok/s
+[mamba_s4d_n16_seed0] step  7400  train_bpc 1.759  28.2k tok/s
+[mamba_s4d_n16_seed0] step  7500  train_bpc 1.845  28.2k tok/s
+[mamba_s4d_n16_seed0] step  7600  train_bpc 1.878  28.2k tok/s
+[mamba_s4d_n16_seed0] step  7700  train_bpc 1.612  28.1k tok/s
+[mamba_s4d_n16_seed0] step  7800  train_bpc 1.798  28.1k tok/s
+[mamba_s4d_n16_seed0] step  7900  train_bpc 1.847  28.1k tok/s
+[mamba_s4d_n16_seed0] step  8000  val_bpc 1.7871  (38.9 min)
+[mamba_s4d_n16_seed0] step  8000  train_bpc 1.731  28.1k tok/s
+[mamba_s4d_n16_seed0] step  8100  train_bpc 1.973  28.1k tok/s
+[mamba_s4d_n16_seed0] step  8200  train_bpc 1.530  28.1k tok/s
+[mamba_s4d_n16_seed0] step  8300  train_bpc 1.676  28.1k tok/s
+[mamba_s4d_n16_seed0] step  8400  train_bpc 1.958  28.1k tok/s
+[mamba_s4d_n16_seed0] step  8500  train_bpc 1.786  28.1k tok/s
+[mamba_s4d_n16_seed0] step  8600  train_bpc 1.857  28.1k tok/s
+[mamba_s4d_n16_seed0] step  8700  train_bpc 1.760  28.1k tok/s
+[mamba_s4d_n16_seed0] step  8800  train_bpc 1.781  28.1k tok/s
+[mamba_s4d_n16_seed0] step  8900  train_bpc 1.675  28.0k tok/s
+[mamba_s4d_n16_seed0] step  9000  train_bpc 1.783  28.0k tok/s
+[mamba_s4d_n16_seed0] step  9100  train_bpc 1.740  28.0k tok/s
+[mamba_s4d_n16_seed0] step  9200  train_bpc 1.850  28.0k tok/s
+[mamba_s4d_n16_seed0] step  9300  train_bpc 1.803  3.3k tok/s
+[mamba_s4d_n16_seed0] step  9400  train_bpc 1.789  3.4k tok/s
+[mamba_s4d_n16_seed0] step  9500  train_bpc 1.721  3.4k tok/s
+[mamba_s4d_n16_seed0] step  9600  train_bpc 1.868  3.4k tok/s
+[mamba_s4d_n16_seed0] step  9700  train_bpc 1.918  3.4k tok/s
+[mamba_s4d_n16_seed0] step  9800  train_bpc 1.711  3.5k tok/s
+[mamba_s4d_n16_seed0] step  9900  train_bpc 1.741  3.5k tok/s
+[mamba_s4d_n16_seed0] step 10000  val_bpc 1.7194  (385.0 min)
+{
+  "run": "mamba_s4d_n16_seed0",
+  "model": "mamba",
+  "layers": "MMMMMMMM",
+  "non_embedding_params": 932992,
+  "steps": 10000,
+  "tokens": 81920000,
+  "seq_len": 512,
+  "final_val_bpc": 1.7194077962143142,
+  "best_val_bpc": 1.7194077962143142,
+  "train_time_min": 384.9873869266594,
+  "tokens_per_sec": 3546.436531941321,
+  "peak_train_mem_mb": 748.49755859375
+}

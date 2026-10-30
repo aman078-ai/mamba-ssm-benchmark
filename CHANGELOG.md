@@ -4,6 +4,19 @@ Each entry records what changed, which results it affects, and the numbers befor
 
 ## Unreleased
 
+### Stage 5d and manuscript (2026-10-29/30)
+
+- Position-free passkey protocol (`data/passkey.py: insert_passkey_stream`, `--passkey_prob`, `--passkey_gap_min/max`),
+  configs `stage5d_passkey_stream_{mamba,alibi}.json`, 3 seeds each. The 5b/5c failure beyond the training length
+  disappears; Mamba still does not learn recall.
+- `analysis/test_split_check.py`: headline numbers re-measured on the untouched test split.
+- `analysis/paper_tables.py`, `analysis/paper_figures.py`: every table and the new figures are generated from results.
+- `docs/paper/`: manuscript rewritten from verified results (`paper.md`), build script producing HTML/PDF and LaTeX
+  (`build.py`, `latex/`), verified bibliography (`refs.bib`), claim-to-evidence audit (`CLAIMS.md`), literature notes
+  (`LITERATURE.md`).
+- Corrected claims listed in `docs/AUDIT.md` ("Stage 6 corrections").
+- `passkey_eval.py`: gaps L/8 and L/4 added, `--batch_tokens`; `passkey_text_control.py` stores P(RECALL) by position.
+
 ### Stage 5: seeds, passkey boundary test, paper draft
 
 - 5a: seeds 1–2 for every pilot configuration; `analysis/aggregate_seeds.py` writes mean, sd and 95% t-intervals to

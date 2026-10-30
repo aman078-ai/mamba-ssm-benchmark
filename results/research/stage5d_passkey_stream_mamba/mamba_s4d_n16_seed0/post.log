@@ -1,0 +1,26 @@
+  gap     64: {'byte_acc': 0.03564453125, 'key_exact': 0.0, 'bits_per_key_byte': 4.704309640171472, 'n': 256}
+  gap    128: {'byte_acc': 0.04052734375, 'key_exact': 0.0, 'bits_per_key_byte': 4.701619573538001, 'n': 256}
+  gap    256: {'byte_acc': 0.03125, 'key_exact': 0.0, 'bits_per_key_byte': 4.704734093353801, 'n': 256}
+  gap    512: {'byte_acc': 0.0390625, 'key_exact': 0.0, 'bits_per_key_byte': 4.704912095397444, 'n': 256}
+  gap   1024: {'byte_acc': 0.0400390625, 'key_exact': 0.0, 'bits_per_key_byte': 4.703205382565945, 'n': 256}
+  gap   2048: {'byte_acc': 0.04248046875, 'key_exact': 0.0, 'bits_per_key_byte': 4.703117241457377, 'n': 256}
+  gap   4096: {'byte_acc': 0.0302734375, 'key_exact': 0.0, 'bits_per_key_byte': 4.704652939040425, 'n': 128}
+  gap   8192: {'byte_acc': 0.0537109375, 'key_exact': 0.0, 'bits_per_key_byte': 4.702059929741077, 'n': 128}
+  gap  16384: {'byte_acc': 0.0361328125, 'key_exact': 0.0, 'bits_per_key_byte': 4.705749403682086, 'n': 128}
+saved results/research/stage5d_passkey_stream_mamba\mamba_s4d_n16_seed0/passkey.json
+  L=   512  bpc=1.7194062376270445
+  L=  1024  bpc=1.7049398313387878
+  L=  2048  bpc=1.697637135031116
+  L=  4096  bpc=1.6940996746344978
+  L=  8192  bpc=1.692522210289356
+  L= 16384  bpc=1.6918967939697998
+  context effect (full - short context, bits/byte): {'1-2x': 0.0001, '2-4x': -0.0021, '4-8x': -0.0028, '8-16x': -0.0011, '16-32x': -0.0021}
+saved results/research/stage5d_passkey_stream_mamba\mamba_s4d_n16_seed0/length_generalization.json
+  P(RECALL) on plain text: {'first_position_p_gt_half': None, 'mean_p_before_L_minus_32': 0.0005494465585798025, 'mean_p_after_L': 0.0005522032151930034}
+         0-256: with marker   1.923   plain   1.897
+       256-512: with marker   1.809   plain   1.809
+      512-1024: with marker   1.645   plain   1.645
+     1024-2048: with marker   1.705   plain   1.705
+     2048-4096: with marker   1.726   plain   1.726
+     4096-8192: with marker   1.832   plain   1.832
+     8192-8273: with marker   1.775   plain   1.775

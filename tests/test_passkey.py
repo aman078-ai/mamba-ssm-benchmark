@@ -43,3 +43,31 @@ def test_insert_passkey_random_end():
         assert torch.equal(buf[i, 1:][mask[i]], buf[i, r0 + 1:r0 + 6])
         ends.add(r0)
     assert len(ends) > 20                                                        # position is not fixed
+
+
+def test_insert_passkey_stream():
+    from data.passkey import insert_passkey_stream
+    g = torch.Generator().manual_seed(0)
+    T1, K = 201, 5
+    buf = torch.full((400, T1), 100, dtype=torch.long)
+    mask = insert_passkey_stream(buf, key_len=K, gap_min=10, gap_max=150, p_present=0.5, generator=g)
+    present = (buf == STORE).any(1)
+    assert 0.4 < present.float().mean() < 0.6                                    # absent from some windows
+    recall_pos, truncated = [], 0
+    for i in range(400):
+        if not present[i]:
+            assert not mask[i].any() and not (buf[i] == RECALL).any()
+            continue
+        s0 = int((buf[i] == STORE).nonzero()[0])
+        r = (buf[i] == RECALL).nonzero()
+        if len(r) == 0:
+            truncated += 1
+            assert not mask[i].any()
+            continue
+        r0 = int(r[0]); recall_pos.append(r0)
+        assert 10 <= r0 - s0 <= 150
+        n = min(K, T1 - r0 - 1)
+        assert torch.equal(buf[i, r0 + 1:r0 + 1 + n], buf[i, s0 + 1:s0 + 1 + n])  # recalled bytes = stored key
+        assert int(mask[i].sum()) == n and torch.equal(buf[i, 1:][mask[i]], buf[i, r0 + 1:r0 + 1 + n])
+    assert truncated > 0                                                         # RECALL may fall outside window
+    assert min(recall_pos) < 60 and max(recall_pos) > 190                        # not tied to the window end

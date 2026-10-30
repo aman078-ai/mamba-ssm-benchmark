@@ -1,0 +1,86 @@
+{
+  "train_len": 512,
+  "key_len": 8,
+  "chance_byte_acc": 0.038461538461538464,
+  "by_gap": {
+    "64": {
+      "byte_acc": 0.04052734375,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.704411539892108,
+      "n": 256
+    },
+    "128": {
+      "byte_acc": 0.0380859375,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.7050950849379625,
+      "n": 256
+    },
+    "256": {
+      "byte_acc": 0.03955078125,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.7011857473012,
+      "n": 256
+    },
+    "512": {
+      "byte_acc": 0.0419921875,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.705454786652242,
+      "n": 256
+    },
+    "1024": {
+      "byte_acc": 0.03662109375,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.705157299661912,
+      "n": 256
+    },
+    "2048": {
+      "byte_acc": 0.03857421875,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.704494199053679,
+      "n": 256
+    },
+    "4096": {
+      "byte_acc": 0.0322265625,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.7042135663631335,
+      "n": 128
+    },
+    "8192": {
+      "byte_acc": 0.0400390625,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.7074851278370025,
+      "n": 128
+    },
+    "16384": {
+      "byte_acc": 0.0322265625,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.710244191760216,
+      "n": 128
+    }
+  },
+  "environment": {
+    "timestamp": "2026-10-30T03:18:52+05:30",
+    "git_commit": "84f2971d1d8134368f21ffa0d0f883e76c7a4e61",
+    "git_dirty": true,
+    "python": "3.11.0",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "cpu": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "torch": "2.7.1+cu126",
+    "cuda": "12.6",
+    "tf32_matmul": true,
+    "deterministic_algorithms": false,
+    "triton": "3.3.1",
+    "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "vram_gib": 3.99951171875,
+    "memory_cap_gib": 1.416015625,
+    "driver": "592.82",
+    "gpu_clocks_mhz": "915 MHz, 5486 MHz",
+    "other_gpu_processes": [
+      "ChatGPT.exe",
+      "EpicGamesLauncher.exe",
+      "EOSOverlayRenderer-Win64-Shipping.exe",
+      "llama-server.exe",
+      "python.exe"
+    ]
+  }
+}

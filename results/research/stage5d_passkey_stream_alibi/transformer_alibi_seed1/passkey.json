@@ -1,0 +1,83 @@
+{
+  "train_len": 512,
+  "key_len": 8,
+  "chance_byte_acc": 0.038461538461538464,
+  "by_gap": {
+    "64": {
+      "byte_acc": 0.9990234375,
+      "key_exact": 0.9921875,
+      "bits_per_key_byte": 0.018671605238827913,
+      "n": 256
+    },
+    "128": {
+      "byte_acc": 0.9990234375,
+      "key_exact": 0.9921875,
+      "bits_per_key_byte": 0.014512967864263248,
+      "n": 256
+    },
+    "256": {
+      "byte_acc": 0.99755859375,
+      "key_exact": 0.98046875,
+      "bits_per_key_byte": 0.026031912664083605,
+      "n": 256
+    },
+    "512": {
+      "byte_acc": 0.9970703125,
+      "key_exact": 0.9765625,
+      "bits_per_key_byte": 0.03985906475306147,
+      "n": 256
+    },
+    "1024": {
+      "byte_acc": 0.92724609375,
+      "key_exact": 0.49609375,
+      "bits_per_key_byte": 0.44691174505257286,
+      "n": 256
+    },
+    "2048": {
+      "byte_acc": 0.09375,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 6.01628443563456,
+      "n": 256
+    },
+    "4096": {
+      "byte_acc": 0.029296875,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 7.086409141582547,
+      "n": 128
+    },
+    "8192": {
+      "byte_acc": 0.0400390625,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 7.12816875961204,
+      "n": 128
+    },
+    "16384": {
+      "byte_acc": 0.037109375,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 7.048321382708493,
+      "n": 128
+    }
+  },
+  "environment": {
+    "timestamp": "2026-10-30T05:05:01+05:30",
+    "git_commit": "84f2971d1d8134368f21ffa0d0f883e76c7a4e61",
+    "git_dirty": true,
+    "python": "3.11.0",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "cpu": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "torch": "2.7.1+cu126",
+    "cuda": "12.6",
+    "tf32_matmul": true,
+    "deterministic_algorithms": false,
+    "triton": "3.3.1",
+    "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "vram_gib": 3.99951171875,
+    "memory_cap_gib": 2.972363281995058,
+    "driver": "592.82",
+    "gpu_clocks_mhz": "1897 MHz, 5871 MHz",
+    "other_gpu_processes": [
+      "EpicGamesLauncher.exe",
+      "EOSOverlayRenderer-Win64-Shipping.exe"
+    ]
+  }
+}

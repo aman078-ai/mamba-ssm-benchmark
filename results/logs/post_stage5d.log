@@ -1,0 +1,211 @@
+== results/research/stage5d_passkey_stream_alibi/transformer_alibi_seed0
+  gap     64: {'byte_acc': 0.99951171875, 'key_exact': 0.99609375, 'bits_per_key_byte': 0.01262242302498511, 'n': 256}
+  gap    128: {'byte_acc': 1.0, 'key_exact': 1.0, 'bits_per_key_byte': 0.009506953630659542, 'n': 256}
+  gap    256: {'byte_acc': 0.9990234375, 'key_exact': 0.99609375, 'bits_per_key_byte': 0.016714829979374197, 'n': 256}
+  gap    512: {'byte_acc': 0.998046875, 'key_exact': 0.984375, 'bits_per_key_byte': 0.03805893511081782, 'n': 256}
+  gap   1024: {'byte_acc': 0.89453125, 'key_exact': 0.328125, 'bits_per_key_byte': 0.6570187414111779, 'n': 256}
+  gap   2048: {'byte_acc': 0.06298828125, 'key_exact': 0.0, 'bits_per_key_byte': 6.154643516225736, 'n': 256}
+  gap   4096: {'byte_acc': 0.0244140625, 'key_exact': 0.0, 'bits_per_key_byte': 6.837852999743076, 'n': 128}
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\amanz\Desktop\mamba ssm\analysis\passkey_eval.py", line 75, in <module>
+    main()
+  File "C:\Users\amanz\Desktop\mamba ssm\analysis\passkey_eval.py", line 62, in main
+    out["by_gap"][gap] = evaluate(model, text, gap, key_len, args.n if gap <= 4 * L else args.n // 2, device,
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\amanz\Desktop\mamba ssm\.venv\Lib\site-packages\torch\utils\_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\amanz\Desktop\mamba ssm\analysis\passkey_eval.py", line 38, in evaluate
+    keys_ok += (pred_ok.sum(1) == key_len).sum().item()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: CUDA error: an illegal memory access was encountered
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+  L=   512  bpc=1.688100349641102
+  L=  1024  bpc=1.6416991181012612
+  L=  2048  bpc=1.6149672344123567
+  L=  4096  bpc=1.6027983933158674
+  L=  8192  bpc=1.5958481712220576
+  L= 16384  bpc=1.5930175707980363
+  context effect (full - short context, bits/byte): {'1-2x': -0.0216, '2-4x': -0.0179, '4-8x': -0.0201, '8-16x': -0.0236, '16-32x': -0.0242}
+saved results/research/stage5d_passkey_stream_alibi/transformer_alibi_seed0/length_generalization.json
+  P(RECALL) on plain text: {'first_position_p_gt_half': None, 'mean_p_before_L_minus_32': 0.000466180412331596, 'mean_p_after_L': 0.0005093325744383037}
+         0-256: with marker   1.779   plain   1.750
+       256-512: with marker   1.740   plain   1.743
+      512-1024: with marker   1.047   plain   1.045
+     1024-2048: with marker   1.719   plain   1.718
+     2048-4096: with marker   2.050   plain   2.050
+     4096-4177: with marker   2.498   plain   2.497
+== results/research/stage5d_passkey_stream_alibi/transformer_alibi_seed1
+  gap     64: {'byte_acc': 0.9990234375, 'key_exact': 0.9921875, 'bits_per_key_byte': 0.018671605238827913, 'n': 256}
+  gap    128: {'byte_acc': 0.9990234375, 'key_exact': 0.9921875, 'bits_per_key_byte': 0.014512967864263248, 'n': 256}
+  gap    256: {'byte_acc': 0.99755859375, 'key_exact': 0.98046875, 'bits_per_key_byte': 0.026031912664083605, 'n': 256}
+  gap    512: {'byte_acc': 0.9970703125, 'key_exact': 0.9765625, 'bits_per_key_byte': 0.03985906475306147, 'n': 256}
+  gap   1024: {'byte_acc': 0.92724609375, 'key_exact': 0.49609375, 'bits_per_key_byte': 0.44691174505257286, 'n': 256}
+  gap   2048: {'byte_acc': 0.09375, 'key_exact': 0.0, 'bits_per_key_byte': 6.01628443563456, 'n': 256}
+  gap   4096: {'byte_acc': 0.029296875, 'key_exact': 0.0, 'bits_per_key_byte': 7.086409141582547, 'n': 128}
+  gap   8192: {'byte_acc': 0.0400390625, 'key_exact': 0.0, 'bits_per_key_byte': 7.12816875961204, 'n': 128}
+  gap  16384: {'byte_acc': 0.037109375, 'key_exact': 0.0, 'bits_per_key_byte': 7.048321382708493, 'n': 128}
+saved results/research/stage5d_passkey_stream_alibi/transformer_alibi_seed1/passkey.json
+  L=   512  bpc=1.689909103420671
+  L=  1024  bpc=1.6449399394384057
+  L=  2048  bpc=1.617748856432922
+  L=  4096  bpc=1.6050213141884726
+  L=  8192  bpc=1.59796052980526
+  L= 16384  bpc=1.5950138805633345
+  context effect (full - short context, bits/byte): {'1-2x': -0.021, '2-4x': -0.019, '4-8x': -0.0214, '8-16x': -0.0262, '16-32x': -0.0255}
+saved results/research/stage5d_passkey_stream_alibi/transformer_alibi_seed1/length_generalization.json
+  P(RECALL) on plain text: {'first_position_p_gt_half': None, 'mean_p_before_L_minus_32': 0.00046177112380973995, 'mean_p_after_L': 0.0005335025489330292}
+         0-256: with marker   1.771   plain   1.740
+       256-512: with marker   1.759   plain   1.758
+      512-1024: with marker   1.040   plain   1.036
+     1024-2048: with marker   1.733   plain   1.733
+     2048-4096: with marker   2.069   plain   2.068
+     4096-4177: with marker   2.470   plain   2.469
+== results/research/stage5d_passkey_stream_alibi/transformer_alibi_seed2
+  gap     64: {'byte_acc': 0.99951171875, 'key_exact': 0.99609375, 'bits_per_key_byte': 0.013153830794494534, 'n': 256}
+  gap    128: {'byte_acc': 0.9990234375, 'key_exact': 0.9921875, 'bits_per_key_byte': 0.013624284969182752, 'n': 256}
+  gap    256: {'byte_acc': 0.9990234375, 'key_exact': 0.9921875, 'bits_per_key_byte': 0.015707999138964212, 'n': 256}
+  gap    512: {'byte_acc': 0.998046875, 'key_exact': 0.984375, 'bits_per_key_byte': 0.03328672805798981, 'n': 256}
+  gap   1024: {'byte_acc': 0.93408203125, 'key_exact': 0.578125, 'bits_per_key_byte': 0.39712824319261736, 'n': 256}
+  gap   2048: {'byte_acc': 0.0615234375, 'key_exact': 0.0, 'bits_per_key_byte': 6.283000746901045, 'n': 256}
+  gap   4096: {'byte_acc': 0.0361328125, 'key_exact': 0.0, 'bits_per_key_byte': 6.923442095375316, 'n': 128}
+  gap   8192: {'byte_acc': 0.0361328125, 'key_exact': 0.0, 'bits_per_key_byte': 7.1046571887696945, 'n': 128}
+  gap  16384: {'byte_acc': 0.0419921875, 'key_exact': 0.0, 'bits_per_key_byte': 6.878883389835079, 'n': 128}
+saved results/research/stage5d_passkey_stream_alibi/transformer_alibi_seed2/passkey.json
+  L=   512  bpc=1.6863357671353032
+  L=  1024  bpc=1.6404571496171372
+  L=  2048  bpc=1.6140552273311577
+  L=  4096  bpc=1.602183975427803
+  L=  8192  bpc=1.5955147645273398
+  L= 16384  bpc=1.5926273224275145
+  context effect (full - short context, bits/byte): {'1-2x': -0.0204, '2-4x': -0.0179, '4-8x': -0.0199, '8-16x': -0.0237, '16-32x': -0.0238}
+saved results/research/stage5d_passkey_stream_alibi/transformer_alibi_seed2/length_generalization.json
+  P(RECALL) on plain text: {'first_position_p_gt_half': None, 'mean_p_before_L_minus_32': 0.0004546201089397073, 'mean_p_after_L': 0.0005878741503693163}
+         0-256: with marker   1.867   plain   1.803
+       256-512: with marker   1.680   plain   1.679
+      512-1024: with marker   1.054   plain   1.047
+     1024-2048: with marker   1.725   plain   1.724
+     2048-4096: with marker   2.071   plain   2.070
+     4096-4177: with marker   2.442   plain   2.440
+== control results/research/stage5b_passkey/mamba_lti_n16
+  P(RECALL) on plain text: {'first_position_p_gt_half': 485, 'mean_p_before_L_minus_32': 0.0006913269171491265, 'mean_p_after_L': 0.9220349788665771}
+         0-256: with marker   1.992   plain   1.975
+       256-512: with marker   2.025   plain   3.353
+      512-1024: with marker  37.324   plain  35.752
+     1024-2048: with marker  32.054   plain  21.417
+     2048-4096: with marker  13.227   plain   9.054
+     4096-8192: with marker   9.117   plain   8.545
+     8192-8273: with marker   7.928   plain   7.630
+== control results/research/stage5b_passkey/mamba_s4d_n16
+  P(RECALL) on plain text: {'first_position_p_gt_half': 508, 'mean_p_before_L_minus_32': 4.125911073060706e-05, 'mean_p_after_L': 0.9984124302864075}
+         0-256: with marker   1.971   plain   1.946
+       256-512: with marker   1.911   plain   1.917
+      512-1024: with marker  29.303   plain  29.364
+     1024-2048: with marker  33.651   plain  33.651
+     2048-4096: with marker  33.798   plain  33.798
+     4096-8192: with marker  33.754   plain  33.754
+     8192-8273: with marker  33.726   plain  33.724
+== control results/research/stage5b_passkey/mamba_s4d_n64
+  P(RECALL) on plain text: {'first_position_p_gt_half': 503, 'mean_p_before_L_minus_32': 9.285492706112564e-05, 'mean_p_after_L': 0.9990770220756531}
+         0-256: with marker   1.949   plain   1.930
+       256-512: with marker   1.884   plain   1.976
+      512-1024: with marker  27.528   plain  28.228
+     1024-2048: with marker  31.739   plain  31.811
+     2048-4096: with marker  32.116   plain  32.149
+     4096-8192: with marker  32.444   plain  32.454
+     8192-8273: with marker  32.628   plain  32.631
+== control results/research/stage5b_passkey/mamba_scalar_n16
+  P(RECALL) on plain text: {'first_position_p_gt_half': 406, 'mean_p_before_L_minus_32': 0.13572894036769867, 'mean_p_after_L': 0.7302670478820801}
+         0-256: with marker   1.971   plain   1.949
+       256-512: with marker   1.885   plain   5.706
+      512-1024: with marker  28.168   plain  32.134
+     1024-2048: with marker  29.124   plain  23.668
+     2048-4096: with marker  21.593   plain  19.400
+     4096-8192: with marker  29.599   plain  29.330
+     8192-8273: with marker  29.318   plain  29.222
+== control results/research/stage5b_passkey/mamba_scalar_n64
+  P(RECALL) on plain text: {'first_position_p_gt_half': 460, 'mean_p_before_L_minus_32': 0.04837742820382118, 'mean_p_after_L': 0.9986400604248047}
+         0-256: with marker   1.961   plain   1.946
+       256-512: with marker   1.880   plain   2.854
+      512-1024: with marker  26.616   plain  31.170
+     1024-2048: with marker  46.542   plain  47.086
+     2048-4096: with marker  48.033   plain  48.049
+     4096-8192: with marker  44.633   plain  44.349
+     8192-8273: with marker  42.466   plain  42.130
+== control results/research/stage5c_passkey_random/mamba_s4d_n16
+  P(RECALL) on plain text: {'first_position_p_gt_half': 753, 'mean_p_before_L_minus_32': 0.01019830722361803, 'mean_p_after_L': 0.7080772519111633}
+         0-256: with marker   1.961   plain   1.953
+       256-512: with marker   1.887   plain   1.975
+      512-1024: with marker   2.535   plain   3.092
+     1024-2048: with marker   7.955   plain   8.514
+     2048-4096: with marker  14.045   plain  14.276
+     4096-8192: with marker  16.963   plain  17.082
+     8192-8273: with marker  18.565   plain  18.628
+== control results/research/stage5c_passkey_random/mamba_scalar_n64
+  P(RECALL) on plain text: {'first_position_p_gt_half': 569, 'mean_p_before_L_minus_32': 0.028189904987812042, 'mean_p_after_L': 0.8911167979240417}
+         0-256: with marker   1.953   plain   1.947
+       256-512: with marker   1.885   plain   2.030
+      512-1024: with marker   3.305   plain   4.582
+     1024-2048: with marker  10.836   plain  11.686
+     2048-4096: with marker  17.239   plain  17.427
+     4096-8192: with marker  19.829   plain  19.850
+     8192-8273: with marker  20.343   plain  20.347
+== control results/research/stage5b_passkey/transformer_alibi
+  P(RECALL) on plain text: {'first_position_p_gt_half': 485, 'mean_p_before_L_minus_32': 0.01738566905260086, 'mean_p_after_L': 0.839893102645874}
+         0-256: with marker   1.841   plain   1.828
+       256-512: with marker   1.754   plain   1.926
+      512-1024: with marker   4.071   plain   5.032
+     1024-2048: with marker   6.618   plain   6.710
+     2048-4096: with marker   8.114   plain   8.118
+     4096-4177: with marker   7.607   plain   7.609
+== control results/research/stage5b_passkey/transformer_rope
+  P(RECALL) on plain text: {'first_position_p_gt_half': 503, 'mean_p_before_L_minus_32': 1.4752043171029072e-05, 'mean_p_after_L': 0.15743598341941833}
+         0-256: with marker   1.813   plain   1.805
+       256-512: with marker   2.001   plain   2.051
+      512-1024: with marker   6.070   plain   5.453
+     1024-2048: with marker   5.497   plain   5.635
+     2048-4096: with marker   5.080   plain   5.236
+     4096-4177: with marker   4.665   plain   4.935
+== test split
+stage4_pilot/transformer_alibi_L1024 1.8024 {'1-2x': -0.009, '2-4x': -0.011, '4-8x': -0.0106, '8-16x': -0.0085}
+stage4_pilot/transformer_alibi_L256 1.849 {'1-2x': -0.0096, '2-4x': -0.049, '4-8x': -0.0618, '8-16x': -0.0576, '16-32x': -0.0673}
+stage4_pilot/transformer_none_L1024 3.1283 {'1-2x': 0.3184, '2-4x': 0.8783, '4-8x': 0.9043, '8-16x': 1.1316}
+stage4_pilot/transformer_none_L256 2.2949 {'1-2x': 0.9276, '2-4x': 2.6692, '4-8x': 3.3283, '8-16x': 3.6437, '16-32x': 3.5333}
+stage4_pilot/transformer_rope_L1024 1.9409 {'1-2x': 2.0997, '2-4x': 3.4532, '4-8x': 3.2395, '8-16x': 3.4332}
+stage4_pilot/transformer_rope_L256 1.8969 {'1-2x': 1.5794, '2-4x': 2.9447, '4-8x': 3.0965, '8-16x': 3.0689, '16-32x': 2.84}
+stage5a_seeds/transformer_alibi_L1024_seed1 1.8061 {'1-2x': -0.0126, '2-4x': -0.012, '4-8x': -0.0134, '8-16x': -0.01}
+stage5a_seeds/transformer_alibi_L1024_seed2 1.7994 {'1-2x': -0.0107, '2-4x': -0.01, '4-8x': -0.0091, '8-16x': -0.0083}
+stage5a_seeds/transformer_alibi_L256_seed1 1.8655 {'1-2x': -0.0162, '2-4x': -0.0287, '4-8x': -0.0396, '8-16x': -0.0405, '16-32x': -0.0476}
+stage5a_seeds/transformer_alibi_L256_seed2 1.8514 {'1-2x': -0.0131, '2-4x': -0.0334, '4-8x': -0.0383, '8-16x': -0.0428, '16-32x': -0.0481}
+stage5a_seeds/transformer_none_L1024_seed1 3.1748 {'1-2x': 0.2399, '2-4x': 0.6416, '4-8x': 0.7973, '8-16x': 1.2278}
+stage5a_seeds/transformer_none_L1024_seed2 3.0724 {'1-2x': 0.325, '2-4x': 0.9871, '4-8x': 0.9594, '8-16x': 1.2819}
+stage5a_seeds/transformer_none_L256_seed1 2.2796 {'1-2x': 0.6182, '2-4x': 1.8104, '4-8x': 2.7275, '8-16x': 2.9348, '16-32x': 2.8478}
+stage5a_seeds/transformer_none_L256_seed2 2.2981 {'1-2x': 0.7431, '2-4x': 2.2658, '4-8x': 3.1553, '8-16x': 3.4347, '16-32x': 3.4436}
+stage5a_seeds/transformer_rope_L1024_seed1 1.9415 {'1-2x': 1.5939, '2-4x': 3.3744, '4-8x': 3.2228, '8-16x': 3.433}
+stage5a_seeds/transformer_rope_L1024_seed2 1.9688 {'1-2x': 1.9505, '2-4x': 3.3354, '4-8x': 3.4617, '8-16x': 3.8552}
+stage5a_seeds/transformer_rope_L256_seed1 1.9053 {'1-2x': 1.881, '2-4x': 2.7956, '4-8x': 3.08, '8-16x': 3.2958, '16-32x': 3.1335}
+stage5a_seeds/transformer_rope_L256_seed2 1.891 {'1-2x': 1.9703, '2-4x': 2.8812, '4-8x': 3.1643, '8-16x': 3.1444, '16-32x': 2.8794}
+| configuration | training length | bpc at training length (test) | context effect 2–4× (test) | context effect 8–16× (test) |
+|---|---|---|---|---|
+| Mamba (N=16) | 256 | 1.812 ± 0.005 (n=3) | -0.001 ± 0.003 (n=3) | -0.003 ± 0.003 (n=3) |
+| Mamba (N=4) | 256 | 1.820 ± 0.009 (n=3) | -0.001 ± 0.002 (n=3) | -0.002 ± 0.002 (n=3) |
+| Mamba (N=64) | 256 | 1.810 ± 0.018 (n=3) | -0.001 ± 0.002 (n=3) | -0.004 ± 0.002 (n=3) |
+| Mamba LTI (N=16) | 256 | 1.849 ± 0.004 (n=3) | +0.000 ± 0.002 (n=3) | +0.006 ± 0.005 (n=3) |
+| Mamba scalar decay (N=16) | 256 | 1.816 ± 0.015 (n=3) | -0.001 ± 0.002 (n=3) | -0.003 ± 0.003 (n=3) |
+| Mamba scalar decay (N=64) | 256 | 1.816 ± 0.006 (n=3) | -0.003 ± 0.001 (n=3) | -0.002 ± 0.002 (n=3) |
+| Transformer (alibi) | 256 | 1.855 ± 0.022 (n=3) | -0.037 ± 0.026 (n=3) | -0.047 ± 0.023 (n=3) |
+| Transformer (none) | 256 | 2.291 ± 0.025 (n=3) | +2.248 ± 1.067 (n=3) | +3.338 ± 0.905 (n=3) |
+| Transformer (rope) | 256 | 1.898 ± 0.018 (n=3) | +2.874 ± 0.186 (n=3) | +3.170 ± 0.287 (n=3) |
+| Mamba (N=16) | 1024 | 1.814 ± 0.006 (n=3) | -0.000 ± 0.002 (n=3) | -0.000 ± 0.001 (n=3) |
+| Mamba (N=4) | 1024 | 1.819 ± 0.003 (n=3) | +0.000 ± 0.000 (n=3) | -0.000 ± 0.001 (n=3) |
+| Mamba (N=64) | 1024 | 1.811 ± 0.011 (n=3) | +0.000 ± 0.000 (n=3) | -0.001 ± 0.000 (n=3) |
+| Mamba LTI (N=16) | 1024 | 1.852 ± 0.009 (n=3) | +0.000 ± 0.001 (n=3) | +0.000 ± 0.000 (n=3) |
+| Transformer (alibi) | 1024 | 1.803 ± 0.008 (n=3) | -0.011 ± 0.002 (n=3) | -0.009 ± 0.002 (n=3) |
+| Transformer (none) | 1024 | 3.125 ± 0.127 (n=3) | +0.836 ± 0.439 (n=3) | +1.214 ± 0.189 (n=3) |
+| Transformer (rope) | 1024 | 1.950 ± 0.040 (n=3) | +3.388 ± 0.149 (n=3) | +3.574 ± 0.605 (n=3) |
+POST5D_DONE

@@ -42,10 +42,10 @@ def load(run_dir, device, attn_impl="chunked"):
 
 
 @torch.no_grad()
-def bpc(model, ds, L, n_bytes, device):
+def bpc(model, ds, L, n_bytes, device, split="valid"):
     total, count = 0.0, 0
     bs = max(1, 32768 // L)
-    for x, y in ds.eval_batches("valid", bs, L, device, n_bytes):
+    for x, y in ds.eval_batches(split, bs, L, device, n_bytes):
         with torch.autocast("cuda", dtype=torch.bfloat16, enabled=device == "cuda"):
             logits = model(x)
         total += F.cross_entropy(logits.float().reshape(-1, 256), y.reshape(-1), reduction="sum").item()
@@ -69,7 +69,7 @@ def position_loss(model, ds, L, n_windows, device, n_bins=48):
 
 
 @torch.no_grad()
-def context_effect(model, ds, L_train, W, n_windows, device):
+def context_effect(model, ds, L_train, W, n_windows, device, split="valid"):
     """Same bytes, two contexts.  For bytes at positions in each band of a W-byte window, compare the loss with the
     full context from the window start against the loss with only ~L_train bytes of context (sliding windows of
     length L_train, stride L_train/2, keeping the second half so every byte sees L_train/2..L_train bytes).
@@ -79,7 +79,7 @@ def context_effect(model, ds, L_train, W, n_windows, device):
              "8-16x": (8 * L_train, 16 * L_train), "16-32x": (16 * L_train, 32 * L_train)}
     bands = {k: v for k, v in bands.items() if v[1] <= W}
     diffs = {k: [] for k in bands}
-    for x, y in ds.eval_batches("valid", 1, W, device, n_windows * W):
+    for x, y in ds.eval_batches(split, 1, W, device, n_windows * W):
         with torch.autocast("cuda", dtype=torch.bfloat16, enabled=device == "cuda"):
             full = F.cross_entropy(model(x).float()[0], y[0], reduction="none")
             starts = torch.arange(0, W - L_train + 1, half, device=device)

@@ -16,7 +16,7 @@ import torch
 import torch.nn.functional as F
 
 from data.enwik8 import Enwik8
-from data.passkey import insert_passkey
+from data.passkey import insert_passkey, insert_passkey_stream
 from models.lm import PRESETS, build
 from runtime import environment, setup_device
 
@@ -67,6 +67,11 @@ def main(argv=None):
                     help="if > 0, insert a STORE/RECALL passkey of this many bytes into every training window (stage 5b)")
     ap.add_argument("--passkey_random_end", action="store_true",
                     help="place the RECALL block at a random position instead of the window end (stage 5c)")
+    ap.add_argument("--passkey_prob", type=float, default=0.0,
+                    help="if > 0, use the position-free protocol: a passkey in each window with this probability, "
+                         "STORE uniform over the window, RECALL truncated at the window end (stage 5d)")
+    ap.add_argument("--passkey_gap_min", type=int, default=0, help="stage 5d gap range (default L/32)")
+    ap.add_argument("--passkey_gap_max", type=int, default=0, help="stage 5d gap range (default 7L/8)")
     ap.add_argument("--out", default="results/enwik8")
     args = ap.parse_args(argv)
 
@@ -117,9 +122,15 @@ def main(argv=None):
         recall_mask = None
         if args.passkey_len:
             buf = torch.cat([x, y[:, -1:]], 1).cpu()
-            recall_mask = insert_passkey(buf, args.passkey_len, args.seq_len // 4,
-                                         args.seq_len - 2 * (args.passkey_len + 1), gen,
-                                         random_end=args.passkey_random_end).to(device)
+            if args.passkey_prob:
+                recall_mask = insert_passkey_stream(buf, args.passkey_len,
+                                                    args.passkey_gap_min or args.seq_len // 32,
+                                                    args.passkey_gap_max or 7 * args.seq_len // 8,
+                                                    args.passkey_prob, gen).to(device)
+            else:
+                recall_mask = insert_passkey(buf, args.passkey_len, args.seq_len // 4,
+                                             args.seq_len - 2 * (args.passkey_len + 1), gen,
+                                             random_end=args.passkey_random_end).to(device)
             buf = buf.to(device)
             x, y = buf[:, :-1], buf[:, 1:]
         with torch.autocast("cuda", dtype=torch.bfloat16, enabled=amp):
@@ -138,7 +149,7 @@ def main(argv=None):
         if step % args.log_every == 0:
             rec = {"step": step, "tokens": (step + 1) * tokens_per_step, "train_time_s": train_time,
                    "train_bpc": loss.item() / LN2, "grad_norm": gnorm.item(), "lr": opt.param_groups[0]["lr"]}
-            if recall_mask is not None:
+            if recall_mask is not None and recall_mask.any():
                 rec["train_passkey_acc"] = (logits.argmax(-1)[recall_mask] == y[recall_mask]).float().mean().item()
             log.write(json.dumps(rec) + "\n")
             if step % (args.log_every * 4) == 0:

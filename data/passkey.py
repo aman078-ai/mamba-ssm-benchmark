@@ -1,4 +1,4 @@
-"""Passkey insertion: force a language model to hold information over a long gap (stage 5b).
+"""Passkey insertion: force a language model to hold information over a long gap (stages 5b-5d).
 
 Each training window gets   ... [STORE] k1 .. kK ... (gap of ordinary text) ... [RECALL] k1 .. kK
 with K random lowercase letters.  The bytes after RECALL are predictable only from memory of the STORE block, so a
@@ -37,6 +37,37 @@ def insert_passkey(buf, key_len, gap_min, gap_max, generator=None, random_end=Fa
         buf[i, r0] = RECALL
         buf[i, r0 + 1:r0 + block] = keys[i]
         mask[i, r0:r0 + key_len] = True                               # y[t] = buf[t + 1]
+    return mask
+
+
+def insert_passkey_stream(buf, key_len, gap_min, gap_max, p_present, generator=None):
+    """Position-free variant (stage 5d).  Each window independently contains a passkey with probability p_present.
+    When present, the STORE block starts at a position drawn uniformly over the window and the RECALL marker follows
+    `gap` bytes later, gap ~ U[gap_min, gap_max], independently of the window boundary; RECALL bytes that would fall
+    beyond the window are dropped, as if the window had been cut from a continuous stream.  Neither event is
+    guaranteed to occur in a window, so absolute position carries almost no information about either (the hazard of
+    meeting a RECALL varies by at most a factor of ~2 across the window for p_present = 0.5).  Returns the mask over
+    targets y = buf[:, 1:] marking the recalled key bytes that are inside the window."""
+    B, T1 = buf.shape
+    block = key_len + 1
+    present = torch.rand(B, generator=generator) < p_present
+    starts = torch.randint(0, T1 - block + 1, (B,), generator=generator)
+    gaps = torch.randint(gap_min, gap_max + 1, (B,), generator=generator)
+    keys = torch.randint(ord("a"), ord("z") + 1, (B, key_len), generator=generator)
+    mask = torch.zeros(B, T1 - 1, dtype=torch.bool)
+    for i in range(B):
+        if not present[i]:
+            continue
+        s0 = int(starts[i])
+        buf[i, s0] = STORE
+        buf[i, s0 + 1:s0 + block] = keys[i]
+        r0 = s0 + int(gaps[i])
+        if r0 >= T1:
+            continue
+        n = min(block, T1 - r0)                                       # RECALL marker + key bytes that fit
+        buf[i, r0] = RECALL
+        buf[i, r0 + 1:r0 + n] = keys[i, :n - 1]
+        mask[i, r0:r0 + n - 1] = True                                 # y[t] = buf[t + 1]
     return mask
 
 

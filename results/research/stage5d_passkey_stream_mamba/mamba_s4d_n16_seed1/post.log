@@ -1,0 +1,26 @@
+  gap     64: {'byte_acc': 0.04052734375, 'key_exact': 0.0, 'bits_per_key_byte': 4.704411539892108, 'n': 256}
+  gap    128: {'byte_acc': 0.0380859375, 'key_exact': 0.0, 'bits_per_key_byte': 4.7050950849379625, 'n': 256}
+  gap    256: {'byte_acc': 0.03955078125, 'key_exact': 0.0, 'bits_per_key_byte': 4.7011857473012, 'n': 256}
+  gap    512: {'byte_acc': 0.0419921875, 'key_exact': 0.0, 'bits_per_key_byte': 4.705454786652242, 'n': 256}
+  gap   1024: {'byte_acc': 0.03662109375, 'key_exact': 0.0, 'bits_per_key_byte': 4.705157299661912, 'n': 256}
+  gap   2048: {'byte_acc': 0.03857421875, 'key_exact': 0.0, 'bits_per_key_byte': 4.704494199053679, 'n': 256}
+  gap   4096: {'byte_acc': 0.0322265625, 'key_exact': 0.0, 'bits_per_key_byte': 4.7042135663631335, 'n': 128}
+  gap   8192: {'byte_acc': 0.0400390625, 'key_exact': 0.0, 'bits_per_key_byte': 4.7074851278370025, 'n': 128}
+  gap  16384: {'byte_acc': 0.0322265625, 'key_exact': 0.0, 'bits_per_key_byte': 4.710244191760216, 'n': 128}
+saved results/research/stage5d_passkey_stream_mamba\mamba_s4d_n16_seed1/passkey.json
+  L=   512  bpc=1.71566423893345
+  L=  1024  bpc=1.700537182613433
+  L=  2048  bpc=1.6930630985457071
+  L=  4096  bpc=1.6896226871131546
+  L=  8192  bpc=1.6879856575636722
+  L= 16384  bpc=1.6873497164697606
+  context effect (full - short context, bits/byte): {'1-2x': -0.0015, '2-4x': -0.0031, '4-8x': -0.0022, '8-16x': -0.0017, '16-32x': -0.0009}
+saved results/research/stage5d_passkey_stream_mamba\mamba_s4d_n16_seed1/length_generalization.json
+  P(RECALL) on plain text: {'first_position_p_gt_half': None, 'mean_p_before_L_minus_32': 0.0005243676132522523, 'mean_p_after_L': 0.0005791391595266759}
+         0-256: with marker   1.912   plain   1.889
+       256-512: with marker   1.827   plain   1.826
+      512-1024: with marker   1.654   plain   1.654
+     1024-2048: with marker   1.705   plain   1.705
+     2048-4096: with marker   1.719   plain   1.718
+     4096-8192: with marker   1.810   plain   1.810
+     8192-8273: with marker   1.792   plain   1.792

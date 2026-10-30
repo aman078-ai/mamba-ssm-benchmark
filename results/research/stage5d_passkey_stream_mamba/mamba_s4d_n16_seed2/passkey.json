@@ -1,0 +1,85 @@
+{
+  "train_len": 512,
+  "key_len": 8,
+  "chance_byte_acc": 0.038461538461538464,
+  "by_gap": {
+    "64": {
+      "byte_acc": 0.0419921875,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.704377487327237,
+      "n": 256
+    },
+    "128": {
+      "byte_acc": 0.03662109375,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.705441801962102,
+      "n": 256
+    },
+    "256": {
+      "byte_acc": 0.0439453125,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.704730739692109,
+      "n": 256
+    },
+    "512": {
+      "byte_acc": 0.041015625,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.704453417667593,
+      "n": 256
+    },
+    "1024": {
+      "byte_acc": 0.037109375,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.705299271340199,
+      "n": 256
+    },
+    "2048": {
+      "byte_acc": 0.03515625,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.703717245930575,
+      "n": 256
+    },
+    "4096": {
+      "byte_acc": 0.0478515625,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.702229166043985,
+      "n": 128
+    },
+    "8192": {
+      "byte_acc": 0.03515625,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.707744558291371,
+      "n": 128
+    },
+    "16384": {
+      "byte_acc": 0.0517578125,
+      "key_exact": 0.0,
+      "bits_per_key_byte": 4.700177649495336,
+      "n": 128
+    }
+  },
+  "environment": {
+    "timestamp": "2026-10-30T04:03:48+05:30",
+    "git_commit": "84f2971d1d8134368f21ffa0d0f883e76c7a4e61",
+    "git_dirty": true,
+    "python": "3.11.0",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "cpu": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "torch": "2.7.1+cu126",
+    "cuda": "12.6",
+    "tf32_matmul": true,
+    "deterministic_algorithms": false,
+    "triton": "3.3.1",
+    "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "vram_gib": 3.99951171875,
+    "memory_cap_gib": 1.416015625,
+    "driver": "592.82",
+    "gpu_clocks_mhz": "1860 MHz, 5871 MHz",
+    "other_gpu_processes": [
+      "ChatGPT.exe",
+      "EpicGamesLauncher.exe",
+      "EOSOverlayRenderer-Win64-Shipping.exe",
+      "python.exe"
+    ]
+  }
+}

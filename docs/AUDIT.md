@@ -149,6 +149,31 @@ exactly one RECALL, so the probability of meeting it still rises to 1 by the win
 forced. What the experiment does show is that a training signal tied to absolute position within the window makes
 Mamba build a non-forgetting counter, and that counter produces collapse beyond the training length.
 
+**5d, position-free passkey (3 seeds).** Each window contains a passkey with probability 0.5; STORE uniform over the
+window; RECALL 16–448 bytes later, dropped if it falls outside the window (`insert_passkey_stream`). The probability
+of meeting a RECALL marker at a position, given none yet, never exceeds 0.0013 per byte. Mamba N = 16 and ALiBi, 10,000
+steps, seeds 0–2. Mamba: recall at chance at every gap from 64 to 16,384 bytes; no clock (P(RECALL) ≈ 0.0005 at every
+position, the training base rate); context effect within 0.003 bits per byte of zero. ALiBi: recall 98–100% inside the
+training length; no clock; small context benefit. The 5b/5c failure is therefore caused by the training format.
+
+**RQ3, final.** Still open: Mamba did not learn recall even inside the training length in any protocol.
+
+## Stage 6 corrections (manuscript audit, 2026-10-29)
+
+Checked every number in the paper against the raw results (`docs/paper/CLAIMS.md`). Corrected:
+- "|context effect| ≤ 0.003" → seed means within 0.004 bits per byte (LTI 16–32× at L = 256 is +0.004).
+- "State RMS grows at most 1.5× after plain training" → 1.2–1.8× (seed means of the largest layer; single seeds up to 2.45×).
+- "Horizons are short, so the state never fills" → most modes are short (median 2–38 bytes), but 0.1–19% of modes
+  outlast the training length and the slowest mode lasts 3e3–8e6 bytes; horizons cannot prove the absence of use.
+- "A layer-6 mode with a 4e5-byte horizon shows non-forgetting" (passkey) → withdrawn; plain-trained models have
+  equally slow modes.
+- "State-norm growth of 9–16× is the signature of the passkey failure" → it is a symptom; stage 5c fails by 15 bits per
+  byte with 2.3× growth.
+- "Smoke test: −0.199 bpc by position bands" → removed from the paper (no stored result).
+- p99 horizons quoted from seed 0 (784 / 679) → 3-seed means (806 / 685).
+- The same-bytes measure is not new (Khandelwal et al. 2018; Sun et al. 2021); the paper no longer presents it as a
+  contribution.
+
 ## Stage checklist
 
 | Stage | Goal | Status |
@@ -158,8 +183,8 @@ Mamba build a non-forgetting counter, and that counter produces collapse beyond 
 | 2 | Tests and tooling: deterministic kernel mode, GPU equivalence, long-sequence stability, optimizer-inclusive throughput | done |
 | 3 | Seed variance and per-architecture learning-rate tuning on the research models | done |
 | 4 | Pilot of H1–H3 (one seed) with baselines; go/no-go | done: go, reframed (see above) |
-| 5 | 5a: seeds 1–2 for every pilot configuration; 5b: forced-long-memory boundary test; 5c: position control | done |
+| 5 | 5a: seeds 1–2 for every pilot configuration; 5b: forced-long-memory boundary test; 5c: position control; 5d: position-free protocol, 3 seeds | done |
 | 6 | Analysis, statistics, figures from CSV | done (`analysis/aggregate_seeds.py`, `analysis/passkey_plots.py`, `results/csv/`) |
-| 7 | Manuscript, release tag | draft in `docs/paper/paper.md`; release tag not created |
+| 7 | Manuscript, release tag | manuscript complete (`docs/paper/`: paper.md, paper.pdf, latex/); test-split confirmation in Appendix C; release tag not created (needs the author's approval) |
 
 Before/after records for each stage are in [`CHANGELOG.md`](../CHANGELOG.md).
